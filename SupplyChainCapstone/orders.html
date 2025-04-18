@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piñana Gourmet - Orders</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Modal Enhancements CSS -->
+  <link rel="stylesheet" href="modal-enhancements.css">
+  <!-- Modal Animations CSS -->
+  <link rel="stylesheet" href="modal-animations.css">
+  <!-- Datepicker CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+        <div class="sidebar-inner">
+          <div class="logo-container d-flex align-items-center mb-4 mt-3">
+            <img src="images/final-light.png" class="pineapple-logo">
+          </div>
+          
+          <div class="sidebar-divider">
+            <span>MAIN MENU</span>
+          </div>
+          
+          <ul class="nav flex-column sidebar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="dashboard.html" data-page="index">
+                <div class="nav-icon">
+                  <i class="bi bi-grid"></i>
+                </div>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="inventory.html" data-page="inventory">
+                <div class="nav-icon">
+                  <i class="bi bi-box"></i>
+                </div>
+                <span>Inventory</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="orders.html" data-page="orders">
+                <div class="nav-icon">
+                  <i class="bi bi-people"></i>
+                </div>
+                <span>Orders</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="delivery.html" data-page="delivery">
+                <div class="nav-icon">
+                  <i class="bi bi-truck"></i>
+                </div>
+                <span>Delivery</span>
+              </a>
+            </li>
+            
+            <div class="sidebar-divider">
+              <span>SALES</span>
+            </div>
+            
+            <li class="nav-item">
+              <a class="nav-link" href="pos.html" data-page="pos">
+                <div class="nav-icon">
+                  <i class="bi bi-credit-card"></i>
+                </div>
+                <span>POS</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="reports.html" data-page="reports">
+                <div class="nav-icon">
+                 <!-- <i class="bi bi-bar-chart"></i> -->
+                </div>
+                <span> </span>
+              </a>
+            </li>
+          </ul>
+          
+          <div class="sidebar-footer">
+            <div class="sidebar-divider">
+              <span>ACCOUNT</span>
+            </div>
+            <div class="user-info d-flex align-items-center">
+              <div class="user-avatar">
+                <i class="bi bi-person-circle"></i>
+              </div>
+              <div class="user-details">
+                <div class="user-name">Admin User</div>
+                <div class="user-role">Piñana Gourmet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Main content -->
+      <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+        <!-- Header -->
+        <div class="fixed-top-header">
+          <div class="d-flex justify-content-between align-items-center w-100">
+            <div class="d-flex align-items-center">
+              <button class="navbar-toggler d-md-none collapsed me-2" type="button" id="sidebarToggle">
+                <i class="bi bi-list"></i>
+              </button>
+              <h5 class="mb-0">Orders Management</h5>
+            </div>
+            <div class="d-flex align-items-center">
+              <div class="dropdown user-profile-dropdown">
+                <div class="profile-circle dropdown-toggle" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person-fill"></i>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown">
+                  <li class="dropdown-item-text">
+                    <div class="d-flex flex-column">
+                      <span class="fw-bold">Admin User</span>
+                      <small class="text-muted">Administrator</small>
+                    </div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="#" id="logoutButton"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-content-inner">
+          <!-- Orders Content -->
+          <div class="orders-section">
+            
+            
+            <div class="row mb-4">
+              <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                  <div class="d-flex flex-wrap mb-2 mb-md-0">
+                    <div class="dropdown me-2 mb-2 mb-md-0">
+                      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="statusFilter" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-funnel me-1"></i> Status: All
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="statusFilter">
+                        <li><a class="dropdown-item status-filter" href="#" data-status="all">All Orders</a></li>
+                        <li><a class="dropdown-item status-filter" href="#" data-status="pending">Pending</a></li>
+                        <li><a class="dropdown-item status-filter" href="#" data-status="processing">Processing</a></li>
+                        <li><a class="dropdown-item status-filter" href="#" data-status="shipped">Shipped</a></li>
+                        <li><a class="dropdown-item status-filter" href="#" data-status="delivered">Delivered</a></li>
+                        <li><a class="dropdown-item status-filter" href="#" data-status="cancelled">Cancelled</a></li>
+                      </ul>
+                    </div>
+                    <div class="dropdown me-2 mb-2 mb-md-0">
+                      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dateFilter" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-calendar3 me-1"></i> Date: All Time
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="dateFilter">
+                        <li><a class="dropdown-item date-filter" href="#" data-range="all">All Time</a></li>
+                        <li><a class="dropdown-item date-filter" href="#" data-range="today">Today</a></li>
+                        <li><a class="dropdown-item date-filter" href="#" data-range="week">Last 7 Days</a></li>
+                        <li><a class="dropdown-item date-filter" href="#" data-range="month">Last 30 Days</a></li>
+                        <li><a class="dropdown-item date-filter" href="#" data-range="custom">Custom Range</a></li>
+                      </ul>
+                    </div>
+                    <div class="date-range-picker mb-2 mb-md-0" style="display: none;">
+                      <div class="input-group">
+                        <input type="text" class="form-control" id="dateRangeStart" placeholder="Start Date">
+                        <span class="input-group-text">to</span>
+                        <input type="text" class="form-control" id="dateRangeEnd" placeholder="End Date">
+                        <button class="btn btn-outline-secondary" id="applyDateRange">Apply</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d-flex mb-2 mb-md-0">
+                    <div class="search-container me-2">
+                      <div class="input-group">
+                        <input type="text" class="form-control" id="orderSearch" placeholder="Search orders...">
+                        <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                          <i class="bi bi-search"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary" id="createOrderBtn" data-bs-toggle="modal" data-bs-target="#orderModal">
+                      <i class="bi bi-plus-lg me-1"></i> Create Order
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Order Stats Cards -->
+            <div class="row mb-4">
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card kpi-card h-100 small-kpi-card">
+                  <div class="card-body">
+                    <h6 class="card-title text-muted small-card-title">Total Orders</h6>
+                    <div class="d-flex align-items-center">
+                      <div class="fw-bold me-3 small-card-value" id="totalOrdersCount">0</div>
+                      <div class="text-success small">
+                        <i class="bi bi-graph-up"></i> <span id="totalOrdersGrowth">0%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card kpi-card h-100 small-kpi-card">
+                  <div class="card-body">
+                    <h6 class="card-title text-muted small-card-title">Pending Orders</h6>
+                    <div class="d-flex align-items-center">
+                      <div class="fw-bold me-3 small-card-value" id="pendingOrdersCount">0</div>
+                      <div class="text-warning">
+                        <i class="bi bi-clock"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card kpi-card h-100 small-kpi-card">
+                  <div class="card-body">
+                    <h6 class="card-title text-muted small-card-title">Delivered Orders</h6>
+                    <div class="d-flex align-items-center">
+                      <div class="fw-bold me-3 small-card-value" id="deliveredOrdersCount">0</div>
+                      <div class="text-success">
+                        <i class="bi bi-check-circle"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card kpi-card h-100 small-kpi-card">
+                  <div class="card-body">
+                    <h6 class="card-title text-muted small-card-title">Total Revenue</h6>
+                    <div class="d-flex align-items-center">
+                      <div class="fw-bold me-3 small-card-value" id="totalRevenue">₱0</div>
+                      <div class="text-success small">
+                        <i class="bi bi-currency-exchange"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mt-2">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h5 class="card-title mb-0">Orders List</h5>
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary refresh-btn" data-tab="active">
+                          <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="exportOrdersBtn">
+                          <i class="bi bi-download me-1"></i> Export
+                        </button>
+                      </div>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-hover table-modern">
+                        <thead>
+                          <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                          <!-- Table content will be loaded dynamically -->
+                          <tr>
+                            <td colspan="7" class="text-center py-4">
+                              <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                              </div>
+                              <p class="mt-2">Loading orders...</p>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                      <div class="text-muted small" id="orderCount">Showing 0 orders</div>
+                      <nav aria-label="Orders pagination">
+                        <ul class="pagination pagination-sm" id="ordersPagination">
+                          <!-- Pagination will be added dynamically -->
+                        </ul>
+                      </nav>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Replace the Create/Edit Order Modal with this landscape-oriented version -->
+<!-- Create/Edit Order Modal -->
+<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="orderModalLabel">
+          <i class="bi bi-bag-plus me-2 text-primary"></i>Create New Order
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <form id="orderForm">
+          <input type="hidden" id="orderId" name="orderId" value="">
+          
+          <div class="row g-0">
+            <!-- Left column - Customer Information and Order Details -->
+            <div class="col-md-5 border-end">
+              <div class="p-4">
+                <div class="section-title mb-3">
+                  <i class="bi bi-person-circle me-2 text-primary"></i>Customer Information
+                </div>
+                
+                <div class="mb-3">
+                  <label for="customerName" class="form-label required">Customer Name</label>
+                  <input type="text" class="form-control" id="customerName" name="customerName" required placeholder="Enter customer name">
+                </div>
+                
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="customerEmail" class="form-label required">Customer Email</label>
+                    <input type="email" class="form-control" id="customerEmail" name="customerEmail" required placeholder="Enter customer email">
+                  </div>
+                  <div class="col-md-6">
+                    <label for="customerPhone" class="form-label required">Phone Number</label>
+                    <input type="tel" class="form-control" id="customerPhone" name="customerPhone" required placeholder="Enter phone number">
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="shippingAddress" class="form-label required">Shipping Address</label>
+                  <textarea class="form-control" id="shippingAddress" name="shippingAddress" rows="2" required placeholder="Enter shipping address"></textarea>
+                </div>
+                
+                <div class="section-title mb-3 mt-4">
+                  <i class="bi bi-gear-fill me-2 text-primary"></i>Order Details
+                </div>
+                
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="orderDate" class="form-label required">Order Date</label>
+                    <input type="text" class="form-control" id="orderDate" name="orderDate" required placeholder="Select date">
+                  </div>
+                  <div class="col-md-6">
+                    <label for="orderStatus" class="form-label required">Status</label>
+                    <select class="form-select" id="orderStatus" name="orderStatus" required>
+                      <option value="pending">Pending</option>
+                      <option value="processing">Processing</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="paymentMethod" class="form-label required">Payment Method</label>
+                  <select class="form-select" id="paymentMethod" name="paymentMethod" required>
+                    <option value="cash">Cash</option>
+                    <option value="mobile_payment">Mobile Payment</option>
+                  </select>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="orderNotes" class="form-label">Notes</label>
+                  <textarea class="form-control" id="orderNotes" name="notes" rows="2" placeholder="Add any additional notes here"></textarea>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right column - Order Items and Totals -->
+            <div class="col-md-7">
+              <div class="p-4">
+                <div class="section-title mb-3">
+                  <i class="bi bi-cart3 me-2 text-primary"></i>Order Items
+                </div>
+                
+                <div class="table-responsive">
+                  <table class="table table-sm" id="orderItemsTable">
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th style="width: 100px;">Quantity</th>
+                        <th style="width: 120px;">Price (₱)</th>
+                        <th style="width: 120px;">Total (₱)</th>
+                        <th style="width: 50px;"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="orderItemsBody">
+                      <tr class="order-item-row">
+                        <td>
+                          <select class="form-select product-select" name="products[]" required>
+                            <option value="">Select Product</option>
+                            <!-- Products will be loaded dynamically -->
+                          </select>
+                        </td>
+                        <td>
+                          <input type="number" class="form-control item-quantity" name="quantities[]" min="1" value="1" required>
+                        </td>
+                        <td>
+                          <input type="number" class="form-control item-price" name="prices[]" step="0.01" min="0" value="0.00" required readonly>
+                        </td>
+                        <td>
+                          <input type="number" class="form-control item-total" step="0.01" min="0" value="0.00" readonly>
+                        </td>
+                        <td>
+                          <button type="button" class="btn btn-sm btn-outline-danger remove-item">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colspan="5">
+                          <button type="button" class="btn btn-sm btn-outline-primary" id="addItemBtn">
+                            <i class="bi bi-plus-circle me-1"></i> Add Item
+                          </button>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+                
+                <div class="row mt-4">
+                  <div class="col-md-6 offset-md-6">
+                    <div class="card bg-light">
+                      <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                          <span>Subtotal:</span>
+                          <span id="orderSubtotal">₱0.00</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                          <label for="orderDiscount" class="form-label mb-0">Discount:</label>
+                          <div class="input-group input-group-sm" style="width: 120px;">
+                            <input type="number" class="form-control" id="orderDiscount" name="discount" min="0" max="100" step="0.01" value="0.00">
+                            <span class="input-group-text">%</span>
+                          </div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                          <span>Discount Amount:</span>
+                          <span id="orderDiscountAmount">₱0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold">
+                          <span>Total:</span>
+                          <span id="orderTotal">₱0.00</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-primary" id="saveOrderBtn">
+          <i class="bi bi-check-lg me-1"></i> Save Order
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Replace the existing View Order Modal with this landscape-oriented version -->
+<!-- View Order Modal -->
+<div class="modal fade" id="viewOrderModal" tabindex="-1" aria-labelledby="viewOrderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="viewOrderModalLabel">
+          <i class="bi bi-info-circle me-2 text-primary"></i>Order Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="row g-0">
+          <!-- Left column - Order and Customer Information -->
+          <div class="col-md-4 border-end">
+            <div class="p-4">
+              <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                  <i class="bi bi-bag fs-3 text-primary"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0 fw-bold">Order #<span id="viewOrderId"></span></h6>
+                  <p class="text-muted mb-0 small">Placed on <span id="viewOrderDate"></span></p>
+                </div>
+              </div>
+              
+              <div class="card mb-3">
+                <div class="card-header bg-light py-2">
+                  <h6 class="mb-0 fw-bold"><i class="bi bi-person me-2"></i>Customer Information</h6>
+                </div>
+                <div class="card-body">
+                  <p class="mb-1"><strong>Name:</strong> <span id="viewCustomerName"></span></p>
+                  <p class="mb-1"><strong>Phone:</strong> <span id="viewCustomerPhone"></span></p>
+                  <p class="mb-1"><strong>Email:</strong> <span id="viewCustomerEmail"></span></p>
+                  <p class="mb-0"><strong>Address:</strong> <span id="viewShippingAddress"></span></p>
+                </div>
+              </div>
+              
+              <div class="card mb-3">
+                <div class="card-header bg-light py-2">
+                  <h6 class="mb-0 fw-bold"><i class="bi bi-info-circle me-2"></i>Order Information</h6>
+                </div>
+                <div class="card-body">
+                  <p class="mb-1"><strong>Status:</strong> <span id="viewOrderStatus"></span></p>
+                  <p class="mb-0"><strong>Payment Method:</strong> <span id="viewPaymentMethod"></span></p>
+                </div>
+              </div>
+              
+              <div class="card">
+                <div class="card-header bg-light py-2">
+                  <h6 class="mb-0 fw-bold"><i class="bi bi-sticky me-2"></i>Notes</h6>
+                </div>
+                <div class="card-body bg-light">
+                  <p id="viewOrderNotes" class="mb-0">No notes available.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Middle column - Order Items -->
+          <div class="col-md-5 border-end">
+            <div class="p-4">
+              <h6 class="fw-bold mb-3"><i class="bi bi-cart3 me-2"></i>Order Items</h6>
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                      <th class="text-end">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="viewOrderItems">
+                    <!-- Order items will be loaded dynamically -->
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="card mt-3">
+                <div class="card-body bg-light">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal:</span>
+                    <span id="viewOrderSubtotal">₱0.00</span>
+                  </div>
+                  
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Discount (%):</span>
+                    <span id="viewOrderDiscountPercentage">0%</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Discount Amount:</span>
+                    <span id="viewOrderDiscount">₱0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between fw-bold">
+                    <span>Total:</span>
+                    <span id="viewOrderTotal">₱0.00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right column - Order Timeline -->
+          <div class="col-md-3">
+            <div class="p-4">
+              <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Order Timeline</h6>
+              <div class="card">
+                <div class="card-body">
+                  <div class="delivery-timeline" id="orderTimeline">
+                    <!-- Timeline will be loaded dynamically -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i> Close
+        </button>
+        <button type="button" class="btn btn-outline-primary" id="printOrderBtn">
+          <i class="bi bi-printer me-1"></i> Print
+        </button>
+        <button type="button" class="btn btn-primary" id="editOrderBtn">
+          <i class="bi bi-pencil me-1"></i> Edit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-labelledby="deleteOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteOrderModalLabel"><i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <i class="bi bi-trash-fill"></i>
+          <p>Are you sure you want to delete order <strong id="deleteOrderId"></strong>?</p>
+          <p class="text-danger">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x me-1"></i> Cancel
+          </button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+            <i class="bi bi-trash me-1"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to logout?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmLogout">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Flatpickr for Date Picker -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- Custom JavaScript -->
+  <script src="orders.js"></script>
+  <script src="script.js"></script>
+  <!-- Modal Enhancements JavaScript -->
+  <script src="modal-enhancements.js"></script>
+  <script src="logout.js"></script>
+</body>
+</html>
