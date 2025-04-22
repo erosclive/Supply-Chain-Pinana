@@ -1,26 +1,120 @@
-// Global variables
+/**
+* Piñana Gourmet - Delivery Management JavaScript
+* This file handles all the functionality for the delivery management interface
+* including modals, data fetching, and status updates.
+*/
+
+// Global variables and state management
 let pendingDeliveries = []
 let activeDeliveries = []
 let completedDeliveries = []
-let deliveryIssues = []
 let reportedIssues = []
 let resolvedIssues = []
-const availableDrivers = [{ id: "DRV001", name: "Piñana Gourmet" }]
+let bootstrap // Will be initialized by Bootstrap's JS
+let flatpickr // Will be initialized by Flatpickr's JS
 
 // Initialize the page
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialize bootstrap
+  initBootstrap()
+  
   // Initialize sidebar toggle for mobile
   initSidebar()
-
-  // Initialize date pickers
-  initDatePickers()
 
   // Load deliveries data
   loadDeliveryData()
 
   // Initialize event listeners
   initEventListeners()
+
+  // Add a global alert container if it doesn't exist
+  if (!document.getElementById("alert-container")) {
+    const alertContainer = document.createElement("div")
+    alertContainer.id = "alert-container"
+    alertContainer.className = "position-fixed top-0 end-0 p-3"
+    alertContainer.style.zIndex = "1050"
+    document.body.appendChild(alertContainer)
+  }
 })
+
+// Initialize Bootstrap components
+function initBootstrap() {
+  // Define global bootstrap variable if not already defined
+  if (!window.bootstrap) {
+    window.bootstrap = {
+      Modal: class {
+        constructor(element) {
+          this.element = element
+          this.options = {
+            backdrop: true,
+            keyboard: true,
+            focus: true,
+          }
+          this.init()
+        }
+
+        init() {
+          // Add event listeners for close buttons
+          const closeButtons = this.element.querySelectorAll('[data-bs-dismiss="modal"]')
+          closeButtons.forEach((button) => {
+            button.addEventListener("click", () => this.hide())
+          })
+
+          // Add backdrop if enabled
+          if (this.options.backdrop) {
+            this.backdrop = document.createElement("div")
+            this.backdrop.className = "modal-backdrop fade show"
+            document.body.appendChild(this.backdrop)
+          }
+
+          // Show the modal
+          this.element.classList.add("show")
+          this.element.style.display = "block"
+          document.body.classList.add("modal-open")
+
+          // Focus the modal
+          if (this.options.focus) {
+            this.element.focus()
+          }
+        }
+
+        hide() {
+          // Hide the modal
+          this.element.classList.remove("show")
+          this.element.style.display = "none"
+
+          // Remove backdrop
+          if (this.backdrop) {
+            document.body.removeChild(this.backdrop)
+          }
+
+          document.body.classList.remove("modal-open")
+        }
+
+        static getInstance(element) {
+          return new Modal(element)
+        }
+      },
+
+      Alert: class {
+        constructor(element) {
+          this.element = element
+        }
+
+        close() {
+          // Fade out and remove the alert
+          this.element.classList.remove("show")
+          setTimeout(() => {
+            if (this.element.parentNode) {
+              this.element.parentNode.removeChild(this.element)
+            }
+          }, 150)
+        }
+      },
+    }
+    bootstrap = window.bootstrap
+  }
+}
 
 // Initialize sidebar toggle for mobile
 function initSidebar() {
@@ -48,6 +142,37 @@ function initSidebar() {
 
 // Initialize date pickers
 function initDatePickers() {
+  // Initialize flatpickr if not already defined
+  if (!window.flatpickr) {
+    window.flatpickr = (selector, config) => {
+      const element = document.querySelector(selector)
+      if (element) {
+        // Simple date picker implementation
+        element.type = "datetime-local"
+        if (config.minDate === "today") {
+          const today = new Date()
+          const year = today.getFullYear()
+          const month = String(today.getMonth() + 1).padStart(2, "0")
+          const day = String(today.getDate()).padStart(2, "0")
+          element.min = `${year}-${month}-${day}T00:00`
+        }
+        if (config.defaultDate) {
+          const defaultDate = new Date(config.defaultDate)
+          const year = defaultDate.getFullYear()
+          const month = String(defaultDate.getMonth() + 1).padStart(2, "0")
+          const day = String(defaultDate.getDate()).padStart(2, "0")
+          const hours = String(defaultDate.getHours()).padStart(2, "0")
+          const minutes = String(defaultDate.getMinutes()).padStart(2, "0")
+          element.value = `${year}-${month}-${day}T${hours}:${minutes}`
+        }
+      }
+      return {
+        destroy: () => {},
+      }
+    }
+    flatpickr = window.flatpickr
+  }
+
   // Delivery date picker
   if (document.getElementById("deliveryDate")) {
     flatpickr("#deliveryDate", {
@@ -65,24 +190,32 @@ function initDatePickers() {
       minDate: "today",
     })
   }
+
+  // Schedule date picker
+  if (document.getElementById("scheduleDate")) {
+    flatpickr("#scheduleDate", {
+      enableTime: false,
+      dateFormat: "Y-m-d",
+      minDate: "today",
+    })
+  }
+
+  // Complete time picker
+  if (document.getElementById("completeTime")) {
+    flatpickr("#completeTime", {
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      defaultDate: new Date(),
+    })
+  }
 }
 
 // Load delivery data for all tabs
 function loadDeliveryData() {
-  // Load pending deliveries
   loadPendingDeliveries()
-
-  // Load active deliveries
   loadActiveDeliveries()
-
-  // Load completed deliveries
   loadCompletedDeliveries()
-
-  // Load delivery issues
   loadDeliveryIssues()
-
-  // Load orders for dropdowns
-  loadOrdersForDropdowns()
 }
 
 // Initialize event listeners
@@ -91,8 +224,7 @@ function initEventListeners() {
   const markReadyBtn = document.getElementById("mark-ready-btn")
   if (markReadyBtn) {
     markReadyBtn.addEventListener("click", () => {
-      const markReadyModal = new bootstrap.Modal(document.getElementById("markReadyModal"))
-      markReadyModal.show()
+      showOrderSelectionModal("ready")
     })
   }
 
@@ -100,49 +232,8 @@ function initEventListeners() {
   const scheduleDeliveryBtn = document.getElementById("schedule-delivery-btn")
   if (scheduleDeliveryBtn) {
     scheduleDeliveryBtn.addEventListener("click", () => {
-      const scheduleModal = new bootstrap.Modal(document.getElementById("scheduleDeliveryModal"))
-      scheduleModal.show()
+      showOrderSelectionModal("schedule")
     })
-  }
-
-  // Confirm ready button
-  const confirmReadyBtn = document.getElementById("confirmReadyBtn")
-  if (confirmReadyBtn) {
-    confirmReadyBtn.addEventListener("click", markOrderReady)
-  }
-
-  // Confirm schedule button
-  const confirmScheduleBtn = document.getElementById("confirmScheduleBtn")
-  if (confirmScheduleBtn) {
-    confirmScheduleBtn.addEventListener("click", scheduleDelivery)
-  }
-
-  // Remove these lines from the initEventListeners function
-  // Update status button in delivery details modal
-  // const updateStatusBtn = document.getElementById("updateStatusBtn")
-  // if (updateStatusBtn) {
-  //   updateStatusBtn.addEventListener("click", showUpdateStatusOptions)
-  // }
-
-  // Report issue button in delivery details modal
-  const reportIssueBtn = document.getElementById("reportIssueBtn")
-  if (reportIssueBtn) {
-    reportIssueBtn.addEventListener("click", () => {
-      const orderId = document.getElementById("detail-order-id").textContent
-      openReportIssueModal(orderId)
-    })
-  }
-
-  // Confirm report issue button
-  const confirmReportIssueBtn = document.getElementById("confirmReportIssueBtn")
-  if (confirmReportIssueBtn) {
-    confirmReportIssueBtn.addEventListener("click", reportIssue)
-  }
-
-  // Confirm resolve issue button
-  const confirmResolveIssueBtn = document.getElementById("confirmResolveIssueBtn")
-  if (confirmResolveIssueBtn) {
-    confirmResolveIssueBtn.addEventListener("click", resolveIssue)
   }
 
   // Tab change event to refresh data
@@ -277,15 +368,15 @@ function loadPendingDeliveries() {
 
   // Show loading indicator
   tableBody.innerHTML = `
-  <tr>
-    <td colspan="5" class="text-center py-4">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      <p class="mt-2">Loading pending deliveries...</p>
-    </td>
-  </tr>
-`
+    <tr>
+      <td colspan="5" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading pending deliveries...</p>
+      </td>
+    </tr>
+  `
 
   // Fetch pending deliveries
   fetch("delivery_operations.php?action=get_pending_deliveries")
@@ -342,13 +433,13 @@ function renderPendingDeliveriesFiltered(deliveries) {
 
   if (deliveries.length === 0) {
     tableBody.innerHTML = `
-    <tr>
-      <td colspan="5" class="text-center py-5">
-        <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
-        <p class="text-muted">No pending deliveries found</p>
-      </td>
-    </tr>
-  `
+      <tr>
+        <td colspan="5" class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+          <p class="text-muted">No pending deliveries found</p>
+        </td>
+      </tr>
+    `
     return
   }
 
@@ -358,50 +449,48 @@ function renderPendingDeliveriesFiltered(deliveries) {
     // Status badge class
     let statusClass = ""
     switch (delivery.status) {
-      case "pending":
-        statusClass = "bg-warning text-dark"
-        break
-      case "processing":
-        statusClass = "bg-info text-dark"
+      case "confirmed":
+        statusClass = "bg-success"
         break
       default:
         statusClass = "bg-secondary"
     }
 
-    // Truncate product list if too long
-    const productList = delivery.product_list || "No products"
-    const truncatedProducts = productList.length > 50 ? productList.substring(0, 50) + "..." : productList
+    // Delivery mode badge
+    const deliveryModeClass = delivery.delivery_mode === "pickup" ? "bg-info" : "bg-primary"
+    const deliveryModeText = delivery.delivery_mode === "pickup" ? "Pickup" : "Delivery"
 
     html += `
-  <tr>
-    <td>
-      <span class="fw-medium">${delivery.order_id}</span>
-    </td>
-    <td>
-      <div class="fw-medium">${delivery.customer_name}</div>
-      <div class="small text-muted">${delivery.customer_email || "No email"}</div>
-    </td>
-    <td>
-      <div>${delivery.formatted_date}</div>
-    </td>
-    <td>
-      <span class="badge ${statusClass}">${delivery.status.charAt(0).toUpperCase() + delivery.status.slice(1)}</span>
-    </td>
-    <td>
-      <div class="btn-group">
-        <button type="button" class="btn btn-sm btn-outline-primary view-delivery-btn" data-id="${delivery.order_id}" title="View Details">
-          <i class="bi bi-eye"></i>
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-success mark-ready-btn" data-id="${delivery.order_id}" title="Mark Ready">
-          <i class="bi bi-box-seam"></i>
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-secondary schedule-btn" data-id="${delivery.order_id}" title="Schedule">
-          <i class="bi bi-calendar"></i>
-        </button>
-      </div>
-    </td>
-  </tr>
-`
+      <tr>
+        <td>
+          <span class="fw-medium">${delivery.order_id}</span>
+        </td>
+        <td>
+          <div class="fw-medium">${delivery.customer_name}</div>
+          <div class="small text-muted">${delivery.customer_email || "No email"}</div>
+        </td>
+        <td>
+          <div>${delivery.formatted_date}</div>
+        </td>
+        <td>
+          <span class="badge ${statusClass}">${delivery.status.charAt(0).toUpperCase() + delivery.status.slice(1)}</span>
+          <span class="badge ${deliveryModeClass}">${deliveryModeText}</span>
+        </td>
+        <td>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-primary view-delivery-btn" data-id="${delivery.order_id}" title="View Details">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-success update-status-btn" data-id="${delivery.order_id}" data-mode="${delivery.delivery_mode}" title="Update Status">
+              <i class="bi bi-arrow-up-circle"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary schedule-btn" data-id="${delivery.order_id}" data-mode="${delivery.delivery_mode}" title="Schedule">
+              <i class="bi bi-calendar"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `
   })
 
   tableBody.innerHTML = html
@@ -414,17 +503,19 @@ function renderPendingDeliveriesFiltered(deliveries) {
     })
   })
 
-  document.querySelectorAll(".mark-ready-btn").forEach((btn) => {
+  document.querySelectorAll(".update-status-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
       const orderId = this.getAttribute("data-id")
-      openMarkReadyModal(orderId)
+      const deliveryMode = this.getAttribute("data-mode")
+      openUpdateStatusModal(orderId, deliveryMode)
     })
   })
 
   document.querySelectorAll(".schedule-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
       const orderId = this.getAttribute("data-id")
-      openScheduleModal(orderId)
+      const deliveryMode = this.getAttribute("data-mode")
+      openEnhancedScheduleModal(orderId, deliveryMode)
     })
   })
 }
@@ -436,15 +527,15 @@ function loadActiveDeliveries() {
 
   // Show loading indicator
   tableBody.innerHTML = `
-  <tr>
-    <td colspan="5" class="text-center py-4">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      <p class="mt-2">Loading active deliveries...</p>
-    </td>
-  </tr>
-`
+    <tr>
+      <td colspan="5" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading active deliveries...</p>
+      </td>
+    </tr>
+  `
 
   // Fetch active deliveries
   fetch("delivery_operations.php?action=get_active_deliveries")
@@ -501,54 +592,67 @@ function renderActiveDeliveriesFiltered(deliveries) {
 
   if (deliveries.length === 0) {
     tableBody.innerHTML = `
-    <tr>
-      <td colspan="5" class="text-center py-5">
-        <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
-        <p class="text-muted">No active deliveries found</p>
-      </td>
-    </tr>
-  `
+      <tr>
+        <td colspan="5" class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+          <p class="text-muted">No active deliveries found</p>
+        </td>
+      </tr>
+    `
     return
   }
 
   let html = ""
 
   deliveries.forEach((delivery) => {
-    // Truncate product list if too long
-    const productList = delivery.product_list || "No products"
-    const truncatedProducts = productList.length > 50 ? productList.substring(0, 50) + "..." : productList
+    // Determine status badge class and text
+    let statusClass = ""
+    let statusText = ""
+
+    if (delivery.delivery_mode === "pickup") {
+      statusClass = "bg-primary"
+      statusText = "Ready for Pickup"
+    } else {
+      statusClass = "bg-primary"
+      statusText = "In Transit"
+    }
+
+    // Delivery mode badge
+    const deliveryModeClass = delivery.delivery_mode === "pickup" ? "bg-info" : "bg-primary"
+    const deliveryModeText = delivery.delivery_mode === "pickup" ? "Pickup" : "Delivery"
 
     html += `
-  <tr>
-    <td>
-      <span class="fw-medium">${delivery.order_id}</span>
-    </td>
-    <td>
-      <div class="fw-medium">${delivery.customer_name}</div>
-      <div class="small text-muted">${delivery.customer_email || "No email"}</div>
-    </td>
-    <td>
-      <div>${delivery.formatted_eta}</div>
-      <div class="small text-muted">Ordered: ${delivery.formatted_date}</div>
-    </td>
-    <td>
-      <span class="badge bg-primary">In Transit</span>
-    </td>
-    <td>
-      <div class="btn-group">
-        <button type="button" class="btn btn-sm btn-outline-primary view-delivery-btn" data-id="${delivery.order_id}" title="View Details">
-          <i class="bi bi-eye"></i>
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-success complete-delivery-btn" data-id="${delivery.order_id}" title="Mark Delivered">
-          <i class="bi bi-check-circle"></i>
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-danger report-issue-btn" data-id="${delivery.order_id}" title="Report Issue">
-          <i class="bi bi-exclamation-triangle"></i>
-        </button>
-      </div>
-    </td>
-  </tr>
-`
+      <tr>
+        <td>
+          <span class="fw-medium">${delivery.order_id}</span>
+        </td>
+        <td>
+          <div class="fw-medium">${delivery.customer_name}</div>
+          <div class="small text-muted">${delivery.customer_email || "No email"}</div>
+        </td>
+        <td>
+          <div>${delivery.formatted_eta || "Not specified"}</div>
+          <div class="small text-muted">Ordered: ${delivery.formatted_date}</div>
+        </td>
+        <td>
+          <span class="badge ${statusClass}">${statusText}</span>
+          <span class="badge ${deliveryModeClass}">${deliveryModeText}</span>
+        </td>
+        <td>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-primary view-delivery-btn" data-id="${delivery.order_id}" title="View Details">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-success complete-delivery-btn" data-id="${delivery.order_id}" data-mode="${delivery.delivery_mode}" title="Mark ${delivery.delivery_mode === "pickup" ? "Picked Up" : "Delivered"}">
+              <i class="bi bi-check-circle"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger report-issue-btn" data-id="${delivery.order_id}" title="Report Issue">
+              <i class="bi bi-exclamation-triangle"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `
   })
 
   tableBody.innerHTML = html
@@ -564,7 +668,8 @@ function renderActiveDeliveriesFiltered(deliveries) {
   document.querySelectorAll(".complete-delivery-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
       const orderId = this.getAttribute("data-id")
-      completeDelivery(orderId)
+      const deliveryMode = this.getAttribute("data-mode")
+      openCompleteDeliveryModal(orderId, deliveryMode)
     })
   })
 
@@ -583,15 +688,15 @@ function loadCompletedDeliveries() {
 
   // Show loading indicator
   tableBody.innerHTML = `
-  <tr>
-    <td colspan="4" class="text-center py-4">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      <p class="mt-2">Loading completed deliveries...</p>
-    </td>
-  </tr>
-`
+    <tr>
+      <td colspan="4" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading completed deliveries...</p>
+      </td>
+    </tr>
+  `
 
   // Fetch completed deliveries
   fetch("delivery_operations.php?action=get_completed_deliveries")
@@ -648,57 +753,52 @@ function renderCompletedDeliveriesFiltered(deliveries) {
 
   if (deliveries.length === 0) {
     tableBody.innerHTML = `
-    <tr>
-      <td colspan="4" class="text-center py-5">
-        <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
-        <p class="text-muted">No completed deliveries found</p>
-      </td>
-    </tr>
-  `
+      <tr>
+        <td colspan="4" class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+          <p class="text-muted">No completed deliveries found</p>
+        </td>
+      </tr>
+    `
     return
   }
 
   let html = ""
 
   deliveries.forEach((delivery) => {
-    // Generate star rating
-    // let ratingStars = ""
-    // const rating = Number.parseInt(delivery.rating) || 0
+    // Delivery mode badge
+    const deliveryModeClass = delivery.delivery_mode === "pickup" ? "bg-info" : "bg-primary"
+    const deliveryModeText = delivery.delivery_mode === "pickup" ? "Pickup" : "Delivery"
 
-    // for (let i = 1; i <= 5; i++) {
-    //   if (i <= rating) {
-    //     ratingStars += '<i class="bi bi-star-fill text-warning"></i>'
-    //   } else {
-    //     ratingStars += '<i class="bi bi-star text-muted"></i>'
-    //   }
-    // }
-
-    // Truncate product list if too long
-    const productList = delivery.product_list || "No products"
-    const truncatedProducts = productList.length > 50 ? productList.substring(0, 50) + "..." : productList
+    // Status badge
+    const statusClass = delivery.delivery_mode === "pickup" ? "bg-success" : "bg-success"
+    const statusText = delivery.delivery_mode === "pickup" ? "Picked Up" : "Delivered"
 
     html += `
-  <tr>
-    <td>
-      <span class="fw-medium">${delivery.order_id}</span>
-    </td>
-    <td>
-      <div class="fw-medium">${delivery.customer_name}</div>
-      <div class="small text-muted">${delivery.customer_email || "No email"}</div>
-    </td>
-    <td>
-      <div>${delivery.formatted_delivery_time}</div>
-      <div class="small text-muted">Ordered: ${delivery.formatted_date}</div>
-    </td>
-    <td>
-      <div class="btn-group">
-        <button type="button" class="btn btn-sm btn-outline-primary view-delivery-btn" data-id="${delivery.order_id}" title="View Details">
-          <i class="bi bi-eye"></i>
-        </button>
-      </div>
-    </td>
-  </tr>
-`
+      <tr>
+        <td>
+          <span class="fw-medium">${delivery.order_id}</span>
+        </td>
+        <td>
+          <div class="fw-medium">${delivery.customer_name}</div>
+          <div class="small text-muted">${delivery.customer_email || "No email"}</div>
+        </td>
+        <td>
+          <div>${delivery.formatted_delivery_time}</div>
+          <div class="small text-muted">
+            <span class="badge ${statusClass}">${statusText}</span>
+            <span class="badge ${deliveryModeClass}">${deliveryModeText}</span>
+          </div>
+        </td>
+        <td>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-primary view-delivery-btn" data-id="${delivery.order_id}" title="View Details">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `
   })
 
   tableBody.innerHTML = html
@@ -721,37 +821,35 @@ function loadDeliveryIssues() {
 
   // Show loading indicators
   reportedTableBody.innerHTML = `
-  <tr>
-    <td colspan="4" class="text-center py-4">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      <p class="mt-2">Loading reported issues...</p>
-    </td>
-  </tr>
-`
+    <tr>
+      <td colspan="4" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading reported issues...</p>
+      </td>
+    </tr>
+  `
 
   resolvedTableBody.innerHTML = `
-  <tr>
-    <td colspan="4" class="text-center py-4">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      <p class="mt-2">Loading resolved issues...</p>
-    </td>
-  </tr>
-`
+    <tr>
+      <td colspan="4" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading resolved issues...</p>
+      </td>
+    </tr>
+  `
 
   // Fetch delivery issues
   fetch("delivery_operations.php?action=get_delivery_issues")
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        deliveryIssues = data.issues
-
         // Split issues into reported and resolved
-        reportedIssues = deliveryIssues.filter((issue) => issue.status !== "resolved")
-        resolvedIssues = deliveryIssues.filter((issue) => issue.status === "resolved")
+        reportedIssues = data.issues.filter((issue) => issue.status !== "resolved")
+        resolvedIssues = data.issues.filter((issue) => issue.status === "resolved")
 
         // Render both tables
         renderReportedIssues(reportedIssues)
@@ -762,15 +860,9 @@ function loadDeliveryIssues() {
         if (issuesBadge) {
           issuesBadge.textContent = reportedIssues.length
         }
-
-        // Update notification badge in header - only count reported issues
-        const notificationBadge = document.getElementById("notification-badge")
-        if (notificationBadge) {
-          notificationBadge.textContent = reportedIssues.length
-        }
       } else {
         showAlert("Failed to load delivery issues: " + data.message, "danger")
-        document.getElementById("reported-issues-table-body").innerHTML = `
+        reportedTableBody.innerHTML = `
           <tr>
             <td colspan="4" class="text-center py-4">
               <div class="text-danger">
@@ -780,7 +872,7 @@ function loadDeliveryIssues() {
             </td>
           </tr>
         `
-        document.getElementById("resolved-issues-table-body").innerHTML = `
+        resolvedTableBody.innerHTML = `
           <tr>
             <td colspan="4" class="text-center py-4">
               <div class="text-danger">
@@ -795,7 +887,7 @@ function loadDeliveryIssues() {
     .catch((error) => {
       console.error("Error loading delivery issues:", error)
       showAlert("Error loading delivery issues. Please try again.", "danger")
-      document.getElementById("reported-issues-table-body").innerHTML = `
+      reportedTableBody.innerHTML = `
         <tr>
           <td colspan="4" class="text-center py-4">
             <div class="text-danger">
@@ -805,7 +897,7 @@ function loadDeliveryIssues() {
           </td>
         </tr>
       `
-      document.getElementById("resolved-issues-table-body").innerHTML = `
+      resolvedTableBody.innerHTML = `
         <tr>
           <td colspan="4" class="text-center py-4">
             <div class="text-danger">
@@ -825,13 +917,13 @@ function renderReportedIssues(issues) {
 
   if (issues.length === 0) {
     tableBody.innerHTML = `
-    <tr>
-      <td colspan="4" class="text-center py-5">
-        <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
-        <p class="text-muted">No reported issues found</p>
-      </td>
-    </tr>
-  `
+      <tr>
+        <td colspan="4" class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+          <p class="text-muted">No reported issues found</p>
+        </td>
+      </tr>
+    `
     return
   }
 
@@ -855,33 +947,33 @@ function renderReportedIssues(issues) {
     const issueType = issue.issue_type.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())
 
     html += `
-  <tr>
-    <td>
-      <span class="fw-medium">${issue.order_id}</span>
-      <div class="small text-muted">${issue.customer_name}</div>
-    </td>
-    <td>
-      <span class="badge bg-info text-dark">${issueType}</span>
-      <div class="small text-muted">${issue.formatted_reported_at}</div>
-    </td>
-    <td>
-      <span class="badge ${statusClass}">${issue.status.charAt(0).toUpperCase() + issue.status.slice(1)}</span>
-    </td>
-    <td>
-      <div class="btn-group">
-        <button type="button" class="btn btn-sm btn-outline-primary view-issue-btn" data-id="${issue.issue_id}" title="View Issue">
-          <i class="bi bi-eye"></i>
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-success resolve-issue-btn" data-id="${issue.issue_id}" title="Resolve Issue">
-          <i class="bi bi-check-circle"></i>
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-secondary view-order-btn" data-id="${issue.order_id}" title="View Order">
-          <i class="bi bi-box"></i>
-        </button>
-      </div>
-    </td>
-  </tr>
-`
+      <tr>
+        <td>
+          <span class="fw-medium">${issue.order_id}</span>
+          <div class="small text-muted">${issue.customer_name}</div>
+        </td>
+        <td>
+          <span class="badge bg-info text-dark">${issueType}</span>
+          <div class="small text-muted">${issue.formatted_reported_at}</div>
+        </td>
+        <td>
+          <span class="badge ${statusClass}">${issue.status.charAt(0).toUpperCase() + issue.status.slice(1)}</span>
+        </td>
+        <td>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-primary view-issue-btn" data-id="${issue.issue_id}" title="View Issue">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-success resolve-issue-btn" data-id="${issue.issue_id}" data-order-id="${issue.order_id}" data-issue-type="${issueType}" data-description="${issue.description || ""}" title="Resolve Issue">
+              <i class="bi bi-check-circle"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary view-order-btn" data-id="${issue.order_id}" title="View Order">
+              <i class="bi bi-box"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `
   })
 
   tableBody.innerHTML = html
@@ -897,7 +989,10 @@ function renderReportedIssues(issues) {
   document.querySelectorAll(".resolve-issue-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
       const issueId = this.getAttribute("data-id")
-      openResolveIssueModal(issueId)
+      const orderId = this.getAttribute("data-order-id")
+      const issueType = this.getAttribute("data-issue-type")
+      const description = this.getAttribute("data-description")
+      openResolveIssueModal(issueId, orderId, issueType, description)
     })
   })
 
@@ -916,13 +1011,13 @@ function renderResolvedIssues(issues) {
 
   if (issues.length === 0) {
     tableBody.innerHTML = `
-    <tr>
-      <td colspan="4" class="text-center py-5">
-        <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
-        <p class="text-muted">No resolved issues found</p>
-      </td>
-    </tr>
-  `
+      <tr>
+        <td colspan="4" class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+          <p class="text-muted">No resolved issues found</p>
+        </td>
+      </tr>
+    `
     return
   }
 
@@ -933,30 +1028,30 @@ function renderResolvedIssues(issues) {
     const issueType = issue.issue_type.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())
 
     html += `
-  <tr>
-    <td>
-      <span class="fw-medium">${issue.order_id}</span>
-      <div class="small text-muted">${issue.customer_name}</div>
-    </td>
-    <td>
-      <span class="badge bg-info text-dark">${issueType}</span>
-    </td>
-    <td>
-      <div>${issue.formatted_resolved_at}</div>
-      <div class="small text-muted">Reported: ${issue.formatted_reported_at}</div>
-    </td>
-    <td>
-      <div class="btn-group">
-        <button type="button" class="btn btn-sm btn-outline-primary view-issue-btn" data-id="${issue.issue_id}" title="View Issue">
-          <i class="bi bi-eye"></i>
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-secondary view-order-btn" data-id="${issue.order_id}" title="View Order">
-          <i class="bi bi-box"></i>
-        </button>
-      </div>
-    </td>
-  </tr>
-`
+      <tr>
+        <td>
+          <span class="fw-medium">${issue.order_id}</span>
+          <div class="small text-muted">${issue.customer_name}</div>
+        </td>
+        <td>
+          <span class="badge bg-info text-dark">${issueType}</span>
+        </td>
+        <td>
+          <div>${issue.formatted_resolved_at}</div>
+          <div class="small text-muted">Reported: ${issue.formatted_reported_at}</div>
+        </td>
+        <td>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-primary view-issue-btn" data-id="${issue.issue_id}" title="View Issue">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary view-order-btn" data-id="${issue.order_id}" title="View Order">
+              <i class="bi bi-box"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `
   })
 
   tableBody.innerHTML = html
@@ -977,150 +1072,439 @@ function renderResolvedIssues(issues) {
   })
 }
 
-// Load orders for dropdowns
-function loadOrdersForDropdowns() {
-  fetch("delivery_operations.php?action=get_orders_for_delivery")
+// View delivery details
+function viewDeliveryDetails(orderId) {
+  // Fetch delivery details
+  fetch(`delivery_operations.php?action=get_delivery_details&order_id=${orderId}`)
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        const orders = data.orders
+        const delivery = data.delivery
 
-        // Populate order select in Mark Ready modal
-        const orderSelect = document.getElementById("orderSelect")
-        if (orderSelect) {
-          orderSelect.innerHTML = "<option selected disabled>Choose an order...</option>"
-          orders.forEach((order) => {
-            const option = document.createElement("option")
-            option.value = order.order_id
-            option.textContent = `${order.order_id} - ${order.customer_name} (${order.formatted_amount})`
-            orderSelect.appendChild(option)
+        // Create modal HTML with fetched data
+        const modalHtml = `
+          <div class="modal fade" id="deliveryDetailsModal" tabindex="-1" aria-labelledby="deliveryDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+              <div class="modal-content">
+                <div class="modal-header bg-light">
+                  <h5 class="modal-title" id="deliveryDetailsModalLabel">
+                    <i class="bi bi-info-circle me-2 text-primary"></i>${delivery.delivery_mode === "pickup" ? "Pickup" : "Delivery"} Details - Order #${delivery.order_id}
+                  </h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="card mb-3">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0"><i class="bi bi-box me-2"></i>Order Information</h6>
+                        </div>
+                        <div class="card-body">
+                          <p class="mb-1"><strong>Order ID:</strong> ${delivery.order_id}</p>
+                          <p class="mb-1"><strong>Order Date:</strong> ${delivery.formatted_order_date}</p>
+                          <p class="mb-1"><strong>Status:</strong> <span class="badge ${getStatusBadgeClass(delivery.status)}">${capitalizeFirstLetter(delivery.status)}</span></p>
+                          <p class="mb-1"><strong>Mode:</strong> <span class="badge ${delivery.delivery_mode === "pickup" ? "bg-info" : "bg-primary"}">${capitalizeFirstLetter(delivery.delivery_mode)}</span></p>
+                          <p class="mb-0"><strong>Total Amount:</strong> ${delivery.formatted_amount}</p>
+                        </div>
+                      </div>
+                      
+                      <div class="card mb-3">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0"><i class="bi bi-person me-2"></i>Customer Information</h6>
+                        </div>
+                        <div class="card-body">
+                          <p class="mb-1"><strong>Name:</strong> ${delivery.customer_name}</p>
+                          <p class="mb-1"><strong>Email:</strong> ${delivery.customer_email || "N/A"}</p>
+                          <p class="mb-1"><strong>Phone:</strong> ${delivery.customer_phone || "N/A"}</p>
+                          <p class="mb-0"><strong>${delivery.delivery_mode === "pickup" ? "Pickup Location" : "Shipping Address"}:</strong> ${delivery.shipping_address || "N/A"}</p>
+                        </div>
+                      </div>
+                      
+                      <!-- Tracking Information Card -->
+                      <div class="card mb-3">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0"><i class="bi bi-geo-alt me-2"></i>${delivery.delivery_mode === "pickup" ? "Pickup" : "Delivery"} Tracking</h6>
+                        </div>
+                        <div class="card-body">
+                          ${
+                            delivery.delivery_mode === "pickup"
+                              ? `
+                              <p class="mb-1"><strong>Pickup Location:</strong> ${delivery.shipping_address || "Shop"}</p>
+                              <p class="mb-1"><strong>Pickup Date:</strong> ${delivery.pickup_date || "Not specified"}</p>
+                              <p class="mb-1"><strong>Ready Status:</strong> 
+                                <span class="badge ${delivery.status === "ready" ? "bg-success" : "bg-warning"}">
+                                  ${delivery.status === "ready" ? "Ready for pickup" : "Being prepared"}
+                                </span>
+                              </p>
+                              <p class="mb-0"><strong>Notes:</strong> ${delivery.notes || "No special instructions"}</p>
+                            `
+                              : `
+                              <p class="mb-1"><strong>Expected Delivery:</strong> ${delivery.formatted_eta || "Not specified"}</p>
+                              <p class="mb-1"><strong>Delivery Address:</strong> ${delivery.shipping_address || "Not specified"}</p>
+                              <p class="mb-1"><strong>Driver:</strong> ${delivery.driver_id || "Not assigned"}</p>
+                              <div class="progress mt-2 mb-2" style="height: 10px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                                  style="width: ${getDeliveryProgressPercentage(delivery.status)}%" 
+                                  aria-valuenow="${getDeliveryProgressPercentage(delivery.status)}" 
+                                  aria-valuemin="0" 
+                                  aria-valuemax="100">
+                                </div>
+                              </div>
+                              <div class="d-flex justify-content-between small text-muted">
+                                <span>Order Placed</span>
+                                <span>Processing</span>
+                                <span>Shipped</span>
+                                <span>Delivered</span>
+                              </div>
+                            `
+                          }
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                      <div class="card mb-3">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0"><i class="bi bi-clock me-2"></i>${delivery.delivery_mode === "pickup" ? "Pickup" : "Delivery"} Schedule</h6>
+                        </div>
+                        <div class="card-body">
+                          <p class="mb-1"><strong>Estimated Time:</strong> ${delivery.formatted_eta || "Not specified"}</p>
+                          <p class="mb-0"><strong>Actual Time:</strong> ${delivery.formatted_delivery_time || "Not completed yet"}</p>
+                        </div>
+                      </div>
+                      
+                      <div class="card mb-3">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0"><i class="bi bi-list-check me-2"></i>Status History</h6>
+                        </div>
+                        <div class="card-body p-0">
+                          <ul class="list-group list-group-flush status-history">
+                            ${
+                              delivery.status_history
+                                ? delivery.status_history
+                                    .map(
+                                      (history) => `
+                              <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                  <span class="badge ${getStatusBadgeClass(history.status)}">${capitalizeFirstLetter(history.status)}</span>
+                                  <small class="text-muted">${history.formatted_date}</small>
+                                </div>
+                                ${history.notes ? `<small class="text-muted">${history.notes}</small>` : ""}
+                              </li>
+                            `,
+                                    )
+                                    .join("")
+                                : "<li class='list-group-item text-center'>No status history available</li>"
+                            }
+                          </ul>
+                        </div>
+                      </div>
+                      
+                      <div class="card">
+                        <div class="card-header bg-light">
+                          <h6 class="mb-0"><i class="bi bi-cart me-2"></i>Order Items</h6>
+                        </div>
+                        <div class="card-body p-0">
+                          <ul class="list-group list-group-flush">
+                            ${
+                              delivery.items && delivery.items.length > 0
+                                ? delivery.items
+                                    .map(
+                                      (item) => `
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                  <div>
+                                    <span class="fw-medium">${item.product_name}</span>
+                                    <span class="text-muted"> - ₱${Number(item.price).toFixed(2)}</span>
+                                  </div>
+                                  <span class="badge bg-primary rounded-pill">${item.quantity}x</span>
+                                </li>
+                              `,
+                                    )
+                                    .join("")
+                                : `<li class="list-group-item text-center text-muted">No items found</li>`
+                            }
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  
+                  ${
+                    delivery.status === "confirmed"
+                      ? `
+                    <button type="button" class="btn btn-primary update-status-btn-modal" data-id="${delivery.order_id}" data-mode="${delivery.delivery_mode}">
+                      <i class="bi bi-arrow-up-circle me-1"></i> Update Status
+                    </button>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    delivery.status === "shipped" || delivery.status === "ready"
+                      ? `
+                    <button type="button" class="btn btn-success complete-delivery-btn-modal" data-id="${delivery.order_id}" data-mode="${delivery.delivery_mode}">
+                      <i class="bi bi-check-circle me-1"></i> Mark as ${delivery.delivery_mode === "pickup" ? "Picked Up" : "Delivered"}
+                    </button>
+                  `
+                      : ""
+                  }
+                  
+                  <button type="button" class="btn btn-danger report-issue-btn-modal" data-id="${delivery.order_id}">
+                    <i class="bi bi-exclamation-triangle me-1"></i> Report Issue
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+
+        // Add modal to DOM and show it
+        if (document.getElementById("deliveryDetailsModal")) {
+          document.getElementById("deliveryDetailsModal").remove()
+        }
+        document.body.insertAdjacentHTML("beforeend", modalHtml)
+
+        const deliveryDetailsModal = new bootstrap.Modal(document.getElementById("deliveryDetailsModal"))
+        deliveryDetailsModal.show()
+
+        // Add event listeners to action buttons
+        const updateStatusBtnModal = document.querySelector(".update-status-btn-modal")
+        if (updateStatusBtnModal) {
+          updateStatusBtnModal.addEventListener("click", function () {
+            deliveryDetailsModal.hide()
+            const orderId = this.getAttribute("data-id")
+            const deliveryMode = this.getAttribute("data-mode")
+            openUpdateStatusModal(orderId, deliveryMode)
           })
         }
 
-        // Populate order select in Schedule Delivery modal
-        const scheduleOrderSelect = document.getElementById("scheduleOrderSelect")
-        if (scheduleOrderSelect) {
-          scheduleOrderSelect.innerHTML = "<option selected disabled>Choose an order...</option>"
-          orders.forEach((order) => {
-            const option = document.createElement("option")
-            option.value = order.order_id
-            option.textContent = `${order.order_id} - ${order.customer_name} (${order.formatted_amount})`
-            scheduleOrderSelect.appendChild(option)
+        const completeDeliveryBtnModal = document.querySelector(".complete-delivery-btn-modal")
+        if (completeDeliveryBtnModal) {
+          completeDeliveryBtnModal.addEventListener("click", function () {
+            deliveryDetailsModal.hide()
+            const orderId = this.getAttribute("data-id")
+            const deliveryMode = this.getAttribute("data-mode")
+            openCompleteDeliveryModal(orderId, deliveryMode)
           })
         }
 
-        // Populate driver selects
-        const driverSelects = document.querySelectorAll(".driver-select")
-        driverSelects.forEach((select) => {
-          select.innerHTML = "<option value=''>Select Driver (Optional)</option>"
-          availableDrivers.forEach((driver) => {
-            const option = document.createElement("option")
-            option.value = driver.id
-            option.textContent = driver.name
-            select.appendChild(option)
+        const reportIssueBtnModal = document.querySelector(".report-issue-btn-modal")
+        if (reportIssueBtnModal) {
+          reportIssueBtnModal.addEventListener("click", function () {
+            deliveryDetailsModal.hide()
+            const orderId = this.getAttribute("data-id")
+            openReportIssueModal(orderId)
           })
-        })
+        }
       } else {
-        showAlert("Failed to load orders: " + data.message, "warning")
+        showAlert("Failed to load delivery details: " + data.message, "danger")
       }
     })
     .catch((error) => {
-      console.error("Error loading orders:", error)
-      showAlert("Error loading orders. Please try again.", "warning")
+      console.error("Error loading delivery details:", error)
+      showAlert("Error loading delivery details. Please try again.", "danger")
     })
 }
 
-// Open Mark Ready modal with order pre-selected
-function openMarkReadyModal(orderId) {
-  const orderSelect = document.getElementById("orderSelect")
-  if (orderSelect) {
-    // Find and select the option with the matching order ID
-    const option = Array.from(orderSelect.options).find((opt) => opt.value === orderId)
-    if (option) {
-      option.selected = true
-    }
+// Helper function to calculate delivery progress percentage based on status
+function getDeliveryProgressPercentage(status) {
+  switch (status) {
+    case "order":
+      return 10
+    case "confirmed":
+      return 35
+    case "shipped":
+    case "ready":
+      return 70
+    case "delivered":
+    case "picked up":
+      return 100
+    case "cancelled":
+      return 0
+    default:
+      return 25
   }
-
-  // Set default estimated time to 2 hours from now
-  const estimatedTime = document.getElementById("estimatedTime")
-  if (estimatedTime) {
-    const now = new Date()
-    now.setHours(now.getHours() + 2)
-    estimatedTime.value = now.toISOString().slice(0, 16).replace("T", " ")
-  }
-
-  // Show the modal
-  const markReadyModal = new bootstrap.Modal(document.getElementById("markReadyModal"))
-  markReadyModal.show()
 }
 
-// Open Schedule Delivery modal with order pre-selected
-function openScheduleModal(orderId) {
-  const scheduleOrderSelect = document.getElementById("scheduleOrderSelect")
-  if (scheduleOrderSelect) {
-    // Find and select the option with the matching order ID
-    const option = Array.from(scheduleOrderSelect.options).find((opt) => opt.value === orderId)
-    if (option) {
-      option.selected = true
-    }
+// Helper function to get status badge class
+function getStatusBadgeClass(status) {
+  switch (status) {
+    case "confirmed":
+      return "bg-info"
+    case "shipped":
+    case "ready":
+      return "bg-primary"
+    case "delivered":
+    case "picked up":
+      return "bg-success"
+    case "cancelled":
+      return "bg-danger"
+    default:
+      return "bg-secondary"
   }
-
-  // Set default date to tomorrow
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-
-  const deliveryDate = document.getElementById("deliveryDate")
-  if (deliveryDate) {
-    deliveryDate.value = tomorrow.toISOString().split("T")[0]
-  }
-
-  // Show the modal
-  const scheduleModal = new bootstrap.Modal(document.getElementById("scheduleDeliveryModal"))
-  scheduleModal.show()
 }
 
-// Open Report Issue modal with order pre-selected
-function openReportIssueModal(orderId) {
-  document.getElementById("issueOrderId").value = orderId
-
-  // Reset form
-  document.getElementById("issueType").value = ""
-  document.getElementById("issueDescription").value = ""
-
-  // Show the modal
-  const reportIssueModal = new bootstrap.Modal(document.getElementById("reportIssueModal"))
-  reportIssueModal.show()
+// Helper function to capitalize the first letter of a string
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
-// Open Resolve Issue modal
-function openResolveIssueModal(issueId) {
-  // Find the issue
-  const issue = deliveryIssues.find((i) => i.issue_id == issueId)
-  if (!issue) {
-    showAlert("Issue not found", "danger")
+// Show alert function
+function showAlert(message, type = "info") {
+  const alertContainer = document.getElementById("alert-container")
+  if (!alertContainer) {
+    console.error("Alert container not found")
     return
   }
 
-  // Populate modal
-  document.getElementById("resolveIssueId").value = issueId
-  document.getElementById("resolveIssueOrderId").textContent = issue.order_id
-  document.getElementById("resolveIssueType").textContent = issue.issue_type
-    .replace("_", " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase())
-  document.getElementById("resolveIssueDescription").textContent = issue.description || "No description provided"
-  document.getElementById("resolveIssueResolution").value = ""
+  const alertId = `alert-${Date.now()}`
+  const alertHtml = `
+    <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `
 
-  // Show the modal
-  const resolveIssueModal = new bootstrap.Modal(document.getElementById("resolveIssueModal"))
-  resolveIssueModal.show()
+  alertContainer.insertAdjacentHTML("beforeend", alertHtml)
+
+  // Auto-dismiss after 5 seconds
+  setTimeout(() => {
+    const alertElement = document.getElementById(alertId)
+    if (alertElement) {
+      const bsAlert = new bootstrap.Alert(alertElement)
+      bsAlert.close()
+    }
+  }, 5000)
 }
 
-// Mark order as ready for delivery
+// Show order selection modal
+function showOrderSelectionModal(type) {
+  // Create modal HTML
+  const modalTitle = type === "ready" ? "Mark Order Ready" : "Schedule Delivery/Pickup"
+  const modalIcon = type === "ready" ? "box-seam" : "calendar"
+  const confirmBtnText = type === "ready" ? "Mark as Ready" : "Schedule"
+  const confirmBtnAction = type === "ready" ? "markOrderReady()" : "scheduleDelivery()"
+
+  const modalHtml = `
+    <div class="modal fade" id="orderSelectionModal" tabindex="-1" aria-labelledby="orderSelectionModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="orderSelectionModalLabel">
+              <i class="bi bi-${modalIcon} me-2"></i>${modalTitle}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="orderSelectionForm">
+              <div class="mb-3">
+                <label for="orderSelect" class="form-label">Select Order</label>
+                <select class="form-select" id="orderSelect" required>
+                  <option value="" selected disabled>Select an order...</option>
+                  ${pendingDeliveries
+                    .map(
+                      (delivery) =>
+                        `<option value="${delivery.order_id}" data-mode="${delivery.delivery_mode}">${delivery.order_id} - ${delivery.customer_name}</option>`,
+                    )
+                    .join("")}
+                </select>
+              </div>
+              
+              ${
+                type === "ready"
+                  ? `
+                <div class="mb-3">
+                  <label for="estimatedTime" class="form-label">Estimated Time</label>
+                  <input type="text" class="form-control" id="estimatedTime" placeholder="Select date and time">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="driverId" class="form-label">Driver (for delivery only)</label>
+                  <select class="form-select" id="driverId">
+                    <option value="">No driver assigned</option>
+                    <option value="D001">Driver 1</option>
+                    <option value="D002">Driver 2</option>
+                    <option value="D003">Driver 3</option>
+                  </select>
+                </div>
+              `
+                  : `
+                <div class="mb-3">
+                  <label for="deliveryDate" class="form-label">Delivery/Pickup Date</label>
+                  <input type="text" class="form-control" id="deliveryDate" placeholder="Select date">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="timeWindow" class="form-label">Time Window</label>
+                  <select class="form-select" id="timeWindow" required>
+                    <option value="" selected disabled>Select time window...</option>
+                    <option value="morning">Morning (8:00 AM - 12:00 PM)</option>
+                    <option value="afternoon">Afternoon (12:00 PM - 4:00 PM)</option>
+                    <option value="evening">Evening (4:00 PM - 8:00 PM)</option>
+                  </select>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="driverId" class="form-label">Driver (for delivery only)</label>
+                  <select class="form-select" id="driverId">
+                    <option value="">No driver assigned</option>
+                    <option value="D001">Driver 1</option>
+                    <option value="D002">Driver 2</option>
+                    <option value="D003">Driver 3</option>
+                  </select>
+                </div>
+              `
+              }
+              
+              <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <textarea class="form-control" id="notes" rows="3" placeholder="Add notes..."></textarea>
+              </div>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="notifyCustomer" checked>
+                <label class="form-check-label" for="notifyCustomer">
+                  Notify customer via email
+                </label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="confirmOrderSelectionBtn" onclick="${confirmBtnAction}">
+              ${confirmBtnText}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+
+  // Remove existing modal if it exists
+  if (document.getElementById("orderSelectionModal")) {
+    document.getElementById("orderSelectionModal").remove()
+  }
+
+  // Add modal to DOM
+  document.body.insertAdjacentHTML("beforeend", modalHtml)
+
+  // Initialize date pickers
+  initDatePickers()
+
+  // Show the modal
+  const modal = new bootstrap.Modal(document.getElementById("orderSelectionModal"))
+  modal.show()
+}
+
+// Mark order as ready
 function markOrderReady() {
   const orderId = document.getElementById("orderSelect").value
   const estimatedTime = document.getElementById("estimatedTime").value
-  const deliveryNotes = document.getElementById("deliveryNotes").value
-  const driverId = document.getElementById("driverSelect").value
+  const driverId = document.getElementById("driverId").value
+  const notes = document.getElementById("notes").value
   const notifyCustomer = document.getElementById("notifyCustomer").checked ? 1 : 0
 
   if (!orderId) {
@@ -1128,54 +1512,77 @@ function markOrderReady() {
     return
   }
 
+  // Show loading state
+  const confirmBtn = document.getElementById("confirmOrderSelectionBtn")
+  const originalBtnHtml = confirmBtn.innerHTML
+  confirmBtn.innerHTML =
+    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...'
+  confirmBtn.disabled = true
+
   // Create form data
   const formData = new FormData()
   formData.append("action", "mark_order_ready")
   formData.append("order_id", orderId)
   formData.append("estimated_time", estimatedTime)
-  formData.append("delivery_notes", deliveryNotes)
   formData.append("driver_id", driverId)
+  formData.append("delivery_notes", notes)
   formData.append("notify_customer", notifyCustomer)
 
-  // Send request
+  // Send request to the server
   fetch("delivery_operations.php", {
     method: "POST",
     body: formData,
   })
     .then((response) => response.json())
     .then((data) => {
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
       if (data.success) {
-        showAlert("Order marked as ready for delivery", "success")
+        // Close the modal
+        bootstrap.Modal.getInstance(document.getElementById("orderSelectionModal")).hide()
 
-        // Close modal
-        const markReadyModal = bootstrap.Modal.getInstance(document.getElementById("markReadyModal"))
-        markReadyModal.hide()
+        // Show success message
+        showAlert(data.message, "success")
 
-        // Reload data
+        // Refresh data
         loadDeliveryData()
       } else {
-        showAlert("Failed to mark order as ready: " + data.message, "danger")
+        showAlert(data.message, "danger")
       }
     })
     .catch((error) => {
-      console.error("Error marking order as ready:", error)
-      showAlert("Error marking order as ready. Please try again.", "danger")
+      console.error("Error:", error)
+
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
+      showAlert("Error marking order as ready", "danger")
     })
 }
 
 // Schedule delivery
 function scheduleDelivery() {
-  const orderId = document.getElementById("scheduleOrderSelect").value
+  const orderId = document.getElementById("orderSelect").value
   const deliveryDate = document.getElementById("deliveryDate").value
-  const timeWindow = document.getElementById("deliveryTimeWindow").value
-  const driverId = document.getElementById("scheduleDriverSelect").value
-  const notes = document.getElementById("scheduleNotes").value
-  const notifyCustomer = document.getElementById("scheduleNotifyCustomer").checked ? 1 : 0
+  const timeWindow = document.getElementById("timeWindow").value
+  const driverId = document.getElementById("driverId").value
+  const notes = document.getElementById("notes").value
+  const notifyCustomer = document.getElementById("notifyCustomer").checked ? 1 : 0
 
   if (!orderId || !deliveryDate || !timeWindow) {
     showAlert("Please fill in all required fields", "warning")
     return
   }
+
+  // Show loading state
+  const confirmBtn = document.getElementById("confirmOrderSelectionBtn")
+  const originalBtnHtml = confirmBtn.innerHTML
+  confirmBtn.innerHTML =
+    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...'
+  confirmBtn.disabled = true
 
   // Create form data
   const formData = new FormData()
@@ -1187,35 +1594,561 @@ function scheduleDelivery() {
   formData.append("notes", notes)
   formData.append("notify_customer", notifyCustomer)
 
-  // Send request
+  // Send request to the server
   fetch("delivery_operations.php", {
     method: "POST",
     body: formData,
   })
     .then((response) => response.json())
     .then((data) => {
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
       if (data.success) {
-        showAlert("Delivery scheduled successfully", "success")
+        // Close the modal
+        bootstrap.Modal.getInstance(document.getElementById("orderSelectionModal")).hide()
 
-        // Close modal
-        const scheduleModal = bootstrap.Modal.getInstance(document.getElementById("scheduleDeliveryModal"))
-        scheduleModal.hide()
+        // Show success message
+        showAlert(data.message, "success")
 
-        // Reload data
+        // Refresh data
         loadDeliveryData()
       } else {
-        showAlert("Failed to schedule delivery: " + data.message, "danger")
+        showAlert(data.message, "danger")
       }
     })
     .catch((error) => {
-      console.error("Error scheduling delivery:", error)
-      showAlert("Error scheduling delivery. Please try again.", "danger")
+      console.error("Error:", error)
+
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
+      showAlert("Error scheduling delivery", "danger")
     })
 }
 
-// Report delivery issue
+// Open update status modal
+function openUpdateStatusModal(orderId, deliveryMode) {
+  // Create modal HTML
+  const modalTitle = deliveryMode === "pickup" ? "Update Pickup Status" : "Update Delivery Status"
+  const modalIcon = deliveryMode === "pickup" ? "box-seam" : "truck"
+
+  const modalHtml = `
+    <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="updateStatusModalLabel">
+              <i class="bi bi-${modalIcon} me-2"></i>${modalTitle}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="updateStatusForm">
+              <input type="hidden" id="updateOrderId" value="${orderId}">
+              <input type="hidden" id="updateDeliveryMode" value="${deliveryMode}">
+              
+              <div class="mb-3">
+                <label for="statusSelect" class="form-label">Status</label>
+                <select class="form-select" id="statusSelect" required>
+                  <option value="" selected disabled>Select status...</option>
+                  ${
+                    deliveryMode === "pickup"
+                      ? `
+                    <option value="confirmed">Confirmed</option>
+                    <option value="ready">Ready for Pickup</option>
+                    <option value="picked up">Picked Up</option>
+                    <option value="cancelled">Cancelled</option>
+                  `
+                      : `
+                    <option value="confirmed">Confirmed</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  `
+                  }
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label for="statusNotes" class="form-label">Notes</label>
+                <textarea class="form-control" id="statusNotes" rows="3" placeholder="Add notes about this status change..."></textarea>
+              </div>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="statusNotifyCustomer" checked>
+                <label class="form-check-label" for="statusNotifyCustomer">
+                  Notify customer via email
+                </label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="confirmUpdateStatusBtn" onclick="updateDeliveryStatus()">
+              Update Status
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+
+  // Remove existing modal if it exists
+  if (document.getElementById("updateStatusModal")) {
+    document.getElementById("updateStatusModal").remove()
+  }
+
+  // Add modal to DOM
+  document.body.insertAdjacentHTML("beforeend", modalHtml)
+
+  // Show the modal
+  const modal = new bootstrap.Modal(document.getElementById("updateStatusModal"))
+  modal.show()
+}
+
+// Update delivery status
+function updateDeliveryStatus() {
+  const orderId = document.getElementById("updateOrderId").value
+  const deliveryMode = document.getElementById("updateDeliveryMode").value
+  const status = document.getElementById("statusSelect").value
+  const notes = document.getElementById("statusNotes").value
+  const notifyCustomer = document.getElementById("statusNotifyCustomer").checked ? 1 : 0
+
+  if (!orderId || !status) {
+    showAlert("Please select a status", "warning")
+    return
+  }
+
+  // Show loading state
+  const confirmBtn = document.getElementById("confirmUpdateStatusBtn")
+  const originalBtnHtml = confirmBtn.innerHTML
+  confirmBtn.innerHTML =
+    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...'
+  confirmBtn.disabled = true
+
+  // Create form data
+  const formData = new FormData()
+  formData.append("action", "update_delivery_status")
+  formData.append("order_id", orderId)
+  formData.append("status", status)
+  formData.append("notes", notes)
+  formData.append("confirmation_type", deliveryMode)
+  formData.append("notify_customer", notifyCustomer)
+
+  // Send request to the server
+  fetch("delivery_operations.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
+      if (data.success) {
+        // Close the modal
+        bootstrap.Modal.getInstance(document.getElementById("updateStatusModal")).hide()
+
+        // Show success message
+        showAlert(data.message, "success")
+
+        // Refresh data
+        loadDeliveryData()
+      } else {
+        showAlert(data.message, "danger")
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error)
+
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
+      showAlert("Error updating status", "danger")
+    })
+}
+
+// Open enhanced schedule modal
+function openEnhancedScheduleModal(orderId, deliveryMode) {
+  // Find the delivery in the pending deliveries
+  const delivery = pendingDeliveries.find((d) => d.order_id === orderId)
+
+  if (!delivery) {
+    showAlert("Delivery not found", "danger")
+    return
+  }
+
+  // Create modal HTML
+  const modalTitle = deliveryMode === "pickup" ? "Schedule Pickup" : "Schedule Delivery"
+  const modalIcon = deliveryMode === "pickup" ? "box-seam" : "truck"
+
+  const modalHtml = `
+    <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="scheduleModalLabel">
+              <i class="bi bi-${modalIcon} me-2"></i>${modalTitle}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              Scheduling for: <strong>${delivery.customer_name}</strong> (Order #${delivery.order_id})
+            </div>
+            
+            <form id="scheduleForm">
+              <input type="hidden" id="scheduleOrderId" value="${orderId}">
+              <input type="hidden" id="scheduleDeliveryMode" value="${deliveryMode}">
+              
+              <div class="mb-3">
+                <label for="scheduleDate" class="form-label">Date</label>
+                <input type="text" class="form-control" id="scheduleDate" placeholder="Select date">
+              </div>
+              
+              <div class="mb-3">
+                <label for="scheduleTimeWindow" class="form-label">Time Window</label>
+                <select class="form-select" id="scheduleTimeWindow" required>
+                  <option value="" selected disabled>Select time window...</option>
+                  <option value="morning">Morning (8:00 AM - 12:00 PM)</option>
+                  <option value="afternoon">Afternoon (12:00 PM - 4:00 PM)</option>
+                  <option value="evening">Evening (4:00 PM - 8:00 PM)</option>
+                </select>
+              </div>
+              
+              ${
+                deliveryMode === "delivery"
+                  ? `
+                <div class="mb-3">
+                  <label for="scheduleDriverId" class="form-label">Driver</label>
+                  <select class="form-select" id="scheduleDriverId">
+                    <option value="">No driver assigned</option>
+                    <option value="D001">Driver 1</option>
+                    <option value="D002">Driver 2</option>
+                    <option value="D003">Driver 3</option>
+                  </select>
+                </div>
+              `
+                  : ""
+              }
+              
+              <div class="mb-3">
+                <label for="scheduleNotes" class="form-label">Notes</label>
+                <textarea class="form-control" id="scheduleNotes" rows="3" placeholder="Add notes..."></textarea>
+              </div>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="scheduleNotifyCustomer" checked>
+                <label class="form-check-label" for="scheduleNotifyCustomer">
+                  Notify customer via email
+                </label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="confirmScheduleBtn" onclick="confirmSchedule()">
+              Schedule
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+
+  // Remove existing modal if it exists
+  if (document.getElementById("scheduleModal")) {
+    document.getElementById("scheduleModal").remove()
+  }
+
+  // Add modal to DOM
+  document.body.insertAdjacentHTML("beforeend", modalHtml)
+
+  // Initialize date picker
+  if (document.getElementById("scheduleDate")) {
+    flatpickr("#scheduleDate", {
+      enableTime: false,
+      dateFormat: "Y-m-d",
+      minDate: "today",
+    })
+  }
+
+  // Show the modal
+  const modal = new bootstrap.Modal(document.getElementById("scheduleModal"))
+  modal.show()
+}
+
+// Confirm schedule
+function confirmSchedule() {
+  const orderId = document.getElementById("scheduleOrderId").value
+  const deliveryDate = document.getElementById("scheduleDate").value
+  const timeWindow = document.getElementById("scheduleTimeWindow").value
+  const driverId = document.getElementById("scheduleDriverId") ? document.getElementById("scheduleDriverId").value : ""
+  const notes = document.getElementById("scheduleNotes").value
+  const notifyCustomer = document.getElementById("scheduleNotifyCustomer").checked ? 1 : 0
+
+  if (!orderId || !deliveryDate || !timeWindow) {
+    showAlert("Please fill in all required fields", "warning")
+    return
+  }
+
+  // Show loading state
+  const confirmBtn = document.getElementById("confirmScheduleBtn")
+  const originalBtnHtml = confirmBtn.innerHTML
+  confirmBtn.innerHTML =
+    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...'
+  confirmBtn.disabled = true
+
+  // Create form data
+  const formData = new FormData()
+  formData.append("action", "schedule_delivery")
+  formData.append("order_id", orderId)
+  formData.append("delivery_date", deliveryDate)
+  formData.append("time_window", timeWindow)
+  formData.append("driver_id", driverId)
+  formData.append("notes", notes)
+  formData.append("notify_customer", notifyCustomer)
+
+  // Send request to the server
+  fetch("delivery_operations.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
+      if (data.success) {
+        // Close the modal
+        bootstrap.Modal.getInstance(document.getElementById("scheduleModal")).hide()
+
+        // Show success message
+        showAlert(data.message, "success")
+
+        // Refresh data
+        loadDeliveryData()
+      } else {
+        showAlert(data.message, "danger")
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error)
+
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
+      showAlert("Error scheduling delivery", "danger")
+    })
+}
+
+// Open complete delivery modal
+function openCompleteDeliveryModal(orderId, deliveryMode) {
+  // Create modal HTML
+  const modalTitle = deliveryMode === "pickup" ? "Mark as Picked Up" : "Mark as Delivered"
+  const modalIcon = deliveryMode === "pickup" ? "bag-check" : "truck-check"
+
+  const modalHtml = `
+    <div class="modal fade" id="completeDeliveryModal" tabindex="-1" aria-labelledby="completeDeliveryModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="completeDeliveryModalLabel">
+              <i class="bi bi-${modalIcon} me-2"></i>${modalTitle}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="completeDeliveryForm">
+              <input type="hidden" id="completeOrderId" value="${orderId}">
+              <input type="hidden" id="completeDeliveryMode" value="${deliveryMode}">
+              
+              <div class="mb-3">
+                <label for="completeTime" class="form-label">Completion Time</label>
+                <input type="text" class="form-control" id="completeTime" placeholder="Select date and time">
+              </div>
+              
+              <div class="mb-3">
+                <label for="completeNotes" class="form-label">Notes</label>
+                <textarea class="form-control" id="completeNotes" rows="3" placeholder="Add notes..."></textarea>
+              </div>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="completeNotifyCustomer" checked>
+                <label class="form-check-label" for="completeNotifyCustomer">
+                  Notify customer via email
+                </label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success" id="confirmCompleteBtn" onclick="completeDelivery()">
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+
+  // Remove existing modal if it exists
+  if (document.getElementById("completeDeliveryModal")) {
+    document.getElementById("completeDeliveryModal").remove()
+  }
+
+  // Add modal to DOM
+  document.body.insertAdjacentHTML("beforeend", modalHtml)
+
+  // Initialize date picker
+  if (document.getElementById("completeTime")) {
+    flatpickr("#completeTime", {
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      defaultDate: new Date(),
+    })
+  }
+
+  // Show the modal
+  const modal = new bootstrap.Modal(document.getElementById("completeDeliveryModal"))
+  modal.show()
+}
+
+// Complete delivery
+function completeDelivery() {
+  const orderId = document.getElementById("completeOrderId").value
+  const deliveryMode = document.getElementById("completeDeliveryMode").value
+  const actualDeliveryTime = document.getElementById("completeTime").value
+  const notes = document.getElementById("completeNotes").value
+  const notifyCustomer = document.getElementById("completeNotifyCustomer").checked ? 1 : 0
+
+  if (!orderId) {
+    showAlert("Order ID is required", "warning")
+    return
+  }
+
+  // Show loading state
+  const confirmBtn = document.getElementById("confirmCompleteBtn")
+  const originalBtnHtml = confirmBtn.innerHTML
+  confirmBtn.innerHTML =
+    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...'
+  confirmBtn.disabled = true
+
+  // Create form data
+  const formData = new FormData()
+  formData.append("action", "update_delivery_status")
+  formData.append("order_id", orderId)
+  formData.append("status", deliveryMode === "pickup" ? "picked up" : "delivered")
+  formData.append("notes", notes)
+  formData.append("confirmation_type", deliveryMode)
+  formData.append("actual_delivery_time", actualDeliveryTime)
+  formData.append("notify_customer", notifyCustomer)
+
+  // Send request to the server
+  fetch("delivery_operations.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
+      if (data.success) {
+        // Close the modal
+        bootstrap.Modal.getInstance(document.getElementById("completeDeliveryModal")).hide()
+
+        // Show success message
+        showAlert(data.message, "success")
+
+        // Refresh data
+        loadDeliveryData()
+      } else {
+        showAlert(data.message, "danger")
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error)
+
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
+      showAlert("Error completing delivery", "danger")
+    })
+}
+
+// Open report issue modal
+function openReportIssueModal(orderId) {
+  // Create modal HTML
+  const modalHtml = `
+    <div class="modal fade" id="reportIssueModal" tabindex="-1" aria-labelledby="reportIssueModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="reportIssueModalLabel">
+              <i class="bi bi-exclamation-triangle me-2"></i>Report Delivery Issue
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="reportIssueForm">
+              <input type="hidden" id="reportIssueOrderId" value="${orderId}">
+              
+              <div class="mb-3">
+                <label for="issueType" class="form-label">Issue Type</label>
+                <select class="form-select" id="issueType" required>
+                  <option value="" selected disabled>Select issue type...</option>
+                  <option value="delay">Delivery Delay</option>
+                  <option value="damage">Damaged Items</option>
+                  <option value="wrong_item">Wrong Items</option>
+                  <option value="missing_item">Missing Items</option>
+                  <option value="other">Other Issue</option>
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label for="issueDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="issueDescription" rows="4" placeholder="Describe the issue in detail..."></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirmReportIssueBtn" onclick="reportIssue()">
+              Report Issue
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+
+  // Remove existing modal if it exists
+  if (document.getElementById("reportIssueModal")) {
+    document.getElementById("reportIssueModal").remove()
+  }
+
+  // Add modal to DOM
+  document.body.insertAdjacentHTML("beforeend", modalHtml)
+
+  // Show the modal
+  const modal = new bootstrap.Modal(document.getElementById("reportIssueModal"))
+  modal.show()
+}
+
+// Report issue
 function reportIssue() {
-  const orderId = document.getElementById("issueOrderId").value
+  const orderId = document.getElementById("reportIssueOrderId").value
   const issueType = document.getElementById("issueType").value
   const description = document.getElementById("issueDescription").value
 
@@ -1224,6 +2157,13 @@ function reportIssue() {
     return
   }
 
+  // Show loading state
+  const confirmBtn = document.getElementById("confirmReportIssueBtn")
+  const originalBtnHtml = confirmBtn.innerHTML
+  confirmBtn.innerHTML =
+    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...'
+  confirmBtn.disabled = true
+
   // Create form data
   const formData = new FormData()
   formData.append("action", "report_delivery_issue")
@@ -1231,46 +2171,265 @@ function reportIssue() {
   formData.append("issue_type", issueType)
   formData.append("description", description)
 
-  // Send request
+  // Send request to the server
   fetch("delivery_operations.php", {
     method: "POST",
     body: formData,
   })
     .then((response) => response.json())
     .then((data) => {
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
       if (data.success) {
-        showAlert("Issue reported successfully", "success")
+        // Close the modal
+        bootstrap.Modal.getInstance(document.getElementById("reportIssueModal")).hide()
 
-        // Close modal
-        const reportIssueModal = bootstrap.Modal.getInstance(document.getElementById("reportIssueModal"))
-        reportIssueModal.hide()
+        // Show success message
+        showAlert(data.message, "success")
 
-        // Reload data
+        // Refresh data
         loadDeliveryIssues()
       } else {
-        showAlert("Failed to report issue: " + data.message, "danger")
+        showAlert(data.message, "danger")
       }
     })
     .catch((error) => {
-      console.error("Error reporting issue:", error)
-      showAlert("Error reporting issue. Please try again.", "danger")
+      console.error("Error:", error)
+
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
+      showAlert("Error reporting issue", "danger")
     })
 }
 
-// Resolve delivery issue
-function resolveIssue() {
-  const issueId = document.getElementById("resolveIssueId").value
-  const resolution = document.getElementById("resolveIssueResolution").value
+// View issue details
+function viewIssueDetails(issueId) {
+  // Find the issue in the reported or resolved issues
+  const issue = [...reportedIssues, ...resolvedIssues].find((i) => i.issue_id === issueId)
 
-  if (!issueId) {
-    showAlert("Issue ID is missing", "warning")
+  if (!issue) {
+    showAlert("Issue not found", "danger")
     return
   }
 
-  if (!resolution) {
+  // Create modal HTML
+  const modalHtml = `
+    <div class="modal fade" id="issueDetailsModal" tabindex="-1" aria-labelledby="issueDetailsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="issueDetailsModalLabel">
+              <i class="bi bi-exclamation-triangle me-2"></i>Issue Details
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Issue Information</h6>
+              </div>
+              <div class="card-body">
+                <p class="mb-1"><strong>Order ID:</strong> ${issue.order_id}</p>
+                <p class="mb-1"><strong>Customer:</strong> ${issue.customer_name}</p>
+                <p class="mb-1"><strong>Issue Type:</strong> <span class="badge bg-info text-dark">${formatIssueType(issue.issue_type)}</span></p>
+                <p class="mb-1"><strong>Status:</strong> <span class="badge ${getIssueStatusBadgeClass(issue.status)}">${capitalizeFirstLetter(issue.status)}</span></p>
+                <p class="mb-1"><strong>Reported:</strong> ${issue.formatted_reported_at}</p>
+                ${issue.status === "resolved" ? `<p class="mb-0"><strong>Resolved:</strong> ${issue.formatted_resolved_at}</p>` : ""}
+              </div>
+            </div>
+            
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-chat-text me-2"></i>Description</h6>
+              </div>
+              <div class="card-body">
+                <p class="mb-0">${issue.description || "No description provided"}</p>
+              </div>
+            </div>
+            
+            ${
+              issue.status === "resolved"
+                ? `
+              <div class="card">
+                <div class="card-header bg-light">
+                  <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Resolution</h6>
+                </div>
+                <div class="card-body">
+                  <p class="mb-0">${issue.resolution || "No resolution details provided"}</p>
+                </div>
+              </div>
+            `
+                : ""
+            }
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            ${
+              issue.status !== "resolved"
+                ? `
+              <button type="button" class="btn btn-success resolve-issue-btn-modal" data-id="${issue.issue_id}" data-order-id="${issue.order_id}" data-issue-type="${formatIssueType(issue.issue_type)}" data-description="${issue.description || ""}">
+                <i class="bi bi-check-circle me-1"></i> Resolve Issue
+              </button>
+            `
+                : ""
+            }
+            <button type="button" class="btn btn-primary view-order-btn-modal" data-id="${issue.order_id}">
+              <i class="bi bi-box me-1"></i> View Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+
+  // Remove existing modal if it exists
+  if (document.getElementById("issueDetailsModal")) {
+    document.getElementById("issueDetailsModal").remove()
+  }
+
+  // Add modal to DOM
+  document.body.insertAdjacentHTML("beforeend", modalHtml)
+
+  // Show the modal
+  const modal = new bootstrap.Modal(document.getElementById("issueDetailsModal"))
+  modal.show()
+
+  // Add event listeners to action buttons
+  const resolveIssueBtnModal = document.querySelector(".resolve-issue-btn-modal")
+  if (resolveIssueBtnModal) {
+    resolveIssueBtnModal.addEventListener("click", function () {
+      modal.hide()
+      const issueId = this.getAttribute("data-id")
+      const orderId = this.getAttribute("data-order-id")
+      const issueType = this.getAttribute("data-issue-type")
+      const description = this.getAttribute("data-description")
+      openResolveIssueModal(issueId, orderId, issueType, description)
+    })
+  }
+
+  const viewOrderBtnModal = document.querySelector(".view-order-btn-modal")
+  if (viewOrderBtnModal) {
+    viewOrderBtnModal.addEventListener("click", function () {
+      modal.hide()
+      const orderId = this.getAttribute("data-id")
+      viewDeliveryDetails(orderId)
+    })
+  }
+}
+
+// Format issue type
+function formatIssueType(issueType) {
+  switch (issueType) {
+    case "delay":
+      return "Delivery Delay"
+    case "damage":
+      return "Damaged Items"
+    case "wrong_item":
+      return "Wrong Items"
+    case "missing_item":
+      return "Missing Items"
+    case "other":
+      return "Other Issue"
+    default:
+      return issueType.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())
+  }
+}
+
+// Get issue status badge class
+function getIssueStatusBadgeClass(status) {
+  switch (status) {
+    case "reported":
+      return "bg-danger"
+    case "investigating":
+      return "bg-warning text-dark"
+    case "resolved":
+      return "bg-success"
+    default:
+      return "bg-secondary"
+  }
+}
+
+// Open resolve issue modal
+function openResolveIssueModal(issueId, orderId, issueType, description) {
+  // Create modal HTML
+  const modalHtml = `
+    <div class="modal fade" id="resolveIssueModal" tabindex="-1" aria-labelledby="resolveIssueModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="resolveIssueModalLabel">
+              <i class="bi bi-check-circle me-2"></i>Resolve Issue
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              Resolving issue for Order #${orderId}
+            </div>
+            
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Issue: ${issueType}</h6>
+              </div>
+              <div class="card-body">
+                <p class="mb-0">${description || "No description provided"}</p>
+              </div>
+            </div>
+            
+            <form id="resolveIssueForm">
+              <input type="hidden" id="resolveIssueId" value="${issueId}">
+              
+              <div class="mb-3">
+                <label for="resolution" class="form-label">Resolution</label>
+                <textarea class="form-control" id="resolution" rows="4" placeholder="Describe how the issue was resolved..." required></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success" id="confirmResolveIssueBtn" onclick="resolveIssue()">
+              Mark as Resolved
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+
+  // Remove existing modal if it exists
+  if (document.getElementById("resolveIssueModal")) {
+    document.getElementById("resolveIssueModal").remove()
+  }
+
+  // Add modal to DOM
+  document.body.insertAdjacentHTML("beforeend", modalHtml)
+
+  // Show the modal
+  const modal = new bootstrap.Modal(document.getElementById("resolveIssueModal"))
+  modal.show()
+}
+
+// Resolve issue
+function resolveIssue() {
+  const issueId = document.getElementById("resolveIssueId").value
+  const resolution = document.getElementById("resolution").value
+
+  if (!issueId || !resolution) {
     showAlert("Please provide a resolution", "warning")
     return
   }
+
+  // Show loading state
+  const confirmBtn = document.getElementById("confirmResolveIssueBtn")
+  const originalBtnHtml = confirmBtn.innerHTML
+  confirmBtn.innerHTML =
+    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...'
+  confirmBtn.disabled = true
 
   // Create form data
   const formData = new FormData()
@@ -1278,498 +2437,37 @@ function resolveIssue() {
   formData.append("issue_id", issueId)
   formData.append("resolution", resolution)
 
-  // Send request
+  // Send request to the server
   fetch("delivery_operations.php", {
     method: "POST",
     body: formData,
   })
     .then((response) => response.json())
     .then((data) => {
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
       if (data.success) {
-        showAlert("Issue resolved successfully", "success")
+        // Close the modal
+        bootstrap.Modal.getInstance(document.getElementById("resolveIssueModal")).hide()
 
-        // Close modal
-        const resolveIssueModal = bootstrap.Modal.getInstance(document.getElementById("resolveIssueModal"))
-        resolveIssueModal.hide()
+        // Show success message
+        showAlert(data.message, "success")
 
-        // Reload data
+        // Refresh data
         loadDeliveryIssues()
       } else {
-        showAlert("Failed to resolve issue: " + data.message, "danger")
+        showAlert(data.message, "danger")
       }
     })
     .catch((error) => {
-      console.error("Error resolving issue:", error)
-      showAlert("Error resolving issue. Please try again.", "danger")
+      console.error("Error:", error)
+
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnHtml
+      confirmBtn.disabled = false
+
+      showAlert("Error resolving issue", "danger")
     })
 }
-
-// View delivery details
-function viewDeliveryDetails(orderId) {
-  fetch(`delivery_operations.php?action=get_delivery_details&order_id=${orderId}`)
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        const delivery = data.delivery
-
-        // Populate delivery details modal
-        document.getElementById("detail-order-id").textContent = delivery.order_id
-        document.getElementById("detail-order-date").textContent = delivery.formatted_order_date
-        document.getElementById("detail-order-amount").textContent = delivery.formatted_amount
-        document.getElementById("detail-payment-method").textContent = delivery.payment_method
-          .replace("_", " ")
-          .replace(/\b\w/g, (l) => l.toUpperCase())
-
-        document.getElementById("detail-customer-name").textContent = delivery.customer_name
-        document.getElementById("detail-customer-phone").textContent = delivery.customer_phone || "N/A"
-        document.getElementById("detail-customer-email").textContent = delivery.customer_email || "N/A"
-        document.getElementById("detail-customer-address").textContent = delivery.shipping_address || "N/A"
-
-        // Display driver info if available
-        const driverInfoContainer = document.getElementById("detail-driver-info")
-        if (delivery.driver_id) {
-          const driver = availableDrivers.find((d) => d.id === delivery.driver_id) || { name: "Unknown Driver" }
-          driverInfoContainer.innerHTML = `
-            <div class="mb-3">
-              <h6 class="text-muted mb-2">Driver Information</h6>
-              <p class="mb-1"><strong>Driver:</strong> ${driver.name}</p>
-              <p class="mb-1"><strong>ID:</strong> ${delivery.driver_id}</p>
-            </div>
-          `
-        } else {
-          driverInfoContainer.innerHTML = ""
-        }
-
-        document.getElementById("detail-delivery-notes").textContent =
-          delivery.delivery_notes || "No special instructions provided."
-
-        // Populate order items
-        const itemsContainer = document.getElementById("detail-order-items")
-        itemsContainer.innerHTML = ""
-
-        if (delivery.items && delivery.items.length > 0) {
-          delivery.items.forEach((item) => {
-            const li = document.createElement("li")
-            li.className = "list-group-item d-flex justify-content-between align-items-center"
-            li.innerHTML = `
-              <div>
-                <span class="fw-medium">${item.product_name}</span>
-                <span class="text-muted"> - ₱${Number.parseFloat(item.price).toFixed(2)}</span>
-              </div>
-              <span class="badge bg-primary rounded-pill">${item.quantity}x</span>
-            `
-            itemsContainer.appendChild(li)
-          })
-        } else {
-          itemsContainer.innerHTML = `
-            <li class="list-group-item text-center text-muted">
-              No items found
-            </li>
-          `
-        }
-
-        // Render delivery timeline
-        renderDeliveryTimeline(delivery)
-
-        // Update modal title
-        document.getElementById("deliveryDetailsModalLabel").textContent = `Delivery Details - ${delivery.order_id}`
-
-        // Show modal
-        const deliveryDetailsModal = new bootstrap.Modal(document.getElementById("deliveryDetailsModal"))
-        deliveryDetailsModal.show()
-      } else {
-        showAlert("Failed to load delivery details: " + data.message, "danger")
-      }
-    })
-    .catch((error) => {
-      console.error("Error loading delivery details:", error)
-      showAlert("Error loading delivery details. Please try again.", "danger")
-    })
-}
-
-// Render delivery timeline
-function renderDeliveryTimeline(delivery) {
-  const timelineContainer = document.querySelector("#deliveryDetailsModal .delivery-timeline")
-  timelineContainer.innerHTML = ""
-
-  // Define all possible statuses in order
-  const statuses = [
-    { key: "pending", label: "Order Received", icon: "bi-inbox" },
-    { key: "processing", label: "Preparing", icon: "bi-gear" },
-    { key: "shipped", label: "In Transit", icon: "bi-truck" },
-    { key: "delivered", label: "Delivered", icon: "bi-check-circle" },
-  ]
-
-  // Get current status index
-  const currentStatusIndex = statuses.findIndex((s) => s.key === delivery.status)
-
-  // Create timeline items
-  statuses.forEach((status, index) => {
-    // Find status update from history
-    const statusUpdate = delivery.status_history.find((h) => h.status === status.key)
-
-    // Determine if this status is completed, active, or upcoming
-    let itemClass = "timeline-item"
-    const iconClass = status.icon
-
-    if (index < currentStatusIndex) {
-      itemClass += " completed"
-    } else if (index === currentStatusIndex) {
-      itemClass += " active"
-    }
-
-    const timelineItem = document.createElement("div")
-    timelineItem.className = itemClass
-
-    // Format date if available
-    let dateText = "Pending"
-    if (statusUpdate) {
-      dateText = statusUpdate.formatted_date
-    } else if (index <= currentStatusIndex) {
-      // If no specific update but status is current or past, use order date
-      dateText = delivery.formatted_order_date
-    }
-
-    timelineItem.innerHTML = `
-      <div class="timeline-icon"><i class="bi ${iconClass}"></i></div>
-      <div class="timeline-content">
-        <h6 class="mb-0 fw-bold">${status.label}</h6>
-        <p class="small text-muted mb-0">${dateText}</p>
-      </div>
-    `
-
-    timelineContainer.appendChild(timelineItem)
-  })
-}
-
-// Complete delivery
-function completeDelivery(orderId) {
-  // Create a modal to collect delivery completion details
-  const modalHtml = `
-    <div class="modal fade" id="completeDeliveryModal" tabindex="-1" aria-labelledby="completeDeliveryModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header bg-success bg-opacity-10">
-            <h5 class="modal-title" id="completeDeliveryModalLabel">
-              <i class="bi bi-check-circle me-2 text-success"></i>Mark as Delivered
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form id="completeDeliveryForm">
-              <div class="mb-3">
-                <label for="deliveryConfirmationType" class="form-label fw-bold">Delivery Confirmation</label>
-                <select class="form-select" id="deliveryConfirmationType" required>
-                  <option value="delivered_to_customer">Delivered to Customer</option>
-                </select>
-              </div>
-              
-              <div class="mb-3">
-                <label for="actualDeliveryTime" class="form-label fw-bold">Actual Delivery Time</label>
-                <input type="datetime-local" class="form-control" id="actualDeliveryTime" required>
-              </div>
-              
-              <div class="mb-3">
-                <label for="deliveryNotes" class="form-label fw-bold">Delivery Notes</label>
-                <textarea class="form-control" id="deliveryNotes" rows="3" placeholder="Any notes about the delivery..."></textarea>
-              </div>
-              
-              <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="notifyCustomerDelivery" checked>
-                <label class="form-check-label" for="notifyCustomerDelivery">
-                  Notify customer about delivery completion
-                </label>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-              <i class="bi bi-x-lg me-1"></i> Cancel
-            </button>
-            <button type="button" class="btn btn-success" id="confirmCompleteDeliveryBtn">
-              <i class="bi bi-check-lg me-1"></i> Confirm Delivery
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `
-
-  // Add modal to the DOM if it doesn't exist
-  if (!document.getElementById("completeDeliveryModal")) {
-    const modalContainer = document.createElement("div")
-    modalContainer.innerHTML = modalHtml
-    document.body.appendChild(modalContainer)
-  }
-
-  // Set current date and time as default
-  const now = new Date()
-  const formattedDateTime = now.toISOString().slice(0, 16)
-
-  // Show the modal
-  const completeDeliveryModal = new bootstrap.Modal(document.getElementById("completeDeliveryModal"))
-  completeDeliveryModal.show()
-
-  // Set the current date and time after modal is shown
-  setTimeout(() => {
-    document.getElementById("actualDeliveryTime").value = formattedDateTime
-  }, 300)
-
-  // Handle confirm button click
-  document.getElementById("confirmCompleteDeliveryBtn").onclick = () => {
-    const confirmationType = document.getElementById("deliveryConfirmationType").value
-    const actualDeliveryTime = document.getElementById("actualDeliveryTime").value
-    const notes = document.getElementById("deliveryNotes").value
-    const notifyCustomer = document.getElementById("notifyCustomerDelivery").checked ? 1 : 0
-
-    // Validate required fields
-    if (!actualDeliveryTime) {
-      showAlert("Please enter the actual delivery time", "warning")
-      return
-    }
-
-    // Create form data
-    const formData = new FormData()
-    formData.append("action", "update_delivery_status")
-    formData.append("order_id", orderId)
-    formData.append("status", "delivered")
-    formData.append("confirmation_type", confirmationType)
-    formData.append("actual_delivery_time", actualDeliveryTime)
-    formData.append("notes", notes)
-    formData.append("notify_customer", notifyCustomer)
-
-    // Send request
-    fetch("delivery_operations.php", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          showAlert("Delivery marked as completed successfully", "success")
-
-          // Close modal
-          completeDeliveryModal.hide()
-
-          // Reload data
-          loadDeliveryData()
-        } else {
-          showAlert("Failed to complete delivery: " + data.message, "danger")
-        }
-      })
-      .catch((error) => {
-        console.error("Error completing delivery:", error)
-        showAlert("Error completing delivery. Please try again.", "danger")
-      })
-  }
-}
-
-// View issue details
-function viewIssueDetails(issueId) {
-  // Find the issue
-  const issue = deliveryIssues.find((i) => i.issue_id == issueId)
-  if (!issue) {
-    showAlert("Issue not found", "danger")
-    return
-  }
-
-  // Create a modal to display issue details
-  const modalHtml = `
-    <div class="modal fade" id="viewIssueModal" tabindex="-1" aria-labelledby="viewIssueModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header bg-light">
-            <h5 class="modal-title" id="viewIssueModalLabel">
-              <i class="bi bi-exclamation-triangle me-2 text-warning"></i>Issue Details
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body p-0">
-            <div class="row g-0">
-              <!-- Left column - Issue Information -->
-              <div class="col-md-6 border-end">
-                <div class="p-4">
-                  <div class="d-flex align-items-center mb-3">
-                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
-                      <i class="bi bi-exclamation-triangle fs-3 text-warning"></i>
-                    </div>
-                    <div>
-                      <h6 class="mb-0 fw-bold">Issue #${issue.issue_id}</h6>
-                      <p class="text-muted mb-0 small">Reported on ${issue.formatted_reported_at}</p>
-                    </div>
-                  </div>
-                  
-                  <div class="card mb-3">
-                    <div class="card-header bg-light py-2">
-                      <h6 class="mb-0 fw-bold"><i class="bi bi-info-circle me-2"></i>Issue Information</h6>
-                    </div>
-                    <div class="card-body">
-                      <p class="mb-2"><strong>Type:</strong> <span class="badge bg-info">${issue.issue_type.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}</span></p>
-                      <p class="mb-2"><strong>Status:</strong> <span class="badge ${issue.status === "resolved" ? "bg-success" : issue.status === "investigating" ? "bg-warning text-dark" : "bg-danger"}">${issue.status.charAt(0).toUpperCase() + issue.status.slice(1)}</span></p>
-                    </div>
-                  </div>
-                  
-                  <div class="card mb-3">
-                    <div class="card-header bg-light py-2">
-                      <h6 class="mb-0 fw-bold"><i class="bi bi-box me-2"></i>Order Information</h6>
-                    </div>
-                    <div class="card-body">
-                      <p class="mb-1"><strong>Order ID:</strong> ${issue.order_id}</p>
-                      <p class="mb-1"><strong>Customer:</strong> ${issue.customer_name}</p>
-                      <p class="mb-1"><strong>Email:</strong> ${issue.customer_email || "N/A"}</p>
-                      <p class="mb-0"><strong>Phone:</strong> ${issue.customer_phone || "N/A"}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Right column - Description and Resolution -->
-              <div class="col-md-6">
-                <div class="p-4">
-                  <h6 class="fw-bold mb-3"><i class="bi bi-chat-left-text me-2"></i>Issue Description</h6>
-                  <div class="card mb-4">
-                    <div class="card-body bg-light">
-                      <p class="mb-0">${issue.description || "No description provided."}</p>
-                    </div>
-                  </div>
-                  
-                  ${
-                    issue.status === "resolved"
-                      ? `
-                    <h6 class="fw-bold mb-3"><i class="bi bi-check-circle me-2"></i>Resolution</h6>
-                    <div class="card">
-                      <div class="card-body bg-success bg-opacity-10">
-                        <p class="mb-2">${issue.resolution || "No resolution details provided."}</p>
-                        <p class="text-muted small mb-0">Resolved on: ${issue.formatted_resolved_at}</p>
-                      </div>
-                    </div>
-                  `
-                      : ""
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            ${
-              issue.status !== "resolved"
-                ? `
-              <button type="button" class="btn btn-success resolve-from-view-btn">Resolve Issue</button>
-            `
-                : ""
-            }
-            <button type="button" class="btn btn-primary view-order-from-issue-btn">View Order</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `
-
-  // Add modal to the DOM if it doesn't exist
-  if (document.getElementById("viewIssueModal")) {
-    document.getElementById("viewIssueModal").remove()
-  }
-
-  const modalContainer = document.createElement("div")
-  modalContainer.innerHTML = modalHtml
-  document.body.appendChild(modalContainer)
-
-  // Show the modal
-  const viewIssueModal = new bootstrap.Modal(document.getElementById("viewIssueModal"))
-  viewIssueModal.show()
-
-  // Add event listeners
-  if (issue.status !== "resolved") {
-    document.querySelector(".resolve-from-view-btn").addEventListener("click", () => {
-      viewIssueModal.hide()
-      openResolveIssueModal(issue.issue_id)
-    })
-  }
-
-  document.querySelector(".view-order-from-issue-btn").addEventListener("click", () => {
-    viewIssueModal.hide()
-    viewDeliveryDetails(issue.order_id)
-  })
-}
-
-// Update delivery status
-function updateDeliveryStatus(orderId, status) {
-  // Create form data
-  const formData = new FormData()
-  formData.append("action", "update_delivery_status")
-  formData.append("order_id", orderId)
-  formData.append("status", status)
-  formData.append("notes", `Status updated to ${status} via delivery details`)
-
-  // Send request
-  fetch("delivery_operations.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        showAlert(`Order status updated to ${status}`, "success")
-
-        // Close modal
-        const deliveryDetailsModal = bootstrap.Modal.getInstance(document.getElementById("deliveryDetailsModal"))
-        deliveryDetailsModal.hide()
-
-        // Reload data
-        loadDeliveryData()
-      } else {
-        showAlert("Failed to update status: " + data.message, "danger")
-      }
-    })
-    .catch((error) => {
-      console.error("Error updating status:", error)
-      showAlert("Error updating status. Please try again.", "danger")
-    })
-}
-
-// Show alert message
-function showAlert(message, type = "info") {
-  // Create alert element
-  const alertDiv = document.createElement("div")
-  alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`
-  alertDiv.setAttribute("role", "alert")
-  alertDiv.style.zIndex = "9999"
-  alertDiv.style.maxWidth = "350px"
-  alertDiv.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)"
-
-  // Alert content
-  alertDiv.innerHTML = `
-    <div class="d-flex align-items-center">
-      <i class="bi ${getAlertIcon(type)} me-2"></i>
-      <div>${message}</div>
-    </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  `
-
-  // Add to document
-  document.body.appendChild(alertDiv)
-
-  // Auto-dismiss after 3 seconds
-  setTimeout(() => {
-    const bsAlert = new bootstrap.Alert(alertDiv)
-    bsAlert.close()
-  }, 3000)
-}
-
-// Get alert icon based on type
-function getAlertIcon(type) {
-  switch (type) {
-    case "success":
-      return "bi-check-circle-fill text-success"
-    case "danger":
-      return "bi-exclamation-circle-fill text-danger"
-    case "warning":
-      return "bi-exclamation-triangle-fill text-warning"
-    case "info":
-      return "bi-info-circle-fill text-info"
-    default:
-      return "bi-bell-fill"
-  }
-}
-

@@ -274,11 +274,44 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
+    
+    /* Delivery Mode Styles */
+    .delivery-mode-container {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .delivery-mode-title {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+    }
+    
+    .delivery-mode-option {
+      margin-right: 1.5rem;
+    }
+    
+    .delivery-mode-option input[type="radio"] {
+      margin-right: 0.5rem;
+    }
+    
+    .delivery-mode-option label {
+      font-weight: 500;
+    }
+    
+    .pickup-location-select {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
   <!-- Response Message Alert -->
-  <div id="response-message" class="alert" role="alert"></div>
+  <div id="response-message" class="alert" role="alert" style="display: none;"></div>
+
 
   <div class="container-fluid">
     <div class="row">
@@ -520,7 +553,6 @@
                             <th>Items</th>
                             <th>Total</th>
                             <th>Status</th>
-                            <th>Expected Delivery</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -562,166 +594,170 @@
   <div class="modal fade" id="createOrderModal" tabindex="-1" aria-labelledby="createOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-light">
           <h5 class="modal-title" id="createOrderModalLabel">
-            <i class="bi bi-cart-plus me-2"></i>Create New Order
+            <i class="bi bi-cart-plus me-2 text-success"></i>Create New Order
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-0">
           <form id="create-order-form">
-            <div class="row mb-4">
+            <div class="row g-0">
               <!-- Customer Information -->
-              <div class="col-md-6">
-                <div class="card h-100">
-                  <div class="card-header bg-light">
-                    <h6 class="mb-0"><i class="bi bi-person me-2"></i>Customer Information</h6>
+              <div class="col-md-6 border-end p-4">
+                <div class="d-flex align-items-center mb-4">
+                  <div class="rounded-circle bg-light p-2 me-3">
+                    <i class="bi bi-person text-success fs-4"></i>
                   </div>
-                  <div class="card-body">
-                    <div class="mb-3">
-                      <label for="retailer-name" class="form-label">Retailer Name</label>
-                      <input type="text" class="form-control" id="retailer-name" name="retailer_name" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="retailer-email" class="form-label">Email</label>
-                      <input type="email" class="form-control" id="retailer-email" name="retailer_email" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="retailer-contact" class="form-label">Contact Number</label>
-                      <input type="text" class="form-control" id="retailer-contact" name="retailer_contact">
-                    </div>
-                  </div>
+                  <h5 class="mb-0">Customer Information</h5>
+                </div>
+                <div class="mb-3">
+                  <label for="retailer-name" class="form-label fw-semibold">Retailer Name <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control form-control-lg" id="retailer-name" name="retailer_name" required>
+                </div>
+                <div class="mb-3">
+                  <label for="retailer-email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                  <input type="email" class="form-control" id="retailer-email" name="retailer_email" required>
+                </div>
+                <div class="mb-3">
+                  <label for="retailer-contact" class="form-label fw-semibold">Contact Number</label>
+                  <input type="text" class="form-control" id="retailer-contact" name="retailer_contact">
+                </div>
+                <div class="mb-3">
+                  <label for="retailer-address" class="form-label fw-semibold">Address</label>
+                  <textarea class="form-control" id="retailer-address" name="retailer_address" rows="3"></textarea>
                 </div>
               </div>
               
               <!-- Order Details -->
-              <div class="col-md-6">
-                <div class="card h-100">
-                  <div class="card-header bg-light">
-                    <h6 class="mb-0"><i class="bi bi-calendar-date me-2"></i>Order Details</h6>
+              <div class="col-md-6 p-4">
+                <div class="d-flex align-items-center mb-4">
+                  <div class="rounded-circle bg-light p-2 me-3">
+                    <i class="bi bi-calendar-date text-success fs-4"></i>
                   </div>
+                  <h5 class="mb-0">Order Details</h5>
+                </div>
+                
+                <!-- Delivery Mode Selection -->
+                <div class="card mb-3 border-0 bg-light">
                   <div class="card-body">
-                    <div class="mb-3">
-                      <label for="order-date" class="form-label">Order Date</label>
-                      <input type="date" class="form-control" id="order-date" name="order_date" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="expected-delivery" class="form-label">Expected Delivery Date</label>
-                      <input type="date" class="form-control" id="expected-delivery" name="expected_delivery" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="order-notes" class="form-label">Notes</label>
-                      <textarea class="form-control" id="order-notes" name="notes" rows="2"></textarea>
+                    <h6 class="card-title mb-3">
+                      <i class="bi bi-truck me-2"></i>Delivery Mode
+                    </h6>
+                    <div class="d-flex">
+                      <div class="form-check me-4">
+                        <input class="form-check-input" type="radio" id="delivery-mode-delivery" name="delivery_mode" value="delivery" checked>
+                        <label class="form-check-label fw-semibold" for="delivery-mode-delivery">Delivery</label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" id="delivery-mode-pickup" name="delivery_mode" value="pickup">
+                        <label class="form-check-label fw-semibold" for="delivery-mode-pickup">Pickup</label>
+                      </div>
                     </div>
                   </div>
+                </div>
+
+                <div class="mb-3" id="expected-delivery-container">
+                  <label for="expected-delivery" class="form-label fw-semibold">Expected Delivery Date <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="expected-delivery" name="expected_delivery" required>
+                </div>
+
+                <div class="mb-3" id="pickup-location-container" style="display: none;">
+                  <label for="pickup-location" class="form-label fw-semibold">Pickup Location <span class="text-danger">*</span></label>
+                  <select class="form-select" id="pickup-location" name="pickup_location">
+                    <option value="Pinana Gourmet Calauan" selected>Pinana Gourmet Calauan</option>
+                  </select>
+                </div>
+
+                <div class="mb-3" id="pickup-date-container" style="display: none;">
+                  <label for="pickup-date" class="form-label fw-semibold">Pickup Date <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="pickup-date" name="pickup_date">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="order-date" class="form-label fw-semibold">Order Date <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="order-date" name="order_date" required>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="order-notes" class="form-label fw-semibold">Notes</label>
+                  <textarea class="form-control" id="order-notes" name="notes" rows="3" placeholder="Add any special instructions or notes here..."></textarea>
                 </div>
               </div>
             </div>
             
-            <!-- Product Selection Area -->
-            <div class="card mb-4">
-              <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-box me-2"></i>Add Products</h6>
+            <!-- Order Items Section -->
+            <div class="bg-light p-4 border-top border-bottom">
+              <div class="d-flex align-items-center mb-4">
+                <div class="rounded-circle bg-white p-2 me-3">
+                  <i class="bi bi-cart text-success fs-4"></i>
+                </div>
+                <h5 class="mb-0">Order Items</h5>
               </div>
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-5">
-                    <!-- Product Search and List -->
-                    <div class="mb-3">
-                      <label for="product-search" class="form-label">Search Products</label>
-                      <input type="text" class="form-control" id="product-search" placeholder="Search by name or ID...">
-                    </div>
-                    
-                    <div class="product-list" id="product-list">
-                      <!-- Products will be loaded here -->
-                      <div class="text-center py-4 text-muted">
-                        <i class="bi bi-search mb-2" style="font-size: 1.5rem;"></i>
-                        <p>Search for products to add to the order</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="col-md-7">
-                    <!-- Selected Product Details -->
-                    <div id="selected-product-details" class="mb-3" style="display: none;">
-                      <div class="card">
-                        <div class="card-header bg-light">
-                          <h6 class="mb-0">Selected Product</h6>
-                        </div>
-                        <div class="card-body">
-                          <h5 id="selected-product-name">Product Name</h5>
-                          <div class="row mb-3">
-                            <div class="col-md-6">
-                              <p class="mb-1"><strong>Price:</strong> ₱<span id="selected-product-price">0.00</span></p>
-                              <p class="mb-1"><strong>Available Stock:</strong> <span id="selected-product-stock">0</span></p>
+              
+              <!-- Order Items Table -->
+              <div class="card">
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="order-items-table">
+                      <thead class="table-light">
+                        <tr>
+                          <th style="width: 40%;">PRODUCT</th>
+                          <th style="width: 15%;">QUANTITY</th>
+                          <th style="width: 15%;">PRICE (₱)</th>
+                          <th style="width: 20%;">TOTAL (₱)</th>
+                          <th style="width: 10%;"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="order-items-body">
+                        <!-- Order items will be added here -->
+                        <tr id="no-items-row">
+                          <td colspan="5" class="text-center py-4">
+                            <i class="bi bi-cart-x fs-1 text-muted"></i>
+                            <p class="mt-2 mb-0">No items added yet</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                      <tfoot class="table-light">
+                        <tr>
+                          <td colspan="3" class="text-end fw-bold">Subtotal:</td>
+                          <td class="fw-bold">₱<span id="subtotal">0.00</span></td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td colspan="3" class="text-end">Discount:</td>
+                          <td>
+                            <div class="input-group input-group-sm">
+                              <span class="input-group-text">₱</span>
+                              <input type="number" class="form-control" id="discount" name="discount" value="0" min="0" step="0.01">
                             </div>
-                            <div class="col-md-6">
-                              <label for="product-quantity" class="form-label">Quantity</label>
-                              <div class="input-group">
-                                <button type="button" class="btn btn-outline-secondary" id="decrease-quantity">-</button>
-                                <input type="number" class="form-control text-center" id="product-quantity" value="1" min="1">
-                                <button type="button" class="btn btn-outline-secondary" id="increase-quantity">+</button>
-                              </div>
-                            </div>
-                          </div>
-                          <button type="button" class="btn btn-pineapple w-100" id="add-to-order-btn">
-                            <i class="bi bi-plus-lg me-1"></i>Add to Order
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <!-- Order Items Table -->
-                    <div class="table-responsive order-items-table">
-                      <table class="table table-sm mb-0" id="order-items-table">
-                        <thead>
-                          <tr>
-                            <th style="width: 40%;">Product</th>
-                            <th style="width: 15%;">Unit Price</th>
-                            <th style="width: 15%;">Quantity</th>
-                            <th style="width: 20%;">Total</th>
-                            <th style="width: 10%;">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody id="order-items-body">
-                          <tr id="no-items-row">
-                            <td colspan="5" class="text-center py-3">No items added yet</td>
-                          </tr>
-                        </tbody>
-                        <tfoot>
-                          <tr>
-                            <td colspan="3" class="text-end fw-bold">Subtotal:</td>
-                            <td class="fw-bold">₱<span id="subtotal">0.00</span></td>
-                            <td></td>
-                          </tr>
-                          <tr>
-                            <td colspan="3" class="text-end">Discount:</td>
-                            <td>
-                              <div class="input-group input-group-sm">
-                                <span class="input-group-text">₱</span>
-                                <input type="number" class="form-control" id="discount" name="discount" value="0" min="0" step="0.01">
-                              </div>
-                            </td>
-                            <td></td>
-                          </tr>
-                          <tr>
-                            <td colspan="3" class="text-end fw-bold">Total:</td>
-                            <td class="fw-bold">₱<span id="total-amount">0.00</span></td>
-                            <td></td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td colspan="3" class="text-end fw-bold">Total:</td>
+                          <td class="fw-bold fs-5 text-success">₱<span id="total-amount">0.00</span></td>
+                          <td></td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
                 </div>
               </div>
+              
+              <!-- Add Item Button -->
+              <div class="mt-3">
+                <button type="button" class="btn btn-outline-success" id="add-item-btn">
+                  <i class="bi bi-plus-circle me-2"></i>Add Item
+                </button>
+              </div>
             </div>
             
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <div class="modal-footer bg-light">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                 <i class="bi bi-x-lg me-1"></i> Cancel
               </button>
-              <button type="submit" class="btn btn-pineapple" id="save-order-btn">
+              <button type="submit" class="btn btn-success" id="save-order-btn">
                 <i class="bi bi-save me-1"></i> Save Order
               </button>
             </div>
@@ -735,167 +771,171 @@
   <div class="modal fade" id="editOrderModal" tabindex="-1" aria-labelledby="editOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-light">
           <h5 class="modal-title" id="editOrderModalLabel">
-            <i class="bi bi-pencil-square me-2"></i>Edit Order
+            <i class="bi bi-pencil-square me-2 text-warning"></i>Edit Order
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-0">
           <form id="edit-order-form">
             <input type="hidden" id="edit-order-id" name="order_id">
-            <div class="row mb-4">
+            <div class="row g-0">
               <!-- Customer Information -->
-              <div class="col-md-6">
-                <div class="card h-100">
-                  <div class="card-header bg-light">
-                    <h6 class="mb-0"><i class="bi bi-person me-2"></i>Customer Information</h6>
+              <div class="col-md-6 border-end p-4">
+                <div class="d-flex align-items-center mb-4">
+                  <div class="rounded-circle bg-light p-2 me-3">
+                    <i class="bi bi-person text-warning fs-4"></i>
                   </div>
-                  <div class="card-body">
-                    <div class="mb-3">
-                      <label for="edit-retailer-name" class="form-label">Retailer Name</label>
-                      <input type="text" class="form-control" id="edit-retailer-name" name="retailer_name" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="edit-retailer-email" class="form-label">Email</label>
-                      <input type="email" class="form-control" id="edit-retailer-email" name="retailer_email" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="edit-retailer-contact" class="form-label">Contact Number</label>
-                      <input type="text" class="form-control" id="edit-retailer-contact" name="retailer_contact">
-                    </div>
-                  </div>
+                  <h5 class="mb-0">Customer Information</h5>
+                </div>
+                <div class="mb-3">
+                  <label for="edit-retailer-name" class="form-label fw-semibold">Retailer Name <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control form-control-lg" id="edit-retailer-name" name="retailer_name" required>
+                </div>
+                <div class="mb-3">
+                  <label for="edit-retailer-email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                  <input type="email" class="form-control" id="edit-retailer-email" name="retailer_email" required>
+                </div>
+                <div class="mb-3">
+                  <label for="edit-retailer-contact" class="form-label fw-semibold">Contact Number</label>
+                  <input type="text" class="form-control" id="edit-retailer-contact" name="retailer_contact">
+                </div>
+                <div class="mb-3">
+                  <label for="edit-retailer-address" class="form-label fw-semibold">Address <small class="text-muted">(non-editable)</small></label>
+                  <textarea class="form-control bg-light" id="edit-retailer-address" name="retailer_address" rows="3" readonly></textarea>
                 </div>
               </div>
               
               <!-- Order Details -->
-              <div class="col-md-6">
-                <div class="card h-100">
-                  <div class="card-header bg-light">
-                    <h6 class="mb-0"><i class="bi bi-calendar-date me-2"></i>Order Details</h6>
+              <div class="col-md-6 p-4">
+                <div class="d-flex align-items-center mb-4">
+                  <div class="rounded-circle bg-light p-2 me-3">
+                    <i class="bi bi-calendar-date text-warning fs-4"></i>
                   </div>
+                  <h5 class="mb-0">Order Details</h5>
+                </div>
+                
+                <!-- Delivery Mode Selection -->
+                <div class="card mb-3 border-0 bg-light">
                   <div class="card-body">
-                    <div class="mb-3">
-                      <label for="edit-order-date" class="form-label">Order Date</label>
-                      <input type="date" class="form-control" id="edit-order-date" name="order_date" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="edit-expected-delivery" class="form-label">Expected Delivery Date</label>
-                      <input type="date" class="form-control" id="edit-expected-delivery" name="expected_delivery" required>
-                    </div>
-                    <div class="mb-3">
-                      <label for="edit-order-notes" class="form-label">Notes</label>
-                      <textarea class="form-control" id="edit-order-notes" name="notes" rows="2"></textarea>
+                    <h6 class="card-title mb-3">
+                      <i class="bi bi-truck me-2"></i>Delivery Mode
+                    </h6>
+                    <div class="d-flex">
+                      <div class="form-check me-4">
+                        <input class="form-check-input" type="radio" id="edit-delivery-mode-delivery" name="edit_delivery_mode" value="delivery" checked>
+                        <label class="form-check-label fw-semibold" for="edit-delivery-mode-delivery">Delivery</label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" id="edit-delivery-mode-pickup" name="edit_delivery_mode" value="pickup">
+                        <label class="form-check-label fw-semibold" for="edit-delivery-mode-pickup">Pickup</label>
+                      </div>
                     </div>
                   </div>
+                </div>
+
+                <div class="mb-3" id="edit-expected-delivery-container">
+                  <label for="edit-expected-delivery" class="form-label fw-semibold">Expected Delivery Date <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="edit-expected-delivery" name="expected_delivery" required>
+                </div>
+
+                <div class="mb-3" id="edit-pickup-location-container" style="display: none;">
+                  <label for="edit-pickup-location" class="form-label fw-semibold">Pickup Location <span class="text-danger">*</span></label>
+                  <select class="form-select" id="edit-pickup-location" name="pickup_location">
+                    <option value="Pinana Gourmet Calauan" selected>Pinana Gourmet Calauan</option>
+                  </select>
+                </div>
+
+                <div class="mb-3" id="edit-pickup-date-container" style="display: none;">
+                  <label for="edit-pickup-date" class="form-label fw-semibold">Pickup Date <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="edit-pickup-date" name="pickup_date">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="edit-order-date" class="form-label fw-semibold">Order Date <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="edit-order-date" name="order_date" required>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="edit-order-notes" class="form-label fw-semibold">Notes</label>
+                  <textarea class="form-control" id="edit-order-notes" name="notes" rows="3" placeholder="Add any special instructions or notes here..."></textarea>
                 </div>
               </div>
             </div>
             
-            <!-- Product Selection Area -->
-            <div class="card mb-4">
-              <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bi bi-box me-2"></i>Add Products</h6>
+            <!-- Order Items Section -->
+            <div class="bg-light p-4 border-top border-bottom">
+              <div class="d-flex align-items-center mb-4">
+                <div class="rounded-circle bg-white p-2 me-3">
+                  <i class="bi bi-cart text-warning fs-4"></i>
+                </div>
+                <h5 class="mb-0">Order Items</h5>
               </div>
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-5">
-                    <!-- Product Search and List -->
-                    <div class="mb-3">
-                      <label for="edit-product-search" class="form-label">Search Products</label>
-                      <input type="text" class="form-control" id="edit-product-search" placeholder="Search by name or ID...">
-                    </div>
-                    
-                    <div class="product-list" id="edit-product-list">
-                      <!-- Products will be loaded here -->
-                      <div class="text-center py-4 text-muted">
-                        <i class="bi bi-search mb-2" style="font-size: 1.5rem;"></i>
-                        <p>Search for products to add to the order</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="col-md-7">
-                    <!-- Selected Product Details -->
-                    <div id="edit-selected-product-details" class="mb-3" style="display: none;">
-                      <div class="card">
-                        <div class="card-header bg-light">
-                          <h6 class="mb-0">Selected Product</h6>
-                        </div>
-                        <div class="card-body">
-                          <h5 id="edit-selected-product-name">Product Name</h5>
-                          <div class="row mb-3">
-                            <div class="col-md-6">
-                              <p class="mb-1"><strong>Price:</strong> ₱<span id="edit-selected-product-price">0.00</span></p>
-                              <p class="mb-1"><strong>Available Stock:</strong> <span id="edit-selected-product-stock">0</span></p>
+              
+              <!-- Order Items Table -->
+              <div class="card">
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="edit-order-items-table">
+                      <thead class="table-light">
+                        <tr>
+                          <th style="width: 40%;">PRODUCT</th>
+                          <th style="width: 15%;">QUANTITY</th>
+                          <th style="width: 15%;">PRICE (₱)</th>
+                          <th style="width: 20%;">TOTAL (₱)</th>
+                          <th style="width: 10%;"></th>
+                        </tr>
+                      </thead>
+                      <tbody id="edit-order-items-body">
+                        <!-- Order items will be added here -->
+                        <tr id="edit-no-items-row">
+                          <td colspan="5" class="text-center py-4">
+                            <i class="bi bi-cart-x fs-1 text-muted"></i>
+                            <p class="mt-2 mb-0">No items added yet</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                      <tfoot class="table-light">
+                        <tr>
+                          <td colspan="3" class="text-end fw-bold">Subtotal:</td>
+                          <td class="fw-bold">₱<span id="edit-subtotal">0.00</span></td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td colspan="3" class="text-end">Discount:</td>
+                          <td>
+                            <div class="input-group input-group-sm">
+                              <span class="input-group-text">₱</span>
+                              <input type="number" class="form-control" id="edit-discount" name="discount" value="0" min="0" step="0.01">
                             </div>
-                            <div class="col-md-6">
-                              <label for="edit-product-quantity" class="form-label">Quantity</label>
-                              <div class="input-group">
-                                <button type="button" class="btn btn-outline-secondary" id="edit-decrease-quantity">-</button>
-                                <input type="number" class="form-control text-center" id="edit-product-quantity" value="1" min="1">
-                                <button type="button" class="btn btn-outline-secondary" id="edit-increase-quantity">+</button>
-                              </div>
-                            </div>
-                          </div>
-                          <button type="button" class="btn btn-pineapple w-100" id="edit-add-to-order-btn">
-                            <i class="bi bi-plus-lg me-1"></i>Add to Order
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <!-- Order Items Table -->
-                    <div class="table-responsive order-items-table">
-                      <table class="table table-sm mb-0" id="edit-order-items-table">
-                        <thead>
-                          <tr>
-                            <th style="width: 40%;">Product</th>
-                            <th style="width: 15%;">Unit Price</th>
-                            <th style="width: 15%;">Quantity</th>
-                            <th style="width: 20%;">Total</th>
-                            <th style="width: 10%;">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody id="edit-order-items-body">
-                          <tr id="edit-no-items-row">
-                            <td colspan="5" class="text-center py-3">No items added yet</td>
-                          </tr>
-                        </tbody>
-                        <tfoot>
-                          <tr>
-                            <td colspan="3" class="text-end fw-bold">Subtotal:</td>
-                            <td class="fw-bold">₱<span id="edit-subtotal">0.00</span></td>
-                            <td></td>
-                          </tr>
-                          <tr>
-                            <td colspan="3" class="text-end">Discount:</td>
-                            <td>
-                              <div class="input-group input-group-sm">
-                                <span class="input-group-text">₱</span>
-                                <input type="number" class="form-control" id="edit-discount" name="discount" value="0" min="0" step="0.01">
-                              </div>
-                            </td>
-                            <td></td>
-                          </tr>
-                          <tr>
-                            <td colspan="3" class="text-end fw-bold">Total:</td>
-                            <td class="fw-bold">₱<span id="edit-total-amount">0.00</span></td>
-                            <td></td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td colspan="3" class="text-end fw-bold">Total:</td>
+                          <td class="fw-bold fs-5 text-warning">₱<span id="edit-total-amount">0.00</span></td>
+                          <td></td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
                 </div>
               </div>
+              
+              <!-- Add Item Button -->
+              <div class="mt-3">
+                <button type="button" class="btn btn-outline-warning" id="edit-add-item-btn">
+                  <i class="bi bi-plus-circle me-2"></i>Add Item
+                </button>
+              </div>
             </div>
             
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <div class="modal-footer bg-light">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                 <i class="bi bi-x-lg me-1"></i> Cancel
               </button>
-              <button type="submit" class="btn btn-pineapple" id="update-order-btn">
+              <button type="submit" class="btn btn-warning text-white" id="update-order-btn">
                 <i class="bi bi-save me-1"></i> Update Order
               </button>
             </div>
@@ -909,77 +949,177 @@
   <div class="modal fade" id="viewOrderModal" tabindex="-1" aria-labelledby="viewOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-light">
           <h5 class="modal-title" id="viewOrderModalLabel">
-            <i class="bi bi-info-circle me-2"></i>Order Details
+            <i class="bi bi-info-circle me-2 text-primary"></i>Order Details
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          <div class="row mb-4">
-            <div class="col-md-6">
-              <h6 class="text-muted mb-2">Order Information</h6>
-              <p class="mb-1"><strong>Order #:</strong> <span id="view-order-number"></span></p>
-              <p class="mb-1"><strong>Date:</strong> <span id="view-order-date"></span></p>
-              <p class="mb-1"><strong>Status:</strong> <span id="view-order-status"></span></p>
-              <p class="mb-1"><strong>Expected Delivery:</strong> <span id="view-expected-delivery"></span></p>
+        <div class="modal-body p-0">
+          <div class="row g-0">
+            <div class="col-md-6 border-end p-4">
+              <div class="d-flex align-items-center mb-4">
+                <div class="rounded-circle bg-light p-2 me-3">
+                  <i class="bi bi-receipt text-primary fs-4"></i>
+                </div>
+                <h5 class="mb-0">Order Information</h5>
+              </div>
+              <div class="mb-4">
+                <div class="card bg-light border-0">
+                  <div class="card-body">
+                    <div class="row mb-2">
+                      <div class="col-5 text-muted">Order #:</div>
+                      <div class="col-7 fw-bold" id="view-order-number"></div>
+                    </div>
+                    <div class="row mb-2">
+                      <div class="col-5 text-muted">Date:</div>
+                      <div class="col-7" id="view-order-date"></div>
+                    </div>
+                    <div class="row mb-2">
+                      <div class="col-5 text-muted">Status:</div>
+                      <div class="col-7" id="view-order-status"></div>
+                    </div>
+                    <div class="row">
+                      <div class="col-5 text-muted">Delivery Mode:</div>
+                      <div class="col-7" id="view-delivery-mode"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Delivery Details -->
+              <div id="view-delivery-details" class="mb-4">
+                <h6 class="fw-bold mb-3">Delivery Details</h6>
+                <div class="card bg-light border-0">
+                  <div class="card-body">
+                    <div class="row mb-2">
+                      <div class="col-5 text-muted">Expected Delivery:</div>
+                      <div class="col-7" id="view-expected-delivery"></div>
+                    </div>
+                    <div class="row">
+                      <div class="col-5 text-muted">Delivery Address:</div>
+                      <div class="col-7" id="view-delivery-address"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Pickup Details -->
+              <div id="view-pickup-details" class="mb-4" style="display: none;">
+                <h6 class="fw-bold mb-3">Pickup Details</h6>
+                <div class="card bg-light border-0">
+                  <div class="card-body">
+                    <div class="row mb-2">
+                      <div class="col-5 text-muted">Pickup Location:</div>
+                      <div class="col-7" id="view-pickup-location"></div>
+                    </div>
+                    <div class="row">
+                      <div class="col-5 text-muted">Pickup Date:</div>
+                      <div class="col-7" id="view-pickup-date"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <h6 class="fw-bold mb-3">Retailer Information</h6>
+                <div class="card bg-light border-0">
+                  <div class="card-body">
+                    <div class="row mb-2">
+                      <div class="col-5 text-muted">Name:</div>
+                      <div class="col-7" id="view-retailer-name"></div>
+                    </div>
+                    <div class="row mb-2">
+                      <div class="col-5 text-muted">Email:</div>
+                      <div class="col-7" id="view-retailer-email"></div>
+                    </div>
+                    <div class="row mb-2">
+                      <div class="col-5 text-muted">Contact:</div>
+                      <div class="col-7" id="view-retailer-contact"></div>
+                    </div>
+                    <div class="row">
+                      <div class="col-5 text-muted">Address:</div>
+                      <div class="col-7" id="view-retailer-address"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <h6 class="fw-bold mb-3">Notes</h6>
+                <div class="card bg-light border-0">
+                  <div class="card-body">
+                    <p id="view-notes" class="mb-0">No notes available</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="col-md-6">
-              <h6 class="text-muted mb-2">Retailer Information</h6>
-              <p class="mb-1"><strong>Name:</strong> <span id="view-retailer-name"></span></p>
-              <p class="mb-1"><strong>Email:</strong> <span id="view-retailer-email"></span></p>
-              <p class="mb-1"><strong>Contact:</strong> <span id="view-retailer-contact"></span></p>
-            </div>
-          </div>
-          
-          <div class="table-responsive mb-4">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Unit Price</th>
-                  <th>Quantity</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody id="view-order-items">
-                <!-- Order items will be loaded here -->
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="3" class="text-end fw-bold">Subtotal:</td>
-                  <td class="fw-bold">₱<span id="view-subtotal"></span></td>
-                </tr>
-                <tr>
-                  <td colspan="3" class="text-end">Discount:</td>
-                  <td>₱<span id="view-discount"></span></td>
-                </tr>
-                <tr>
-                  <td colspan="3" class="text-end fw-bold">Total:</td>
-                  <td class="fw-bold">₱<span id="view-total-amount"></span></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          
-          <div class="mb-3">
-            <h6 class="text-muted mb-2">Notes</h6>
-            <p id="view-notes" class="mb-0">No notes available</p>
-          </div>
-          
-          <div class="mb-0">
-            <h6 class="text-muted mb-2">Status History</h6>
-            <div id="status-timeline">
-              <!-- Status timeline will be loaded here -->
+            
+            <div class="col-md-6 p-4">
+              <div class="d-flex align-items-center mb-4">
+                <div class="rounded-circle bg-light p-2 me-3">
+                  <i class="bi bi-cart-check text-primary fs-4"></i>
+                </div>
+                <h5 class="mb-0">Order Items</h5>
+              </div>
+              
+              <div class="table-responsive mb-4">
+                <table class="table table-sm table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Product</th>
+                      <th>Unit Price</th>
+                      <th>Quantity</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="view-order-items">
+                    <!-- Order items will be loaded here -->
+                  </tbody>
+                  <tfoot class="table-light">
+                    <tr>
+                      <td colspan="3" class="text-end fw-bold">Subtotal:</td>
+                      <td class="fw-bold">₱<span id="view-subtotal"></span></td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" class="text-end">Discount:</td>
+                      <td>₱<span id="view-discount"></span></td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" class="text-end fw-bold">Total:</td>
+                      <td class="fw-bold fs-5 text-primary">₱<span id="view-total-amount"></span></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              
+              <div class="mb-0">
+                <div class="d-flex align-items-center mb-4">
+                  <div class="rounded-circle bg-light p-2 me-3">
+                    <i class="bi bi-clock-history text-primary fs-4"></i>
+                  </div>
+                  <h5 class="mb-0">Status History</h5>
+                </div>
+                <div class="card bg-light border-0">
+                  <div class="card-body">
+                    <div id="status-timeline">
+                      <!-- Status timeline will be loaded here -->
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
             <i class="bi bi-x-lg me-1"></i> Close
           </button>
+          <button type="button" class="btn btn-outline-primary edit-order-btn" data-id="">
+            <i class="bi bi-pencil me-1"></i> Edit
+          </button>
           <div class="dropdown">
-            <button class="btn btn-pineapple dropdown-toggle" type="button" id="updateStatusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="updateStatusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="bi bi-arrow-repeat me-1"></i> Update Status
             </button>
             <ul class="dropdown-menu" aria-labelledby="updateStatusDropdown">
@@ -999,28 +1139,38 @@
   <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-light">
           <h5 class="modal-title" id="updateStatusModalLabel">
-            <i class="bi bi-arrow-repeat me-2"></i>Update Order Status
+            <i class="bi bi-arrow-repeat me-2 text-primary"></i>Update Order Status
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form i  aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <form id="update-status-form">
             <input type="hidden" id="update-order-id">
             <input type="hidden" id="update-status">
             
+            <div class="alert alert-info d-flex align-items-center mb-4">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <div>
+                You are about to update the order status. This will be recorded in the order history.
+              </div>
+            </div>
+            
             <div class="mb-3">
-              <label for="status-notes" class="form-label">Notes (Optional)</label>
+              <label for="status-notes" class="form-label fw-semibold">Notes (Optional)</label>
               <textarea class="form-control" id="status-notes" rows="3" placeholder="Add any notes about this status change..."></textarea>
             </div>
           </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
             <i class="bi bi-x-lg me-1"></i> Cancel
           </button>
-          <button type="button" class="btn btn-pineapple" id="confirm-status-update">
+          <button type="button" class="btn btn-primary" id="confirm-status-update">
             <i class="bi bi-check-lg me-1"></i> Update Status
           </button>
         </div>
@@ -1033,15 +1183,15 @@
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content">
         <div class="modal-body text-center p-4">
-          <div class="delete-confirm-icon">
-            <i class="bi bi-exclamation-triangle-fill"></i>
+          <div class="mb-4">
+            <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
           </div>
           <h5 class="modal-title mb-3" id="deleteOrderModalLabel">Confirm Delete</h5>
-          <p class="delete-confirm-text">Are you sure you want to delete this order? This action cannot be undone.</p>
+          <p class="mb-4">Are you sure you want to delete this order? This action cannot be undone.</p>
           <input type="hidden" id="delete-order-id">
           
           <div class="d-flex justify-content-center gap-2 mt-4">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
               <i class="bi bi-x-lg me-1"></i> Cancel
             </button>
             <button type="button" class="btn btn-danger" id="confirm-delete-btn">
@@ -1053,14 +1203,16 @@
     </div>
   </div>
 
+ 
   <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Flatpickr JS -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- jQuery (needed for some functionality) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- Custom JavaScript -->
-  <script src="script.js"></script>
-  <script src="mobile-menu.js"></script>
-  <!-- Orders JavaScript -->
+  <script src="scripts.js"></script>
   <script src="retail_orders.js"></script>
+  
 </body>
 </html>

@@ -118,3 +118,7 @@
 2025-04-16 15:38:50 - Verification attempt with token: b0c7c7d6319671e54bdf46f44f9ba201da80fe3a95f1d45bba6e8de4e93725f4
 2025-04-16 15:38:57 - Welcome email sent to: tuhtargaryen@gmail.com
 2025-04-16 15:38:57 - Success: Email verified for user ID: 6
+2025-04-22 07:29:03 - Resent verification email to: fyavetargaryen@gmail.com
+2025-04-22 07:29:21 - Verification attempt with token: f3479c9e35ac5d3c2d0d42b85f48f816e24d92231c64c6ebb3a65261f81f3dde
+2025-04-22 07:29:31 - Welcome email sent to: fyavetargaryen@gmail.com
+2025-04-22 07:29:31 - Success: Email verified for user ID: 21

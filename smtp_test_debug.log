@@ -258,3 +258,55 @@
 2025-04-12 02:34:04: SERVER -> CLIENT: 221 2.0.0 closing connection d9443c01a7336-22ac7c9929csm56765265ad.112 - gsmtp
 
 2025-04-12 02:34:04: Connection: closed
+2025-04-22 07:28:30: Connection: opening to smtp.gmail.com:587, timeout=300, options=array (
+  'ssl' => 
+  array (
+    'verify_peer' => false,
+    'verify_peer_name' => false,
+    'allow_self_signed' => true,
+  ),
+)
+2025-04-22 07:28:30: Connection: opened
+2025-04-22 07:28:30: SERVER -> CLIENT: 220 smtp.gmail.com ESMTP d2e1a72fcca58-73dbf8e0bbesm7693216b3a.37 - gsmtp
+
+2025-04-22 07:28:30: CLIENT -> SERVER: EHLO localhost
+
+2025-04-22 07:28:31: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [49.144.233.117]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+2025-04-22 07:28:31: CLIENT -> SERVER: STARTTLS
+
+2025-04-22 07:28:31: SERVER -> CLIENT: 220 2.0.0 Ready to start TLS
+
+2025-04-22 07:28:31: CLIENT -> SERVER: EHLO localhost
+
+2025-04-22 07:28:31: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [49.144.233.117]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+2025-04-22 07:28:31: CLIENT -> SERVER: AUTH LOGIN
+
+2025-04-22 07:28:32: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+2025-04-22 07:28:32: CLIENT -> SERVER: [credentials hidden]
+2025-04-22 07:28:32: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+2025-04-22 07:28:32: CLIENT -> SERVER: [credentials hidden]
+2025-04-22 07:28:32: SERVER -> CLIENT: 235 2.7.0 Accepted
+
+2025-04-22 07:28:32: CLIENT -> SERVER: QUIT
+
+2025-04-22 07:28:32: SERVER -> CLIENT: 221 2.0.0 closing connection d2e1a72fcca58-73dbf8e0bbesm7693216b3a.37 - gsmtp
+
+2025-04-22 07:28:32: Connection: closed

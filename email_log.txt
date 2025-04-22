@@ -83,3 +83,12 @@
 2025-04-16 15:38:50 - Attempting to send welcome email to: tuhtargaryen@gmail.com
 2025-04-16 15:38:50 - Logo found and encoded for welcome email
 2025-04-16 15:38:57 - Welcome email sent successfully to: tuhtargaryen@gmail.com
+2025-04-22 07:28:33 - Attempting to send verification email to: fyavetargaryen@gmail.com
+2025-04-22 07:28:33 - Logo found and encoded
+2025-04-22 07:28:42 - Verification email sent successfully to: fyavetargaryen@gmail.com
+2025-04-22 07:28:42 - Attempting to send verification email to: fyavetargaryen@gmail.com
+2025-04-22 07:28:42 - Logo found and encoded
+2025-04-22 07:29:02 - Verification email sent successfully to: fyavetargaryen@gmail.com
+2025-04-22 07:29:21 - Attempting to send welcome email to: fyavetargaryen@gmail.com
+2025-04-22 07:29:21 - Logo found and encoded for welcome email
+2025-04-22 07:29:31 - Welcome email sent successfully to: fyavetargaryen@gmail.com

@@ -150,7 +150,7 @@
                     <i class="bi bi-box-seam me-1"></i> Mark Order Ready
                   </button>
                   <button class="btn btn-outline-primary" id="schedule-delivery-btn">
-                    <i class="bi bi-calendar me-1"></i> Schedule Delivery
+                    <i class="bi bi-calendar me-1"></i> Schedule Delivery/Pickup
                   </button>
                 </div>
               </div>
@@ -216,7 +216,7 @@
                       <tbody id="pending-delivery-table-body">
                         <!-- Table content will be loaded dynamically -->
                         <tr>
-                          <td colspan="8" class="text-center py-4">
+                          <td colspan="5" class="text-center py-4">
                             <div class="spinner-border text-primary" role="status">
                               <span class="visually-hidden">Loading...</span>
                             </div>
@@ -259,7 +259,7 @@
                       <tbody id="active-delivery-table-body">
                         <!-- Table content will be loaded dynamically -->
                         <tr>
-                          <td colspan="8" class="text-center py-4">
+                          <td colspan="5" class="text-center py-4">
                             <div class="spinner-border text-primary" role="status">
                               <span class="visually-hidden">Loading...</span>
                             </div>
@@ -301,7 +301,7 @@
                       <tbody id="completed-delivery-table-body">
                         <!-- Table content will be loaded dynamically -->
                         <tr>
-                          <td colspan="7" class="text-center py-4">
+                          <td colspan="4" class="text-center py-4">
                             <div class="spinner-border text-primary" role="status">
                               <span class="visually-hidden">Loading...</span>
                             </div>
@@ -407,227 +407,112 @@
   </div>
 </div>
 
-<!-- Mark Order Ready Modal -->
-<div class="modal fade" id="markReadyModal" tabindex="-1" aria-labelledby="markReadyModalLabel" aria-hidden="true">
+<!-- Update Status Modal for Pickup Orders -->
+<div class="modal fade" id="updatePickupStatusModal" tabindex="-1" aria-labelledby="updatePickupStatusModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="markReadyModalLabel">
-          <i class="bi bi-box-seam me-2 text-primary"></i>Mark Order Ready for Delivery
+      <div class="modal-header bg-primary bg-opacity-10">
+        <h5 class="modal-title" id="updatePickupStatusModalLabel">
+          <i class="bi bi-box-seam me-2 text-primary"></i>Update Pickup Status
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="markReadyForm">
+        <form id="updatePickupStatusForm">
+          <input type="hidden" id="pickup-order-id" name="order_id">
+          
           <div class="mb-3">
-            <label for="orderSelect" class="form-label">Select Order</label>
-            <select class="form-select" id="orderSelect" required>
-              <option selected disabled>Choose an order...</option>
-              <!-- Orders will be loaded dynamically -->
+            <label for="pickup-status" class="form-label fw-bold">Status</label>
+            <select class="form-select" id="pickup-status" required>
+              <option value="" selected disabled>Select status...</option>
+              <option value="order">Order</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="ready">Ready for Pickup</option>
+              <option value="picked up">Picked Up</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
           
           <div class="mb-3">
-            <label for="estimatedTime" class="form-label">Estimated Delivery Time</label>
-            <input type="text" class="form-control" id="estimatedTime" placeholder="Select date and time">
+            <label for="pickup-notes" class="form-label fw-bold">Notes</label>
+            <textarea class="form-control" id="pickup-notes" rows="3" placeholder="Add notes about this status change..."></textarea>
           </div>
           
-          <div class="mb-3">
-            <label for="driverSelect" class="form-label">Assign Driver (Optional)</label>
-            <select class="form-select driver-select" id="driverSelect">
-              <option value="">Select Driver (Optional)</option>
-              <!-- Drivers will be loaded dynamically -->
-            </select>
-          </div>
-          
-          <div class="mb-3">
-            <label for="deliveryNotes" class="form-label">Delivery Notes</label>
-            <textarea class="form-control" id="deliveryNotes" rows="3" placeholder="Special instructions for delivery..."></textarea>
+          <div class="alert alert-info" id="pickup-status-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <span id="pickup-status-message">Select a status to see more information.</span>
           </div>
           
           <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="notifyCustomer">
-            <label class="form-check-label" for="notifyCustomer">
+            <input class="form-check-input" type="checkbox" id="notifyCustomerPickup" checked>
+            <label class="form-check-label" for="notifyCustomerPickup">
               Notify customer via email
             </label>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
           <i class="bi bi-x-lg me-1"></i> Cancel
         </button>
-        <button type="button" class="btn btn-primary" id="confirmReadyBtn">
-          <i class="bi bi-check-lg me-1"></i> Mark as Ready
+        <button type="button" class="btn btn-primary" id="confirmUpdatePickupStatusBtn">
+          <i class="bi bi-check-lg me-1"></i> Update Status
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Schedule Delivery Modal -->
-<div class="modal fade" id="scheduleDeliveryModal" tabindex="-1" aria-labelledby="scheduleDeliveryModalLabel" aria-hidden="true">
+<!-- Update Status Modal for Delivery Orders -->
+<div class="modal fade" id="updateDeliveryStatusModal" tabindex="-1" aria-labelledby="updateDeliveryStatusModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="scheduleDeliveryModalLabel">
-          <i class="bi bi-calendar me-2 text-primary"></i>Schedule Delivery
+      <div class="modal-header bg-primary bg-opacity-10">
+        <h5 class="modal-title" id="updateDeliveryStatusModalLabel">
+          <i class="bi bi-truck me-2 text-primary"></i>Update Delivery Status
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="scheduleDeliveryForm">
+        <form id="updateDeliveryStatusForm">
+          <input type="hidden" id="delivery-order-id" name="order_id">
+          
           <div class="mb-3">
-            <label for="scheduleOrderSelect" class="form-label">Select Order</label>
-            <select class="form-select" id="scheduleOrderSelect" required>
-              <option selected disabled>Choose an order...</option>
-              <!-- Orders will be loaded dynamically -->
+            <label for="delivery-status" class="form-label fw-bold">Status</label>
+            <select class="form-select" id="delivery-status" required>
+              <option value="" selected disabled>Select status...</option>
+              <option value="order">Order</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
           
           <div class="mb-3">
-            <label for="deliveryDate" class="form-label">Delivery Date</label>
-            <input type="text" class="form-control" id="deliveryDate" placeholder="Select date" required>
+            <label for="delivery-notes" class="form-label fw-bold">Notes</label>
+            <textarea class="form-control" id="delivery-notes" rows="3" placeholder="Add notes about this status change..."></textarea>
           </div>
           
-          <div class="mb-3">
-            <label for="deliveryTimeWindow" class="form-label">Time Window</label>
-            <select class="form-select" id="deliveryTimeWindow" required>
-              <option value="morning">Morning (8:00 AM - 12:00 PM)</option>
-              <option value="afternoon">Afternoon (12:00 PM - 4:00 PM)</option>
-              <option value="evening">Evening (4:00 PM - 8:00 PM)</option>
-            </select>
-          </div>
-          
-          <div class="mb-3">
-            <label for="scheduleDriverSelect" class="form-label">Assign Driver (Optional)</label>
-            <select class="form-select driver-select" id="scheduleDriverSelect">
-              <option value="">Select Driver (Optional)</option>
-              <!-- Drivers will be loaded dynamically -->
-            </select>
-          </div>
-          
-          <div class="mb-3">
-            <label for="scheduleNotes" class="form-label">Delivery Notes</label>
-            <textarea class="form-control" id="scheduleNotes" rows="3" placeholder="Special instructions for delivery..."></textarea>
+          <div class="alert alert-info" id="delivery-status-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <span id="delivery-status-message">Select a status to see more information.</span>
           </div>
           
           <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="scheduleNotifyCustomer">
-            <label class="form-check-label" for="scheduleNotifyCustomer">
+            <input class="form-check-input" type="checkbox" id="notifyCustomerDelivery" checked>
+            <label class="form-check-label" for="notifyCustomerDelivery">
               Notify customer via email
             </label>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
           <i class="bi bi-x-lg me-1"></i> Cancel
         </button>
-        <button type="button" class="btn btn-primary" id="confirmScheduleBtn">
-          <i class="bi bi-check-lg me-1"></i> Schedule Delivery
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Delivery Details Modal -->
-<div class="modal fade" id="deliveryDetailsModal" tabindex="-1" aria-labelledby="deliveryDetailsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content">
-      <div class="modal-header bg-light">
-        <h5 class="modal-title" id="deliveryDetailsModalLabel">
-          <i class="bi bi-info-circle me-2 text-primary"></i>Delivery Details
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-0">
-        <div class="row g-0">
-          <!-- Left column - Order and Customer Info -->
-          <div class="col-md-4 border-end">
-            <div class="p-4">
-              <div class="d-flex align-items-center mb-3">
-                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
-                  <i class="bi bi-box-seam fs-3 text-primary"></i>
-                </div>
-                <div>
-                  <h6 class="mb-0 fw-bold">Order #<span id="detail-order-id"></span></h6>
-                  <p class="text-muted mb-0 small">Placed on <span id="detail-order-date"></span></p>
-                </div>
-              </div>
-              
-              <div class="card mb-3">
-                <div class="card-header bg-light py-2">
-                  <h6 class="mb-0 fw-bold"><i class="bi bi-person me-2"></i>Customer Information</h6>
-                </div>
-                <div class="card-body">
-                  <p class="mb-1"><strong>Name:</strong> <span id="detail-customer-name"></span></p>
-                  <p class="mb-1"><strong>Phone:</strong> <span id="detail-customer-phone"></span></p>
-                  <p class="mb-1"><strong>Email:</strong> <span id="detail-customer-email"></span></p>
-                  <p class="mb-0"><strong>Address:</strong> <span id="detail-customer-address"></span></p>
-                </div>
-              </div>
-              
-              <div class="card mb-3">
-                <div class="card-header bg-light py-2">
-                  <h6 class="mb-0 fw-bold"><i class="bi bi-credit-card me-2"></i>Payment Details</h6>
-                </div>
-                <div class="card-body">
-                  <p class="mb-1"><strong>Total:</strong> <span id="detail-order-amount" class="fw-bold text-primary"></span></p>
-                  <p class="mb-0"><strong>Method:</strong> <span id="detail-payment-method"></span></p>
-                </div>
-              </div>
-              
-              <!-- Driver Information (will be populated if available) -->
-              <div id="detail-driver-info"></div>
-            </div>
-          </div>
-          
-          <!-- Middle column - Order Items -->
-          <div class="col-md-4 border-end">
-            <div class="p-4">
-              <h6 class="fw-bold mb-3"><i class="bi bi-cart me-2"></i>Order Items</h6>
-              <div class="card">
-                <div class="card-body p-0">
-                  <ul class="list-group list-group-flush" id="detail-order-items">
-                    <!-- Order items will be loaded dynamically -->
-                  </ul>
-                </div>
-              </div>
-              
-              <div class="mt-4">
-                <h6 class="fw-bold mb-3"><i class="bi bi-chat-left-text me-2"></i>Delivery Notes</h6>
-                <div class="card">
-                  <div class="card-body bg-light">
-                    <p id="detail-delivery-notes" class="mb-0">No special instructions provided.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Right column - Delivery Timeline -->
-          <div class="col-md-4">
-            <div class="p-4">
-              <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Delivery Timeline</h6>
-              <div class="card">
-                <div class="card-body">
-                  <div class="delivery-timeline">
-                    <!-- Timeline will be loaded dynamically -->
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          <i class="bi bi-x-lg me-1"></i> Close
-        </button>
-        <button type="button" class="btn btn-danger" id="reportIssueBtn">
-          <i class="bi bi-exclamation-triangle me-1"></i> Report Issue
+        <button type="button" class="btn btn-primary" id="confirmUpdateDeliveryStatusBtn">
+          <i class="bi bi-check-lg me-1"></i> Update Status
         </button>
       </div>
     </div>
@@ -646,7 +531,7 @@
       </div>
       <div class="modal-body">
         <form id="reportIssueForm">
-          <input type="hidden" id="issueOrderId" value="">
+          <input type="hidden" id="reportIssueOrderId" value="">
           
           <div class="mb-3">
             <label for="issueType" class="form-label fw-bold">Issue Type</label>
@@ -713,8 +598,8 @@
           </div>
           
           <div class="mb-3">
-            <label for="resolveIssueResolution" class="form-label fw-bold">Resolution</label>
-            <textarea class="form-control" id="resolveIssueResolution" rows="4" placeholder="Describe how the issue was resolved..." required></textarea>
+            <label for="resolution" class="form-label fw-bold">Resolution</label>
+            <textarea class="form-control" id="resolution" rows="4" placeholder="Describe how the issue was resolved..." required></textarea>
           </div>
         </form>
       </div>
@@ -729,6 +614,9 @@
     </div>
   </div>
 </div>
+
+<!-- Alert Container -->
+<div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
 
 <!-- Logout Confirmation Modal -->
 <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
@@ -761,4 +649,3 @@
 <script src="logout.js"></script>
 </body>
 </html>
-

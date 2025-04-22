@@ -1,10 +1,11 @@
 // Global variables
 let currentPage = 1
+let retailerCurrentPage = 1
 const itemsPerPage = 10
 let totalPages = 1
+let retailerTotalPages = 1
 let currentOrders = []
-let allProducts = []
-const deliveredOrders = [] // Add this line
+let currentRetailerOrders = []
 const currentFilters = {
   status: "all",
   dateRange: "all",
@@ -12,26 +13,48 @@ const currentFilters = {
   endDate: null,
   search: "",
 }
+const retailerFilters = {
+  status: "all",
+  search: "",
+}
 
 // Initialize the page
 document.addEventListener("DOMContentLoaded", () => {
+  // Check if required elements exist
+  const requiredElements = [
+    { id: "retailer-orders-table-body", name: "Retailer orders table body" },
+    { id: "viewOrderModal", name: "View order modal" },
+    { id: "alertContainer", name: "Alert container" },
+  ]
+
+  // Remove the check for elements we don't need anymore
+  const missingElements = []
+  requiredElements.forEach((element) => {
+    if (!document.getElementById(element.id)) {
+      missingElements.push(element.name)
+      console.error(`Required element not found: ${element.id}`)
+    }
+  })
+
+  if (missingElements.length > 0) {
+    showAlert("warning", `Some required elements are missing: ${missingElements.join(", ")}`)
+  }
+
   // Initialize sidebar toggle for mobile
   initSidebar()
 
   // Initialize date pickers
   initDatePickers()
 
-  // Load products for order form
-  loadProducts()
-
-  // Load orders
-  loadOrders()
+  // Load retailer orders by default instead of customer orders
+  //loadRetailerOrders()
+  loadRetailerOrders()
 
   // Initialize event listeners
   initEventListeners()
 
-  // Initialize order form
-  initOrderForm()
+  // Initialize tabs
+  initTabs()
 })
 
 // Initialize sidebar toggle for mobile
@@ -61,17 +84,8 @@ function initSidebar() {
 // Initialize date pickers
 function initDatePickers() {
   try {
-    // Order date picker in form
+    // Date range pickers
     if (typeof flatpickr !== "undefined") {
-      flatpickr("#orderDate", {
-        enableTime: false,
-        dateFormat: "Y-m-d",
-        defaultDate: new Date(),
-        clickOpens: false, // Prevent the calendar from opening when clicked
-        disableMobile: true, // Disable mobile input
-      })
-
-      // Date range pickers
       flatpickr("#dateRangeStart", {
         enableTime: false,
         dateFormat: "Y-m-d",
@@ -81,6 +95,14 @@ function initDatePickers() {
         enableTime: false,
         dateFormat: "Y-m-d",
       })
+      flatpickr("#retailerDateRangeStart", {
+        enableTime: false,
+        dateFormat: "Y-m-d",
+      })
+
+      flatpickr("#retailerDateRangeEnd", {
+        enableTime: false,
+      })
     } else {
       console.warn("flatpickr is not defined. Date pickers may not work properly.")
     }
@@ -89,8 +111,29 @@ function initDatePickers() {
   }
 }
 
+// Initialize tabs
+function initTabs() {
+  // Add event listener for customer orders tab
+  const customerOrdersTab = document.getElementById("customerOrdersTab")
+  if (customerOrdersTab) {
+    customerOrdersTab.addEventListener("click", () => {
+      loadOrders()
+    })
+  }
+
+  // Add event listener for retailer orders tab
+  const retailerOrdersTab = document.getElementById("retailerOrdersTab")
+  if (retailerOrdersTab) {
+    retailerOrdersTab.addEventListener("click", () => {
+      loadRetailerOrders()
+    })
+  }
+}
+
 // Initialize event listeners
 function initEventListeners() {
+  // Customer Orders Tab Event Listeners
+
   // Status filter
   const statusFilters = document.querySelectorAll(".status-filter")
   statusFilters.forEach((filter) => {
@@ -161,11 +204,11 @@ function initEventListeners() {
     }
   })
 
-  // Refresh button - Simplified implementation
+  // Refresh button
   document.querySelectorAll(".refresh-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       // Show loading spinner
-      const tableBody = document.getElementById("orders-table-body")
+      const tableBody = document.getElementById("customer-orders-table-body")
       if (tableBody) {
         tableBody.innerHTML = `
           <tr>
@@ -190,486 +233,154 @@ function initEventListeners() {
   })
 
   // Create order button
-  document.getElementById("createOrderBtn").addEventListener("click", () => {
-    resetOrderForm()
-    document.getElementById("orderModalLabel").textContent = "Create New Order"
-  })
+  const createOrderBtn = document.getElementById("createOrderBtn")
+  if (createOrderBtn) {
+    createOrderBtn.addEventListener("click", () => {
+      console.log("Create order button clicked")
 
-  // Save order button
-  document.getElementById("saveOrderBtn").addEventListener("click", () => {
-    saveOrder()
-  })
+      // Reset form
+      resetOrderForm()
 
-  // Edit order button in view modal
-  document.getElementById("editOrderBtn").addEventListener("click", () => {
-    const orderId = document.getElementById("viewOrderId").textContent
-
-    try {
-      const viewOrderModal = document.getElementById("viewOrderModal")
-      if (viewOrderModal && typeof bootstrap !== "undefined") {
-        const modal = bootstrap.Modal.getInstance(viewOrderModal)
-        if (modal) {
-          modal.hide()
-        }
+      // Set modal title
+      const modalLabel = document.getElementById("orderModalLabel")
+      if (modalLabel) {
+        modalLabel.textContent = "Create New Order"
+      } else {
+        console.error("Modal label element not found")
       }
 
-      // Find the order and populate the form
-      const order = currentOrders.find((o) => o.order_id === orderId)
-      if (order) {
-        populateOrderForm(order)
-        document.getElementById("orderModalLabel").textContent = "Edit Order"
-
-        const orderModal = document.getElementById("orderModal")
-        if (orderModal && typeof bootstrap !== "undefined") {
-          const modal = new bootstrap.Modal(orderModal)
-          modal.show()
+      // Show modal
+      const orderModal = document.getElementById("orderModal")
+      if (orderModal) {
+        try {
+          const bsModal = new bootstrap.Modal(orderModal)
+          bsModal.show()
+        } catch (error) {
+          console.error("Error showing modal:", error)
+          showAlert("danger", "Error opening order form. Please try again.")
         }
+      } else {
+        console.error("Order modal element not found")
+        showAlert("danger", "Order form not found. Please refresh the page and try again.")
       }
-    } catch (error) {
-      console.error("Error handling edit order:", error)
-      showAlert("danger", "Error opening edit form. Please try again.")
+    })
+  } else {
+    console.error("Create order button not found")
+  }
+
+  // Order form submission
+  const orderForm = document.getElementById("orderForm")
+  if (orderForm) {
+    orderForm.addEventListener("submit", (e) => {
+      e.preventDefault()
+      saveOrder()
+    })
+  }
+
+  // Add item button in order form
+  const addItemBtn = document.getElementById("addItemBtn")
+  if (addItemBtn) {
+    addItemBtn.addEventListener("click", addOrderItem)
+  }
+
+  // Retailer Orders Tab Event Listeners
+
+  // Retailer status filter
+  const retailerStatusFilters = document.querySelectorAll(".retailer-status-filter")
+  retailerStatusFilters.forEach((filter) => {
+    filter.addEventListener("click", function (e) {
+      e.preventDefault()
+      const status = this.getAttribute("data-status")
+      retailerFilters.status = status
+      document.getElementById("retailerStatusFilter").innerHTML =
+        `<i class="bi bi-funnel me-1"></i> Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`
+      loadRetailerOrders()
+    })
+  })
+
+  // Retailer search orders
+  document.getElementById("retailerSearchBtn").addEventListener("click", () => {
+    const searchTerm = document.getElementById("retailerOrderSearch").value.trim()
+    retailerFilters.search = searchTerm
+    loadRetailerOrders()
+  })
+
+  // Retailer search on Enter key
+  document.getElementById("retailerOrderSearch").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      document.getElementById("retailerSearchBtn").click()
     }
   })
 
-  // Print order button
-  document.getElementById("printOrderBtn").addEventListener("click", () => {
-    printOrder()
+  // Retailer refresh button
+  document.querySelectorAll(".refresh-retailer-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      // Show loading spinner
+      const tableBody = document.getElementById("retailer-orders-table-body")
+      if (tableBody) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Refreshing retailer orders...</p>
+            </td>
+          </tr>
+        `
+      }
+
+      // Simply reload retailer orders
+      loadRetailerOrders(true)
+    })
   })
+
+  // Export retailer orders button
+  document.getElementById("exportRetailerOrdersBtn").addEventListener("click", () => {
+    exportRetailerOrders()
+  })
+
+  // Remove the create retailer order button event listener since we're simplifying
 
   // Confirm delete button
-  document.getElementById("confirmDeleteBtn").addEventListener("click", () => {
-    const orderId = document.getElementById("deleteOrderId").textContent
-    deleteOrder(orderId)
-  })
-
-  // Add event listener to clear form when modal is closed
-  const orderModal = document.getElementById("orderModal")
-  if (orderModal) {
-    orderModal.addEventListener("hidden.bs.modal", () => {
-      resetOrderForm()
-    })
-
-    // Also add event listener to the cancel button
-    const cancelBtn = orderModal.querySelector('button[data-bs-dismiss="modal"]')
-    if (cancelBtn) {
-      cancelBtn.addEventListener("click", () => {
-        resetOrderForm()
-      })
-    }
-  }
-}
-
-// Initialize order form
-function initOrderForm() {
-  // Add item button
-  document.getElementById("addItemBtn").addEventListener("click", () => {
-    addOrderItemRow()
-  })
-
-  // Initial order item row event listeners
-  const initialRow = document.querySelector(".order-item-row")
-  if (initialRow) {
-    setupOrderItemRowListeners(initialRow)
-  }
-
-  // Order discount input
-  document.getElementById("orderDiscount").addEventListener("input", () => {
-    calculateOrderTotals()
-  })
-
-  // Add validation for customer name field
-  const customerNameInput = document.getElementById("customerName")
-  if (customerNameInput) {
-    customerNameInput.addEventListener("input", function () {
-      validateCustomerName(this)
-    })
-
-    customerNameInput.addEventListener("invalid", function () {
-      if (!this.value.trim()) {
-        this.setCustomValidity("Customer name cannot be empty or contain only spaces")
-      } else if (!/^[A-Za-z0-9\s\-',.()]+$/.test(this.value)) {
-        this.setCustomValidity("Customer name cannot contain special characters")
+  const confirmDeleteBtn = document.getElementById("confirmDeleteBtn")
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener("click", () => {
+      const orderId = document.getElementById("deleteOrderId").value
+      if (orderId) {
+        deleteRetailerOrder(orderId)
+        const deleteOrderModal = bootstrap.Modal.getInstance(document.getElementById("deleteOrderModal"))
+        if (deleteOrderModal) {
+          deleteOrderModal.hide()
+        }
       }
     })
   }
 
-  // Add validation for customer email field
-  const customerEmailInput = document.getElementById("customerEmail")
-  if (customerEmailInput) {
-    customerEmailInput.addEventListener("input", function () {
-      this.setCustomValidity("")
-    })
-  }
-
-  // Add validation for customer phone field
-  const customerPhoneInput = document.getElementById("customerPhone")
-  if (customerPhoneInput) {
-    customerPhoneInput.addEventListener("input", function () {
-      this.setCustomValidity("")
-
-      // Basic phone validation - allow numbers, +, -, and spaces
-      if (this.value.trim() && !/^[0-9+\-\s()]+$/.test(this.value)) {
-        this.setCustomValidity("Phone number can only contain numbers, +, -, spaces, and parentheses")
-      }
-    })
-  }
-
-  // Add validation for shipping address field
-  const shippingAddressInput = document.getElementById("shippingAddress")
-  if (shippingAddressInput) {
-    shippingAddressInput.addEventListener("input", function () {
-      // Check if input contains only whitespace
-      if (!this.value.trim()) {
-        this.setCustomValidity("Shipping address cannot be empty or contain only spaces")
-      }
-      // Check for special characters - only allow letters, numbers, spaces, hyphens, apostrophes, commas, periods, and parentheses
-      else if (!/^[A-Za-z0-9\s\-',.()]+$/.test(this.value)) {
-        this.setCustomValidity("Shipping address cannot contain special characters")
-      } else {
-        this.setCustomValidity("")
-      }
-    })
-
-    shippingAddressInput.addEventListener("invalid", function () {
-      if (!this.value.trim()) {
-        this.setCustomValidity("Shipping address cannot be empty or contain only spaces")
-      } else if (!/^[A-Za-z0-9\s\-',.()]+$/.test(this.value)) {
-        this.setCustomValidity("Shipping address cannot contain special characters")
-      }
-    })
-  }
+  // Load the order status handler script
+  const script = document.createElement("script")
+  script.src = "order-status-handler.js"
+  document.head.appendChild(script)
 }
 
-// Validate customer name
-function validateCustomerName(input) {
-  // Check if input contains only whitespace
-  if (!input.value.trim()) {
-    input.setCustomValidity("Customer name cannot be empty or contain only spaces")
-    return false
-  }
-
-  // Check for special characters - only allow letters, numbers, spaces, hyphens, apostrophes, commas, periods, and parentheses
-  const pattern = /^[A-Za-z0-9\s\-',.()]+$/
-  if (!pattern.test(input.value)) {
-    input.setCustomValidity("Customer name cannot contain special characters")
-    return false
-  } else {
-    input.setCustomValidity("")
-    return true
-  }
-}
-
-// Setup event listeners for order item row
-function setupOrderItemRowListeners(row) {
-  // Product select change
-  const productSelect = row.querySelector(".product-select")
-  productSelect.addEventListener("change", function () {
-    const productId = this.value
-    const product = allProducts.find((p) => p.product_id === productId)
-
-    if (product) {
-      const priceInput = row.querySelector(".item-price")
-      priceInput.value = Number.parseFloat(product.price).toFixed(2)
-
-      // Update quantity max based on stock
-      const quantityInput = row.querySelector(".item-quantity")
-      quantityInput.max = product.stocks
-
-      // Calculate row total
-      calculateRowTotal(row)
-    }
-  })
-
-  // Quantity change
-  const quantityInput = row.querySelector(".item-quantity")
-  quantityInput.addEventListener("input", () => {
-    calculateRowTotal(row)
-  })
-
-  // Remove item button
-  const removeBtn = row.querySelector(".remove-item")
-  removeBtn.addEventListener("click", () => {
-    // Don't remove if it's the only row
-    const rows = document.querySelectorAll(".order-item-row")
-    if (rows.length > 1) {
-      row.remove()
-      calculateOrderTotals()
-    } else {
-      showAlert("warning", "Order must have at least one item")
-    }
-  })
-}
-
-// Add a new order item row
-function addOrderItemRow() {
-  const orderItemsBody = document.getElementById("orderItemsBody")
-  const newRow = document.createElement("tr")
-  newRow.className = "order-item-row"
-
-  // Create row HTML
-  newRow.innerHTML = `
-        <td>
-            <select class="form-select product-select" name="products[]" required>
-                <option value="">Select Product</option>
-                ${allProducts.map((p) => `<option value="${p.product_id}">${p.product_name}</option>`).join("")}
-            </select>
-        </td>
-        <td>
-            <input type="number" class="form-control item-quantity" name="quantities[]" min="1" value="1" required>
-        </td>
-        <td>
-            <input type="number" class="form-control item-price" name="prices[]" step="0.01" min="0" value="0.00" required readonly>
-        </td>
-        <td>
-            <input type="number" class="form-control item-total" step="0.01" min="0" value="0.00" readonly>
-        </td>
-        <td>
-            <button type="button" class="btn btn-sm btn-outline-danger remove-item">
-                <i class="bi bi-trash"></i>
-            </button>
-        </td>
-    `
-
-  orderItemsBody.appendChild(newRow)
-  setupOrderItemRowListeners(newRow)
-}
-
-// Calculate row total
-function calculateRowTotal(row) {
-  const quantity = Number.parseFloat(row.querySelector(".item-quantity").value) || 0
-  const price = Number.parseFloat(row.querySelector(".item-price").value) || 0
-  const total = quantity * price
-
-  row.querySelector(".item-total").value = total.toFixed(2)
-  calculateOrderTotals()
-}
-
-// Update the calculateOrderTotals function to use percentage discount
-function calculateOrderTotals() {
-  let subtotal = 0
-
-  // Sum all item totals
-  document.querySelectorAll(".item-total").forEach((input) => {
-    subtotal += Number.parseFloat(input.value) || 0
-  })
-
-  // Calculate discount as a percentage of subtotal
-  const discountPercentage = Number.parseFloat(document.getElementById("orderDiscount").value) || 0
-  const discountAmount = (subtotal * discountPercentage) / 100
-  const total = subtotal - discountAmount
-
-  // Update summary
-  document.getElementById("orderSubtotal").textContent = `₱${subtotal.toFixed(2)}`
-  document.getElementById("orderDiscountAmount").textContent = `₱${discountAmount.toFixed(2)}`
-  document.getElementById("orderTotal").textContent = `₱${total.toFixed(2)}`
-}
-
-// Reset order form
-function resetOrderForm() {
-  const form = document.getElementById("orderForm")
-  if (form) {
-    form.reset()
-  }
-
-  document.getElementById("orderId").value = ""
-
-  // Reset order items to just one row
-  const orderItemsBody = document.getElementById("orderItemsBody")
-  if (orderItemsBody) {
-    orderItemsBody.innerHTML = ""
-
-    // Add a fresh row
-    addOrderItemRow()
-  }
-
-  // Reset totals
-  calculateOrderTotals()
-
-  // Set current date
-  const orderDateInput = document.getElementById("orderDate")
-  if (orderDateInput) {
-    try {
-      // Get today's date in YYYY-MM-DD format
-      const today = new Date().toISOString().split("T")[0]
-
-      // Set the value directly first to ensure it's visible
-      orderDateInput.value = today
-
-      if (typeof flatpickr !== "undefined") {
-        // Initialize flatpickr with today's date
-        const fp = flatpickr("#orderDate", {
-          enableTime: false,
-          dateFormat: "Y-m-d",
-          defaultDate: today,
-          clickOpens: true,
-          disableMobile: true,
-        })
-      }
-    } catch (error) {
-      console.error("Error setting date:", error)
-      // Fallback if flatpickr fails
-      orderDateInput.value = new Date().toISOString().split("T")[0]
-    }
-  }
-
-  // Clear any validation messages
-  const inputs = form.querySelectorAll("input, select, textarea")
-  inputs.forEach((input) => {
-    input.setCustomValidity("")
-  })
-}
-
-// Populate order form with order data
-function populateOrderForm(order) {
-  // Reset form first
-  resetOrderForm()
-
-  // Set basic order info
-  document.getElementById("orderId").value = order.order_id
-  document.getElementById("customerName").value = order.customer_name
-  document.getElementById("customerEmail").value = order.customer_email || ""
-  document.getElementById("customerPhone").value = order.customer_phone || ""
-
-  // Set order date
-  if (document.getElementById("orderDate") && order.order_date) {
-    try {
-      if (typeof flatpickr !== "undefined") {
-        // For existing orders, show their original date but still allow editing
-        const fp = flatpickr("#orderDate", {
-          enableTime: false,
-          dateFormat: "Y-m-d",
-          defaultDate: order.order_date,
-          // Allow the calendar to open when clicked for existing orders too
-          clickOpens: true,
-          disableMobile: true,
-        })
-
-        // Make sure the date is set
-        document.getElementById("orderDate").value = order.order_date
-      } else {
-        document.getElementById("orderDate").value = order.order_date
-      }
-    } catch (error) {
-      console.error("Error setting date:", error)
-      document.getElementById("orderDate").value = order.order_date
-    }
-  }
-
-  document.getElementById("shippingAddress").value = order.shipping_address || ""
-  document.getElementById("orderStatus").value = order.status
-  document.getElementById("paymentMethod").value = order.payment_method
-  // Update the populateOrderForm function to handle percentage discount
-  // Find this section in the populateOrderForm function and replace it:
-  document.getElementById("orderDiscount").value = Number.parseFloat(order.discount_percentage || 0).toFixed(2)
-  document.getElementById("orderNotes").value = order.notes || ""
-
-  // Clear existing items
-  const orderItemsBody = document.getElementById("orderItemsBody")
-  orderItemsBody.innerHTML = ""
-
-  // Add order items
-  if (order.items && order.items.length > 0) {
-    order.items.forEach((item) => {
-      const newRow = document.createElement("tr")
-      newRow.className = "order-item-row"
-
-      // Create the row HTML
-      newRow.innerHTML = `
-        <td>
-          <select class="form-select product-select" name="products[]" required>
-            <option value="">Select Product</option>
-            ${allProducts.map((p) => `<option value="${p.product_id}" ${p.product_id === item.product_id ? "selected" : ""}>${p.product_name}</option>`).join("")}
-          </select>
-        </td>
-        <td>
-          <input type="number" class="form-control item-quantity" name="quantities[]" min="1" value="${item.quantity}" required>
-        </td>
-        <td>
-          <input type="number" class="form-control item-price" name="prices[]" step="0.01" min="0" value="${Number.parseFloat(item.price).toFixed(2)}" required readonly>
-        </td>
-        <td>
-          <input type="number" class="form-control item-total" step="0.01" min="0" value="${(Number.parseFloat(item.price) * Number.parseInt(item.quantity)).toFixed(2)}" readonly>
-        </td>
-        <td>
-          <button type="button" class="btn btn-sm btn-outline-danger remove-item">
-            <i class="bi bi-trash"></i>
-          </button>
-        </td>
-      `
-
-      orderItemsBody.appendChild(newRow)
-      setupOrderItemRowListeners(newRow)
-
-      // Ensure the product is properly selected by setting it directly
-      const productSelect = newRow.querySelector(".product-select")
-      if (productSelect) {
-        productSelect.value = item.product_id
-
-        // Trigger change event to update price and calculations
-        const changeEvent = new Event("change", { bubbles: true })
-        productSelect.dispatchEvent(changeEvent)
-      }
-    })
-  } else {
-    // Add a fresh row if no items
-    addOrderItemRow()
-  }
-
-  // Calculate totals
-  calculateOrderTotals()
-}
-
-// Load products for order form
-function loadProducts() {
-  fetch("order_operations.php?action=get_products")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
-      return response.json()
-    })
-    .then((data) => {
-      if (data.success) {
-        allProducts = data.products
-
-        // Populate product dropdowns
-        const productSelects = document.querySelectorAll(".product-select")
-        productSelects.forEach((select) => {
-          select.innerHTML = '<option value="">Select Product</option>'
-          allProducts.forEach((product) => {
-            const option = document.createElement("option")
-            option.value = product.product_id
-            option.textContent = product.product_name
-            select.appendChild(option)
-          })
-        })
-      } else {
-        showAlert("danger", "Failed to load products: " + data.message)
-      }
-    })
-    .catch((error) => {
-      console.error("Error loading products:", error)
-      showAlert("danger", "Error loading products. Please try again.")
-    })
-}
-
-// Load orders with current filters
+// Load customer orders with current filters
 function loadOrders(showLoading = true) {
   if (showLoading) {
-    document.getElementById("orders-table-body").innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Loading orders...</p>
-                </td>
-            </tr>
-        `
+    document.getElementById("customer-orders-table-body").innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Loading orders...</p>
+        </td>
+      </tr>
+    `
   }
 
-  // Build query string directly
-  let queryString = `order_operations.php?action=get_orders&page=${currentPage}&limit=${itemsPerPage}&status=${currentFilters.status}&date_range=${currentFilters.dateRange}&exclude_tax=true`
+  // Build query string
+  let queryString = `fetch_orders.php?page=${currentPage}&limit=${itemsPerPage}&status=${currentFilters.status}&date_range=${currentFilters.dateRange}`
 
   if (currentFilters.search) {
     queryString += `&search=${encodeURIComponent(currentFilters.search)}`
@@ -678,9 +389,6 @@ function loadOrders(showLoading = true) {
   if (currentFilters.dateRange === "custom" && currentFilters.startDate && currentFilters.endDate) {
     queryString += `&start_date=${encodeURIComponent(currentFilters.startDate)}&end_date=${encodeURIComponent(currentFilters.endDate)}`
   }
-
-  // Add a filter to exclude delivered orders
-  queryString += "&exclude_delivered=true"
 
   // Fetch orders
   fetch(queryString)
@@ -707,51 +415,54 @@ function loadOrders(showLoading = true) {
         renderPagination()
 
         // Update order count text
-        document.getElementById("orderCount").textContent =
+        document.getElementById("customerOrderCount").textContent =
           `Showing ${data.orders.length} of ${data.total_count} orders`
       } else {
         showAlert("danger", "Failed to load orders: " + (data.message || "Unknown error"))
-        document.getElementById("orders-table-body").innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center py-4">
-                            <div class="text-danger">
-                                <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
-                                <p>Error loading orders. Please try again.</p>
-                            </div>
-                        </td>
-                    </tr>
-                `
+        document.getElementById("customer-orders-table-body").innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-4">
+              <div class="text-danger">
+                <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+                <p>Error loading orders. Please try again.</p>
+              </div>
+            </td>
+          </tr>
+        `
       }
     })
     .catch((error) => {
       console.error("Error loading orders:", error)
+      console.log("Current filters:", currentFilters)
+      console.log("Current page:", currentPage)
       showAlert("danger", "Error loading orders. Please try again.")
-      document.getElementById("orders-table-body").innerHTML = `
-                <tr>
-                    <td colspan="7" class="text-center py-4">
-                        <div class="text-danger">
-                            <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
-                            <p>Error loading orders. Please try again.</p>
-                        </div>
-                    </td>
-                </tr>
-            `
+      document.getElementById("customer-orders-table-body").innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center py-4">
+            <div class="text-danger">
+              <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+              <p>Error loading orders. Please try again.</p>
+              <button class="btn btn-sm btn-outline-danger mt-2" onclick="loadOrders(true)">Retry</button>
+            </div>
+          </td>
+        </tr>
+      `
     })
 }
 
-// Render orders in the table
+// Render customer orders in the table
 function renderOrders(orders) {
-  const tableBody = document.getElementById("orders-table-body")
+  const tableBody = document.getElementById("customer-orders-table-body")
 
   if (!orders || orders.length === 0) {
     tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-5">
-                    <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
-                    <p class="text-muted">No orders found</p>
-                </td>
-            </tr>
-        `
+      <tr>
+        <td colspan="7" class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+          <p class="text-muted">No orders found</p>
+        </td>
+      </tr>
+    `
     return
   }
 
@@ -773,7 +484,7 @@ function renderOrders(orders) {
         statusClass = "bg-warning text-dark"
         break
       case "processing":
-        statusClass = "bg-info text-dark"
+        statusClass = "bg-info"
         break
       case "shipped":
         statusClass = "bg-primary"
@@ -789,38 +500,38 @@ function renderOrders(orders) {
     }
 
     html += `
-            <tr>
-                <td>
-                    <span class="fw-medium">${order.order_id}</span>
-                </td>
-                <td>
-                    <div class="fw-medium">${order.customer_name}</div>
-                    <div class="small text-muted">${order.customer_email || "No email"}</div>
-                </td>
-                <td>
-                    <div>${formattedDate}</div>
-                    <div class="small text-muted">${order.order_time || ""}</div>
-                </td>
-                <td>${order.item_count} item${order.item_count !== 1 ? "s" : ""}</td>
-                <td class="fw-bold">₱${Number.parseFloat(order.total_amount).toFixed(2)}</td>
-                <td>
-                    <span class="badge ${statusClass}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
-                </td>
-                <td>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-primary view-order-btn" data-id="${order.order_id}">
-                            <i class="bi bi-eye"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary edit-order-btn" data-id="${order.order_id}">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger delete-order-btn" data-id="${order.order_id}">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `
+      <tr>
+        <td>
+          <span class="fw-medium">${order.order_id}</span>
+        </td>
+        <td>
+          <div class="fw-medium">${order.customer_name}</div>
+          <div class="small text-muted">${order.customer_email || "No email"}</div>
+        </td>
+        <td>
+          <div>${formattedDate}</div>
+          <div class="small text-muted">${order.expected_delivery ? `Expected: ${new Date(order.expected_delivery).toLocaleDateString()}` : ""}</div>
+        </td>
+        <td>${order.item_count} item${order.item_count !== 1 ? "s" : ""}</td>
+        <td class="fw-bold">₱${Number.parseFloat(order.total_amount).toFixed(2)}</td>
+        <td>
+          <span class="badge ${statusClass}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+        </td>
+        <td>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-primary view-order-btn" data-id="${order.order_id}">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary edit-order-btn" data-id="${order.order_id}">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger delete-order-btn" data-id="${order.order_id}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `
   })
 
   tableBody.innerHTML = html
@@ -893,7 +604,7 @@ function updateOrderStats(stats) {
 
 // Render pagination
 function renderPagination() {
-  const pagination = document.getElementById("ordersPagination")
+  const pagination = document.getElementById("customerOrdersPagination")
   if (!pagination) return
 
   pagination.innerHTML = ""
@@ -954,573 +665,13 @@ function renderPagination() {
   }
 }
 
-// View order details
-function viewOrder(orderId) {
-  fetch(`order_operations.php?action=get_order_details&order_id=${orderId}&exclude_tax=true`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
-      return response.json()
-    })
-    .then((data) => {
-      if (data.success) {
-        const order = data.order
-
-        // Store the complete order in currentOrders for easier editing later
-        const existingOrderIndex = currentOrders.findIndex((o) => o.order_id === order.order_id)
-        if (existingOrderIndex >= 0) {
-          // Update existing order with complete data including items
-          currentOrders[existingOrderIndex] = order
-        } else {
-          // Add to currentOrders if not already there
-          currentOrders.push(order)
-        }
-
-        // Populate view modal
-        document.getElementById("viewOrderId").textContent = order.order_id
-        document.getElementById("viewOrderDate").textContent = new Date(order.order_date).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-
-        // Status with badge
-        let statusClass = ""
-        switch (order.status) {
-          case "pending":
-            statusClass = "bg-warning text-dark"
-            break
-          case "processing":
-            statusClass = "bg-info text-dark"
-            break
-          case "shipped":
-            statusClass = "bg-primary"
-            break
-          case "delivered":
-            statusClass = "bg-success"
-            break
-          case "cancelled":
-            statusClass = "bg-danger"
-            break
-          default:
-            statusClass = "bg-secondary"
-        }
-
-        document.getElementById("viewOrderStatus").innerHTML =
-          `<span class="badge ${statusClass}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>`
-
-        // Payment method
-        document.getElementById("viewPaymentMethod").textContent = order.payment_method
-          .replace("_", " ")
-          .replace(/\b\w/g, (l) => l.toUpperCase())
-
-        // Customer info
-        document.getElementById("viewCustomerName").textContent = order.customer_name
-        document.getElementById("viewCustomerEmail").textContent = order.customer_email || "N/A"
-        document.getElementById("viewCustomerPhone").textContent = order.customer_phone || "N/A"
-        document.getElementById("viewShippingAddress").textContent = order.shipping_address || "N/A"
-
-        // Order items
-        const itemsContainer = document.getElementById("viewOrderItems")
-        itemsContainer.innerHTML = ""
-
-        if (order.items && order.items.length > 0) {
-          order.items.forEach((item) => {
-            const row = document.createElement("tr")
-            const itemTotal = Number.parseFloat(item.price) * Number.parseInt(item.quantity)
-
-            row.innerHTML = `
-                            <td>${item.product_name}</td>
-                            <td>${item.quantity}</td>
-                            <td>₱${Number.parseFloat(item.price).toFixed(2)}</td>
-                            <td class="text-end">₱${itemTotal.toFixed(2)}</td>
-                        `
-
-            itemsContainer.appendChild(row)
-          })
-        } else {
-          itemsContainer.innerHTML = `
-                        <tr>
-                            <td colspan="4" class="text-center">No items found</td>
-                        </tr>
-                    `
-        }
-
-        // Order totals
-        document.getElementById("viewOrderSubtotal").textContent = `₱${Number.parseFloat(order.subtotal).toFixed(2)}`
-        document.getElementById("viewOrderDiscount").textContent = `₱${Number.parseFloat(order.discount).toFixed(2)}`
-        document.getElementById("viewOrderTotal").textContent = `₱${Number.parseFloat(order.total_amount).toFixed(2)}`
-
-        // Notes
-        document.getElementById("viewOrderNotes").textContent = order.notes || "No notes available."
-
-        // Order timeline
-        renderOrderTimeline(order)
-
-        // Show modal
-        try {
-          if (typeof bootstrap !== "undefined") {
-            const viewOrderModal = new bootstrap.Modal(document.getElementById("viewOrderModal"))
-            viewOrderModal.show()
-          } else {
-            console.warn("Bootstrap is not defined. Modal may not work properly.")
-          }
-        } catch (error) {
-          console.error("Error showing modal:", error)
-        }
-      } else {
-        showAlert("danger", "Failed to load order details: " + (data.message || "Unknown error"))
-      }
-    })
-    .catch((error) => {
-      console.error("Error loading order details:", error)
-      showAlert("danger", "Error loading order details. Please try again.")
-    })
-}
-
-// Render order timeline
-function renderOrderTimeline(order) {
-  const timelineContainer = document.getElementById("orderTimeline")
-  if (!timelineContainer) return
-
-  timelineContainer.innerHTML = ""
-
-  // Create timeline based on status
-  const statuses = ["pending", "processing", "shipped", "delivered"]
-  const statusLabels = {
-    pending: "Order Placed",
-    processing: "Processing",
-    shipped: "Shipped",
-    cancelled: "Cancelled",
-    delivered: "Delivered",
-  }
-
-  // If order is cancelled, show different timeline
-  if (order.status === "cancelled") {
-    const cancelledItem = document.createElement("div")
-    cancelledItem.className = "timeline-item active"
-    cancelledItem.innerHTML = `
-            <div class="timeline-icon">
-                <i class="bi bi-x-circle"></i>
-            </div>
-            <div class="timeline-content">
-                <div class="fw-medium">Order Cancelled</div>
-                <div class="small text-muted">${new Date(order.updated_at || order.order_date).toLocaleString()}</div>
-            </div>
-        `
-    timelineContainer.appendChild(cancelledItem)
-
-    const placedItem = document.createElement("div")
-    placedItem.className = "timeline-item completed"
-    placedItem.innerHTML = `
-            <div class="timeline-icon">
-                <i class="bi bi-check-circle"></i>
-            </div>
-            <div class="timeline-content">
-                <div class="fw-medium">Order Placed</div>
-                <div class="small text-muted">${new Date(order.order_date).toLocaleString()}</div>
-            </div>
-        `
-    timelineContainer.appendChild(placedItem)
-
-    return
-  }
-
-  // Regular order timeline
-  const currentStatusIndex = statuses.indexOf(order.status)
-
-  statuses.forEach((status, index) => {
-    const timelineItem = document.createElement("div")
-
-    // Determine if this status is completed, active, or upcoming
-    let itemClass = "timeline-item"
-    let iconClass = "bi bi-circle"
-
-    if (index < currentStatusIndex) {
-      itemClass += " completed"
-      iconClass = "bi bi-check-circle"
-    } else if (index === currentStatusIndex) {
-      itemClass += " active"
-      iconClass = "bi bi-circle-fill"
-    }
-
-    timelineItem.className = itemClass
-    timelineItem.innerHTML = `
-            <div class="timeline-icon">
-                <i class="${iconClass}"></i>
-            </div>
-            <div class="timeline-content">
-                <div class="fw-medium">${statusLabels[status]}</div>
-                <div class="small text-muted">
-                    ${index <= currentStatusIndex ? new Date(order.status_updates?.[status]?.date || order.order_date).toLocaleString() : "Pending"}
-                </div>
-            </div>
-        `
-
-    timelineContainer.appendChild(timelineItem)
-  })
-}
-
-// Enhance the editOrder function to ensure we get complete order data when editing
-
-// Replace the existing editOrder function with this improved version:
-
-// Edit order
-function editOrder(orderId) {
-  // Show loading in the modal
-  document.getElementById("orderModalLabel").textContent = "Edit Order"
-  resetOrderForm()
-
-  // First check if we already have the order in our current list
-  const order = currentOrders.find((o) => o.order_id === orderId)
-
-  if (order && order.items) {
-    // If we have the complete order with items, use it directly
-    populateOrderForm(order)
-
-    try {
-      if (typeof bootstrap !== "undefined") {
-        const orderModal = new bootstrap.Modal(document.getElementById("orderModal"))
-        orderModal.show()
-      } else {
-        console.warn("Bootstrap is not defined. Modal may not work properly.")
-      }
-    } catch (error) {
-      console.error("Error showing modal:", error)
-    }
-  } else {
-    // If order not in current list or doesn't have items, fetch it
-    // Show loading indicator in the form
-    const orderItemsBody = document.getElementById("orderItemsBody")
-    if (orderItemsBody) {
-      orderItemsBody.innerHTML = `
-        <tr>
-          <td colspan="5" class="text-center py-3">
-            <div class="spinner-border spinner-border-sm text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <span class="ms-2">Loading order details...</span>
-          </td>
-        </tr>
-      `
-    }
-
-    // Show the modal while loading
-    try {
-      if (typeof bootstrap !== "undefined") {
-        const orderModal = new bootstrap.Modal(document.getElementById("orderModal"))
-        orderModal.show()
-      }
-    } catch (error) {
-      console.error("Error showing modal:", error)
-    }
-
-    // Fetch complete order details
-    fetch(`order_operations.php?action=get_order_details&order_id=${orderId}&exclude_tax=true`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`)
-        }
-        return response.json()
-      })
-      .then((data) => {
-        if (data.success) {
-          // Populate the form with the fetched order data
-          populateOrderForm(data.order)
-        } else {
-          showAlert("danger", "Failed to load order details: " + (data.message || "Unknown error"))
-          // Reset the form if there was an error
-          resetOrderForm()
-        }
-      })
-      .catch((error) => {
-        console.error("Error loading order details:", error)
-        showAlert("danger", "Error loading order details. Please try again.")
-        // Reset the form if there was an error
-        resetOrderForm()
-      })
-  }
-}
-
-// Confirm delete order
-function confirmDeleteOrder(orderId) {
-  document.getElementById("deleteOrderId").textContent = orderId
-  try {
-    if (typeof bootstrap !== "undefined") {
-      const deleteModal = new bootstrap.Modal(document.getElementById("deleteOrderModal"))
-      deleteModal.show()
-    } else {
-      console.warn("Bootstrap is not defined. Modal may not work properly.")
-    }
-  } catch (error) {
-    console.error("Error showing modal:", error)
-  }
-}
-
-// Delete order
-function deleteOrder(orderId) {
-  fetch("order_operations.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: `action=delete_order&order_id=${orderId}`,
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
-      return response.json()
-    })
-    .then((data) => {
-      if (data.success) {
-        showAlert("success", "Order deleted successfully")
-
-        // Close modal
-        try {
-          if (typeof bootstrap !== "undefined") {
-            const deleteModal = bootstrap.Modal.getInstance(document.getElementById("deleteOrderModal"))
-            if (deleteModal) {
-              deleteModal.hide()
-            }
-          }
-        } catch (error) {
-          console.error("Error hiding modal:", error)
-        }
-
-        // Reload orders
-        loadOrders()
-      } else {
-        showAlert("danger", "Failed to delete order: " + (data.message || "Unknown error"))
-      }
-    })
-    .catch((error) => {
-      console.error("Error deleting order:", error)
-      showAlert("danger", "Error deleting order. Please try again.")
-    })
-}
-
-// Save order (create or update)
-function saveOrder() {
-  // Validate form
-  const form = document.getElementById("orderForm")
-  if (!form.checkValidity()) {
-    form.reportValidity()
-    return
-  }
-
-  // Get form data
-  const formData = new FormData(form)
-  const orderId = document.getElementById("orderId").value
-
-  // Add action
-  formData.append("action", orderId ? "update_order" : "create_order")
-
-  // Send request
-  fetch("order_operations.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
-      return response.json()
-    })
-    .then((data) => {
-      if (data.success) {
-        showAlert("success", orderId ? "Order updated successfully" : "Order created successfully")
-
-        // Close modal
-        try {
-          if (typeof bootstrap !== "undefined") {
-            const orderModal = bootstrap.Modal.getInstance(document.getElementById("orderModal"))
-            if (orderModal) {
-              orderModal.hide()
-            }
-          }
-        } catch (error) {
-          console.error("Error hiding modal:", error)
-        }
-
-        // Reload orders
-        loadOrders()
-      } else {
-        showAlert("danger", "Failed to save order: " + (data.message || "Unknown error"))
-      }
-    })
-    .catch((error) => {
-      console.error("Error saving order:", error)
-      showAlert("danger", "Error saving order. Please try again.")
-    })
-}
-
-// Print order
-function printOrder() {
-  const printWindow = window.open("", "_blank")
-  const orderId = document.getElementById("viewOrderId").textContent
-  const orderDate = document.getElementById("viewOrderDate").textContent
-  const customerName = document.getElementById("viewCustomerName").textContent
-  const orderStatus = document
-    .getElementById("viewOrderStatus")
-    .textContent.replace(/<[^>]*>/g, "")
-    .trim()
-  const orderItems = document.getElementById("viewOrderItems").innerHTML
-  const subtotal = document.getElementById("viewOrderSubtotal").textContent
-  const discount = document.getElementById("viewOrderDiscount").textContent
-  const total = document.getElementById("viewOrderTotal").textContent
-
-  printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Order #${orderId} - Piñana Gourmet</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 0;
-                    padding: 20px;
-                    color: #333;
-                }
-                .header {
-                    text-align: center;
-                    margin-bottom: 20px;
-                    padding-bottom: 10px;
-                    border-bottom: 1px solid #ddd;
-                }
-                .logo {
-                    max-width: 150px;
-                    margin-bottom: 10px;
-                }
-                .order-info {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 20px;
-                }
-                .order-info div {
-                    flex: 1;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 20px;
-                }
-                th, td {
-                    padding: 10px;
-                    text-align: left;
-                    border-bottom: 1px solid #ddd;
-                }
-                th {
-                    background-color: #f5f5f5;
-                }
-                .text-end {
-                    text-align: right;
-                }
-                .totals {
-                    width: 300px;
-                    margin-left: auto;
-                }
-                .totals div {
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 5px 0;
-                }
-                .totals .total {
-                    font-weight: bold;
-                    border-top: 1px solid #ddd;
-                    padding-top: 10px;
-                    margin-top: 5px;
-                }
-                .footer {
-                    margin-top: 40px;
-                    text-align: center;
-                    font-size: 12px;
-                    color: #777;
-                }
-                @media print {
-                    body {
-                        print-color-adjust: exact;
-                        -webkit-print-color-adjust: exact;
-                    }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <img src="images/final-dark.png" alt="Piñana Gourmet" class="logo">
-                <h2>Order Receipt</h2>
-            </div>
-            
-            <div class="order-info">
-                <div>
-                    <p><strong>Order ID:</strong> ${orderId}</p>
-                    <p><strong>Date:</strong> ${orderDate}</p>
-                    <p><strong>Status:</strong> ${orderStatus}</p>
-                </div>
-                <div>
-                    <p><strong>Customer:</strong> ${customerName}</p>
-                    <p><strong>Shipping Address:</strong> ${document.getElementById("viewShippingAddress").textContent}</p>
-                </div>
-            </div>
-            
-            <h3>Order Items</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th class="text-end">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${orderItems}
-                </tbody>
-            </table>
-            
-            <div class="totals">
-                <div>
-                    <span>Subtotal:</span>
-                    <span>${subtotal}</span>
-                </div>
-                <div>
-                    <span>Discount:</span>
-                    <span>${discount}</span>
-                </div>
-                <div class="total">
-                    <span>Total:</span>
-                    <span>${total}</span>
-                </div>
-            </div>
-            
-            <div class="footer">
-                <p>Thank you for your order!</p>
-                <p>Piñana Gourmet - Premium Pineapple Products</p>
-            </div>
-            
-            <script>
-                window.onload = function() {
-                    window.print();
-                    setTimeout(function() {
-                        window.close();
-                    }, 500);
-                };
-            </script>
-        </body>
-        </html>
-    `)
-
-  printWindow.document.close()
-}
-
 // Export orders to CSV
 function exportOrders() {
   // Show a loading indicator
   showAlert("info", "Preparing export file...")
 
   // Apply current filters
-  let queryString = `order_operations.php?action=export_orders&status=${currentFilters.status}&date_range=${currentFilters.dateRange}&export=csv&exclude_tax=true`
+  let queryString = `export_orders.php?status=${currentFilters.status}&date_range=${currentFilters.dateRange}`
 
   if (currentFilters.search) {
     queryString += `&search=${encodeURIComponent(currentFilters.search)}`
@@ -1537,7 +688,7 @@ function exportOrders() {
   // Create download link with a more descriptive filename
   const downloadLink = document.createElement("a")
   downloadLink.href = queryString
-  downloadLink.download = `pinana_gourmet_orders_${dateString}.csv`
+  downloadLink.download = `orders_${dateString}.csv`
   document.body.appendChild(downloadLink)
   downloadLink.click()
   document.body.removeChild(downloadLink)
@@ -1548,98 +699,1976 @@ function exportOrders() {
   }, 1000)
 }
 
-// Show alert message
-function showAlert(type, message) {
-  // Create alert element
-  const alertDiv = document.createElement("div")
-  alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`
-  alertDiv.setAttribute("role", "alert")
-  alertDiv.style.zIndex = "9999"
-  alertDiv.style.maxWidth = "350px"
-  alertDiv.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)"
-
-  // Alert content
-  alertDiv.innerHTML = `
-        <div class="d-flex align-items-center">
-            <i class="bi ${getAlertIcon(type)} me-2"></i>
-            <div>${message}</div>
+// View order details
+function viewOrder(orderId) {
+  // Show loading in modal
+  const viewOrderModalBody = document.querySelector("#viewOrderModal .modal-body")
+  if (viewOrderModalBody) {
+    viewOrderModalBody.innerHTML = `
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <p class="mt-3">Loading order details...</p>
+      </div>
     `
+  }
 
-  // Add to document
-  document.body.appendChild(alertDiv)
+  // Show modal
+  const viewOrderModal = new bootstrap.Modal(document.getElementById("viewOrderModal"))
+  viewOrderModal.show()
 
-  // Auto-dismiss after 3 seconds
-  setTimeout(() => {
-    try {
-      if (typeof bootstrap !== "undefined") {
-        const bsAlert = new bootstrap.Alert(alertDiv)
-        bsAlert.close()
-      } else {
-        alertDiv.remove()
+  // Fetch order details
+  fetch(`get_order_details.php?order_id=${orderId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
       }
-    } catch (error) {
-      console.error("Error closing alert:", error)
-      alertDiv.remove()
-    }
-  }, 3000)
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        renderOrderDetails(data.order, data.items)
+      } else {
+        viewOrderModalBody.innerHTML = `
+          <div class="text-center py-5">
+            <div class="text-danger">
+              <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+              <p>Error loading order details. Please try again.</p>
+            </div>
+          </div>
+        `
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading order details:", error)
+      viewOrderModalBody.innerHTML = `
+        <div class="text-center py-5">
+          <div class="text-danger">
+            <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+            <p>Error loading order details. Please try again.</p>
+          </div>
+        </div>
+      `
+    })
 }
 
-// Get alert icon based on type
-function getAlertIcon(type) {
-  switch (type) {
-    case "success":
-      return "bi-check-circle-fill text-success"
-    case "danger":
-      return "bi-exclamation-circle-fill text-danger"
-    case "warning":
-      return "bi-exclamation-triangle-fill text-warning"
-    case "info":
-      return "bi-info-circle-fill text-info"
+// Render order details in the view modal
+function renderOrderDetails(order, items) {
+  const viewOrderModalBody = document.querySelector("#viewOrderModal .modal-body")
+  if (!viewOrderModalBody) return
+
+  // Format date
+  const orderDate = new Date(order.order_date)
+  const formattedDate = orderDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+
+  // Status badge class
+  let statusClass = ""
+  switch (order.status) {
+    case "pending":
+      statusClass = "bg-warning text-dark"
+      break
+    case "processing":
+      statusClass = "bg-info"
+      break
+    case "shipped":
+      statusClass = "bg-primary"
+      break
+    case "delivered":
+      statusClass = "bg-success"
+      break
+    case "cancelled":
+      statusClass = "bg-danger"
+      break
     default:
-      return "bi-bell-fill"
+      statusClass = "bg-secondary"
   }
+
+  // Build items table
+  let itemsHtml = ""
+  items.forEach((item, index) => {
+    itemsHtml += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>
+          <div class="fw-medium">${item.product_name}</div>
+          <div class="small text-muted">${item.product_sku || "No SKU"}</div>
+        </td>
+        <td>${item.quantity}</td>
+        <td>₱${Number.parseFloat(item.unit_price).toFixed(2)}</td>
+        <td>₱${Number.parseFloat(item.subtotal).toFixed(2)}</td>
+      </tr>
+    `
+  })
+
+  // Set modal title
+  document.getElementById("viewOrderModalLabel").textContent = `Order #${order.order_id}`
+
+  // Build modal content
+  viewOrderModalBody.innerHTML = `
+    <div class="order-details">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <h6 class="text-muted mb-2">Order Information</h6>
+          <div class="card">
+            <div class="card-body">
+              <div class="mb-3">
+                <div class="small text-muted">Order ID</div>
+                <div>${order.order_id}</div>
+              </div>
+              <div class="mb-3">
+                <div class="small text-muted">Order Date</div>
+                <div>${formattedDate}</div>
+              </div>
+              <div class="mb-3">
+                <div class="small text-muted">Status</div>
+                <div><span class="badge ${statusClass}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span></div>
+              </div>
+              <div>
+                <div class="small text-muted">Payment Method</div>
+                <div>${order.payment_method || "Not specified"}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <h6 class="text-muted mb-2">Customer Information</h6>
+          <div class="card">
+            <div class="card-body">
+              <div class="mb-3">
+                <div class="small text-muted">Customer Name</div>
+                <div>${order.customer_name}</div>
+              </div>
+              <div class="mb-3">
+                <div class="small text-muted">Email</div>
+                <div>${order.customer_email || "Not provided"}</div>
+              </div>
+              <div class="mb-3">
+                <div class="small text-muted">Phone</div>
+                <div>${order.customer_phone || "Not provided"}</div>
+              </div>
+              <div>
+                <div class="small text-muted">Address</div>
+                <div>${order.shipping_address || "Not provided"}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h6 class="text-muted mb-2">Order Items</h6>
+      <div class="card mb-4">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Unit Price</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <h6 class="text-muted mb-2">Notes</h6>
+          <div class="card">
+            <div class="card-body">
+              <p class="mb-0">${order.notes || "No notes for this order."}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <h6 class="text-muted mb-2">Order Summary</h6>
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Subtotal:</span>
+                <span>₱${Number.parseFloat(order.subtotal).toFixed(2)}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Tax:</span>
+                <span>₱${Number.parseFloat(order.tax).toFixed(2)}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Shipping:</span>
+                <span>₱${Number.parseFloat(order.shipping_fee).toFixed(2)}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Discount:</span>
+                <span>-₱${Number.parseFloat(order.discount).toFixed(2)}</span>
+              </div>
+              <hr>
+              <div class="d-flex justify-content-between fw-bold">
+                <span>Total:</span>
+                <span>₱${Number.parseFloat(order.total_amount).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+}
+
+// Edit order
+function editOrder(orderId) {
+  // Reset form
+  resetOrderForm()
+
+  // Set modal title
+  document.getElementById("orderModalLabel").textContent = "Edit Order"
+
+  // Show loading in form
+  const orderFormContent = document.getElementById("orderFormContent")
+  if (orderFormContent) {
+    orderFormContent.innerHTML = `
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Loading order data...</p>
+      </div>
+    `
+  }
+
+  // Show modal
+  const orderModal = new bootstrap.Modal(document.getElementById("orderModal"))
+  orderModal.show()
+
+  // Fetch order details
+  fetch(`get_order_details.php?order_id=${orderId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        // Populate form with order data
+        populateOrderForm(data.order, data.items)
+      } else {
+        orderFormContent.innerHTML = `
+          <div class="text-center py-5">
+            <div class="text-danger">
+              <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+              <p>Error loading order data. Please try again.</p>
+            </div>
+          </div>
+        `
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading order data:", error)
+      orderFormContent.innerHTML = `
+        <div class="text-center py-5">
+          <div class="text-danger">
+            <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+            <p>Error loading order data. Please try again.</p>
+          </div>
+        </div>
+      `
+    })
+}
+
+// Populate order form with data
+function populateOrderForm(order, items) {
+  // Reset form content
+  resetOrderForm()
+
+  // Set order ID in hidden field
+  document.getElementById("orderId").value = order.order_id
+
+  // Customer information
+  document.getElementById("customerName").value = order.customer_name
+  document.getElementById("customerEmail").value = order.customer_email || ""
+  document.getElementById("customerPhone").value = order.customer_phone || ""
+  document.getElementById("shippingAddress").value = order.shipping_address || ""
+
+  // Order information
+  document.getElementById("orderDate").value = order.order_date.split(" ")[0] // Get just the date part
+  document.getElementById("orderStatus").value = order.status
+  document.getElementById("paymentMethod").value = order.payment_method || ""
+  document.getElementById("orderNotes").value = order.notes || ""
+
+  // Order items
+  const itemsContainer = document.getElementById("orderItems")
+  itemsContainer.innerHTML = "" // Clear existing items
+
+  items.forEach((item, index) => {
+    addOrderItemRow(item, index)
+  })
+
+  // Calculate totals
+  calculateOrderTotals()
+}
+
+// Add order item row to form
+function addOrderItemRow(item = null, index = null) {
+  const itemsContainer = document.getElementById("orderItems")
+  const rowIndex = index !== null ? index : itemsContainer.children.length
+
+  const row = document.createElement("div")
+  row.className = "order-item-row mb-3 p-3 border rounded"
+  row.dataset.index = rowIndex
+
+  row.innerHTML = `
+    <div class="row g-2">
+      <div class="col-md-5">
+        <label class="form-label small">Product</label>
+        <select class="form-select product-select" name="items[${rowIndex}][product_id]" required>
+          <option value="">Select Product</option>
+          <!-- Products will be loaded dynamically -->
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Quantity</label>
+        <input type="number" class="form-control item-quantity" name="items[${rowIndex}][quantity]" min="1" value="${item ? item.quantity : 1}" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Unit Price</label>
+        <input type="number" class="form-control item-price" name="items[${rowIndex}][unit_price]" step="0.01" min="0" value="${item ? item.unit_price : 0}" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Subtotal</label>
+        <input type="text" class="form-control item-subtotal" value="${item ? Number.parseFloat(item.subtotal).toFixed(2) : "0.00"}" readonly>
+      </div>
+      <div class="col-md-1 d-flex align-items-end">
+        <button type="button" class="btn btn-outline-danger remove-item-btn" data-index="${rowIndex}">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+  `
+
+  itemsContainer.appendChild(row)
+
+  // Load products for the select dropdown
+  loadProductsForSelect(row.querySelector(".product-select"), item ? item.product_id : null)
+
+  // Add event listeners for calculations
+  const quantityInput = row.querySelector(".item-quantity")
+  const priceInput = row.querySelector(".item-price")
+
+  quantityInput.addEventListener("input", () => {
+    updateItemSubtotal(row)
+    calculateOrderTotals()
+  })
+
+  priceInput.addEventListener("input", () => {
+    updateItemSubtotal(row)
+    calculateOrderTotals()
+  })
+
+  // Add event listener for remove button
+  const removeBtn = row.querySelector(".remove-item-btn")
+  removeBtn.addEventListener("click", () => {
+    row.remove()
+    calculateOrderTotals()
+  })
+}
+
+// Update item subtotal
+function updateItemSubtotal(row) {
+  const quantity = Number.parseFloat(row.querySelector(".item-quantity").value) || 0
+  const price = Number.parseFloat(row.querySelector(".item-price").value) || 0
+  const subtotal = quantity * price
+
+  row.querySelector(".item-subtotal").value = subtotal.toFixed(2)
+}
+
+// Calculate order totals
+function calculateOrderTotals() {
+  const itemRows = document.querySelectorAll(".order-item-row")
+  let subtotal = 0
+
+  itemRows.forEach((row) => {
+    subtotal += Number.parseFloat(row.querySelector(".item-subtotal").value) || 0
+  })
+
+  // Get tax rate and shipping fee
+  const taxRate = Number.parseFloat(document.getElementById("taxRate").value) || 0
+  const shippingFee = Number.parseFloat(document.getElementById("shippingFee").value) || 0
+  const discount = Number.parseFloat(document.getElementById("discount").value) || 0
+
+  // Calculate tax amount
+  const taxAmount = subtotal * (taxRate / 100)
+
+  // Calculate total
+  const total = subtotal + taxAmount + shippingFee - discount
+
+  // Update form fields
+  document.getElementById("subtotal").value = subtotal.toFixed(2)
+  document.getElementById("taxAmount").value = taxAmount.toFixed(2)
+  document.getElementById("total").value = total.toFixed(2)
+}
+
+// Load products for select dropdown
+function loadProductsForSelect(selectElement, selectedProductId = null) {
+  // Fetch products from server
+  fetch("get_products.php")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        // Clear existing options except the first one
+        selectElement.innerHTML = '<option value="">Select Product</option>'
+
+        // Add product options
+        data.products.forEach((product) => {
+          const option = document.createElement("option")
+          option.value = product.product_id
+          option.textContent = `${product.product_name} (₱${Number.parseFloat(product.price).toFixed(2)})`
+          option.dataset.price = product.price
+
+          if (selectedProductId && product.product_id == selectedProductId) {
+            option.selected = true
+          }
+
+          selectElement.appendChild(option)
+        })
+
+        // Add change event listener
+        selectElement.addEventListener("change", function () {
+          const selectedOption = this.options[this.selectedIndex]
+          const price = selectedOption.dataset.price || 0
+
+          // Update price field
+          const row = this.closest(".order-item-row")
+          row.querySelector(".item-price").value = price
+
+          // Update subtotal
+          updateItemSubtotal(row)
+          calculateOrderTotals()
+        })
+      } else {
+        console.error("Failed to load products:", data.message)
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading products:", error)
+    })
+}
+
+// Add new order item
+function addOrderItem() {
+  addOrderItemRow()
 }
 
 // Reset order form
-function resetOrderFormLocal() {
-  const form = document.getElementById("orderForm")
-  if (form) {
-    form.reset()
-  }
+function resetOrderForm() {
+  const orderForm = document.getElementById("orderForm")
+  if (orderForm) {
+    orderForm.reset()
 
-  // Clear order items
-  const orderItemsBody = document.getElementById("orderItemsBody")
-  if (orderItemsBody) {
-    orderItemsBody.innerHTML = ""
-  }
+    // Clear order ID
+    document.getElementById("orderId").value = ""
 
-  // Clear order ID
-  document.getElementById("orderId").value = ""
+    // Set default date to today
+    const today = new Date().toISOString().split("T")[0]
+    document.getElementById("orderDate").value = today
 
-  // Hide delete button
-  const deleteButton = document.getElementById("deleteOrderButton")
-  if (deleteButton) {
-    deleteButton.style.display = "none"
+    // Clear order items
+    document.getElementById("orderItems").innerHTML = ""
+
+    // Add one empty item row
+    addOrderItemRow()
+
+    // Reset totals
+    document.getElementById("subtotal").value = "0.00"
+    document.getElementById("taxAmount").value = "0.00"
+    document.getElementById("total").value = "0.00"
+
+    // Reset form content
+    const orderFormContent = document.getElementById("orderFormContent")
+    if (orderFormContent) {
+      orderFormContent.innerHTML = `
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <h6 class="mb-3">Customer Information</h6>
+            <div class="mb-3">
+              <label for="customerName" class="form-label">Customer Name</label>
+              <input type="text" class="form-control" id="customerName" name="customer_name" required>
+            </div>
+            <div class="mb-3">
+              <label for="customerEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="customerEmail" name="customer_email">
+            </div>
+            <div class="mb-3">
+              <label for="customerPhone" class="form-label">Phone</label>
+              <input type="text" class="form-control" id="customerPhone" name="customer_phone">
+            </div>
+            <div class="mb-3">
+              <label for="shippingAddress" class="form-label">Shipping Address</label>
+              <textarea class="form-control" id="shippingAddress" name="shipping_address" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="mb-3">Order Information</h6>
+            <div class="mb-3">
+              <label for="orderDate" class="form-label">Order Date</label>
+              <input type="date" class="form-control" id="orderDate" name="order_date" required>
+            </div>
+            <div class="mb-3">
+              <label for="orderStatus" class="form-label">Status</label>
+              <select class="form-select" id="orderStatus" name="status" required>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="paymentMethod" class="form-label">Payment Method</label>
+              <select class="form-select" id="paymentMethod" name="payment_method">
+                <option value="cash">Cash</option>
+                <option value="credit_card">Credit Card</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="gcash">GCash</option>
+                <option value="maya">Maya</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="orderNotes" class="form-label">Notes</label>
+              <textarea class="form-control" id="orderNotes" name="notes" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <h6 class="mb-3">Order Items</h6>
+        <div id="orderItems" class="mb-3">
+          <!-- Order items will be added here -->
+        </div>
+        
+        <div class="text-end mb-3">
+          <button type="button" class="btn btn-outline-primary" id="addItemBtn">
+            <i class="bi bi-plus-circle me-1"></i> Add Item
+          </button>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <!-- Empty column for spacing -->
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="card-title">Order Summary</h6>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="subtotal" class="col-form-label">Subtotal:</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="text" class="form-control text-end" id="subtotal" name="subtotal" value="0.00" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="taxRate" class="col-form-label">Tax Rate (%):</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <input type="number" class="form-control text-end" id="taxRate" name="tax_rate" value="12" min="0" step="0.01">
+                        <span class="input-group-text">%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="taxAmount" class="col-form-label">Tax Amount:</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="text" class="form-control text-end" id="taxAmount" name="tax" value="0.00" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="shippingFee" class="col-form-label">Shipping Fee:</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="number" class="form-control text-end" id="shippingFee" name="shipping_fee" value="0" min="0" step="0.01">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="discount" class="col-form-label">Discount:</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="number" class="form-control text-end" id="discount" name="discount" value="0" min="0" step="0.01">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <hr>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="total" class="col-form-label fw-bold">Total:</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="text" class="form-control text-end fw-bold" id="total" name="total_amount" value="0.00" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+
+      // Re-add event listeners
+      const addItemBtn = document.getElementById("addItemBtn")
+      if (addItemBtn) {
+        addItemBtn.addEventListener("click", addOrderItem)
+      }
+
+      // Add event listeners for tax rate, shipping fee, and discount
+      const taxRateInput = document.getElementById("taxRate")
+      const shippingFeeInput = document.getElementById("shippingFee")
+      const discountInput = document.getElementById("discount")
+
+      if (taxRateInput) {
+        taxRateInput.addEventListener("input", calculateOrderTotals)
+      }
+      if (shippingFeeInput) {
+        shippingFeeInput.addEventListener("input", calculateOrderTotals)
+      }
+      if (discountInput) {
+        discountInput.addEventListener("input", calculateOrderTotals)
+      }
+    }
   }
 }
 
-// Update the viewOrder function to display discount percentage
-// Find the section where order totals are set in the viewOrder function and add:
-document.getElementById("viewOrderDiscountPercentage").textContent =
-  `${Number.parseFloat(order.discount_percentage || 0).toFixed(2)}%`
+// Save order
+function saveOrder() {
+  // Show loading indicator
+  const saveBtn = document.querySelector("#orderForm button[type='submit']")
+  const originalBtnText = saveBtn.innerHTML
+  saveBtn.disabled = true
+  saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...`
 
-// Update the printOrder function to include discount percentage
-// Find the section in printOrder function where totals are added to the print template and add:
-const discountPercentage = document.getElementById("viewOrderDiscountPercentage").textContent
+  // Get form data
+  const formData = new FormData(document.getElementById("orderForm"))
 
-// Then in the HTML template section of printOrder, add this line before the discount amount:
-//div>
-//spanDiscount Rate:/span
-//span$
-//{
-//discountPercentage
-//}
-//span/span
-//div
+  // Send to server
+  fetch("save_order.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        // Close modal
+        const orderModalElement = document.getElementById("orderModal")
+        if (orderModalElement) {
+          const orderModal = bootstrap.Modal.getInstance(orderModalElement)
+          if (orderModal) {
+            orderModal.hide()
+          } else {
+            console.warn("Order modal instance not found.")
+          }
+        } else {
+          console.warn("Order modal element not found.")
+        }
+
+        // Show success message
+        showAlert("success", data.message || "Order saved successfully")
+
+        // Reload orders
+        loadOrders()
+      } else {
+        // Show error message
+        showAlert("danger", data.message || "Failed to save order")
+
+        // Reset button
+        saveBtn.disabled = false
+        saveBtn.innerHTML = originalBtnText
+      }
+    })
+    .catch((error) => {
+      console.error("Error saving order:", error)
+      showAlert("danger", "Error saving order. Please try again.")
+
+      // Reset button
+      saveBtn.disabled = false
+      saveBtn.innerHTML = originalBtnText
+    })
+}
+
+// Confirm delete order
+function confirmDeleteOrder(orderId) {
+  // Set order ID in hidden field
+  document.getElementById("deleteOrderId").value = orderId
+
+  // Show confirmation modal
+  const deleteOrderModal = new bootstrap.Modal(document.getElementById("deleteOrderModal"))
+  deleteOrderModal.show()
+
+  // Add event listener to delete button
+  document.getElementById("confirmDeleteBtn").onclick = () => {
+    deleteOrder(orderId)
+    deleteOrderModal.hide()
+  }
+}
+
+// Delete order
+function deleteOrder(orderId) {
+  // Show loading indicator
+  showAlert("info", "Deleting order...")
+
+  // Send delete request
+  fetch(`delete_order.php?order_id=${orderId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        // Show success message
+        showAlert("success", data.message || "Order deleted successfully")
+
+        // Reload orders
+        loadOrders()
+      } else {
+        // Show error message
+        showAlert("danger", data.message || "Failed to delete order")
+      }
+    })
+    .catch((error) => {
+      console.error("Error deleting order:", error)
+      showAlert("danger", "Error deleting order. Please try again.")
+    })
+}
+
+// Load retailer orders with current filters
+function loadRetailerOrders(showLoading = true) {
+  if (showLoading) {
+    document.getElementById("retailer-orders-table-body").innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Loading retailer orders...</p>
+        </td>
+      </tr>
+    `
+  }
+
+  // Build query string
+  let queryString = `fetch_retailer_orders.php?page=${retailerCurrentPage}&limit=${itemsPerPage}&status=${retailerFilters.status}`
+
+  if (retailerFilters.search) {
+    queryString += `&search=${encodeURIComponent(retailerFilters.search)}`
+  }
+
+  console.log("Fetching retailer orders with URL:", queryString)
+
+  // Fetch retailer orders
+  fetch(queryString)
+    .then((response) => {
+      console.log("Response status:", response.status)
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      console.log("Received data:", data)
+      if (data.success) {
+        currentRetailerOrders = data.orders
+        retailerTotalPages = Math.ceil(data.total_count / itemsPerPage)
+
+        // Render retailer orders
+        renderRetailerOrders(data.orders)
+
+        // Update pagination
+        renderRetailerPagination()
+
+        // Update retailer order count text
+        document.getElementById("retailerOrderCount").textContent =
+          `Showing ${data.orders.length} of ${data.total_count} retailer orders`
+
+        // Update retailer order stats if available
+        if (data.stats) {
+          updateRetailerOrderStats(data.stats)
+        }
+      } else {
+        showAlert("danger", "Failed to load retailer orders: " + (data.message || "Unknown error"))
+        document.getElementById("retailer-orders-table-body").innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-4">
+              <div class="text-danger">
+                <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+                <p>Error loading retailer orders. Please try again.</p>
+              </div>
+            </td>
+          </tr>
+        `
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading retailer orders:", error)
+      showAlert("danger", "Error loading retailer orders. Please try again.")
+      document.getElementById("retailer-orders-table-body").innerHTML = `
+        <tr>
+          <td colspan="8" class="text-center py-4">
+            <div class="text-danger">
+              <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+              <p>Error loading retailer orders. Please try again.</p>
+              <button class="btn btn-sm btn-outline-danger mt-2" onclick="loadRetailerOrders(true)">Retry</button>
+            </div>
+          </td>
+        </tr>
+      `
+    })
+}
+
+// Function to render retailer orders in the table with delivery/pickup specific actions
+function renderRetailerOrders(orders) {
+  const tableBody = document.getElementById("retailer-orders-table-body")
+
+  if (!orders || orders.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+          <p class="text-muted">No retailer orders found</p>
+        </td>
+      </tr>
+    `
+    return
+  }
+
+  let html = ""
+
+  orders.forEach((order) => {
+    // Format date
+    const orderDate = new Date(order.order_date)
+    const formattedDate = orderDate.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+
+    // Status badge class
+    let statusClass = ""
+    switch (order.status) {
+      case "order":
+        statusClass = "bg-warning text-dark"
+        break
+      case "confirmed":
+        statusClass = "bg-success"
+        break
+      case "shipped":
+      case "ready":
+        statusClass = "bg-primary"
+        break
+      case "delivered":
+      case "picked up":
+        statusClass = "bg-info"
+        break
+      case "cancelled":
+        statusClass = "bg-danger"
+        break
+      default:
+        statusClass = "bg-secondary"
+    }
+
+    // Simplified action buttons - only View and Confirm Order
+    const actionButtons = `
+      <button type="button" class="btn btn-sm btn-outline-primary view-retailer-order-btn" data-id="${order.order_id}" title="View Order">
+        <i class="bi bi-eye"></i>
+      </button>
+      ${
+        order.status === "order"
+          ? `
+      <button type="button" class="btn btn-sm btn-outline-success confirm-order-btn" data-id="${order.order_id}" title="Confirm Order">
+        <i class="bi bi-check-circle"></i>
+      </button>
+      `
+          : ""
+      }
+    `
+
+    html += `
+      <tr>
+        <td>
+          <span class="fw-medium">${order.order_id}</span>
+        </td>
+        <td>
+          <span class="fw-medium">${order.po_number || "N/A"}</span>
+        </td>
+        <td>
+          <div class="fw-medium">${order.retailer_name}</div>
+          <div class="small text-muted">${order.retailer_email || "No email"}</div>
+        </td>
+        <td>
+          <div>${formattedDate}</div>
+          <div class="small text-muted">${order.expected_delivery ? `Expected: ${new Date(order.expected_delivery).toLocaleDateString()}` : ""}</div>
+        </td>
+        <td>${order.item_count} item${order.item_count !== 1 ? "s" : ""}</td>
+        <td class="fw-bold">₱${Number.parseFloat(order.total_amount).toFixed(2)}</td>
+        <td class="status-cell" data-order-id="${order.order_id}">
+          <span class="badge ${statusClass}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+          ${order.delivery_mode ? `<span class="badge bg-info ms-1">${order.delivery_mode.charAt(0).toUpperCase() + order.delivery_mode.slice(1)}</span>` : ""}
+        </td>
+        <td>
+          <div class="btn-group">
+            ${actionButtons}
+          </div>
+        </td>
+      </tr>
+    `
+  })
+
+  tableBody.innerHTML = html
+
+  // Add event listeners to action buttons
+  document.querySelectorAll(".view-retailer-order-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-id")
+      viewRetailerOrder(orderId)
+    })
+  })
+
+  // Add event listeners for confirm order buttons
+  document.querySelectorAll(".confirm-order-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-id")
+      confirmOrder(orderId)
+    })
+  })
+}
+
+// Update the confirmOrder function to use a modal instead of a browser confirm dialog
+function confirmOrder(orderId) {
+  // Set the order ID in the hidden field
+  document.getElementById("confirmOrderId").value = orderId
+
+  // Show the confirmation modal
+  const confirmModal = new bootstrap.Modal(document.getElementById("confirmOrderModal"))
+  confirmModal.show()
+
+  // Add event listener to the confirm button
+  document.getElementById("processConfirmOrderBtn").onclick = () => {
+    processOrderConfirmation(orderId)
+    confirmModal.hide()
+  }
+}
+
+// Add a new function to process the order confirmation
+function processOrderConfirmation(orderId) {
+  // Show loading indicator
+  showAlert("info", `Confirming order #${orderId}...`)
+
+  // Create form data
+  const formData = new FormData()
+  formData.append("order_id", orderId)
+  formData.append("status", "confirmed")
+
+  // Send request to update status
+  fetch("update_order_status.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        showAlert("success", "Order confirmed successfully")
+
+        // Update the status display in the table
+        const statusCell = document.querySelector(`.status-cell[data-order-id="${orderId}"]`)
+        if (statusCell) {
+          statusCell.innerHTML = `<span class="badge bg-success">Confirmed</span>`
+        }
+
+        // Refresh orders list
+        loadRetailerOrders()
+      } else {
+        showAlert("danger", data.message || "Failed to confirm order")
+      }
+    })
+    .catch((error) => {
+      console.error("Error confirming order:", error)
+      showAlert("danger", "Error confirming order. Please try again.")
+    })
+}
+
+// Update retailer order statistics
+function updateRetailerOrderStats(stats) {
+  if (!stats) return
+
+  if (document.getElementById("totalRetailerOrdersCount")) {
+    document.getElementById("totalRetailerOrdersCount").textContent = stats.total_orders || 0
+  }
+
+  if (document.getElementById("pendingRetailerOrdersCount")) {
+    document.getElementById("pendingRetailerOrdersCount").textContent = stats.pending_orders || 0
+  }
+
+  if (document.getElementById("confirmedRetailerOrdersCount")) {
+    document.getElementById("confirmedRetailerOrdersCount").textContent = stats.confirmed_orders || 0
+  }
+
+  // Format total revenue
+  if (document.getElementById("totalRetailerRevenue")) {
+    const totalRevenue = Number.parseFloat(stats.total_revenue) || 0
+    document.getElementById("totalRetailerRevenue").textContent = `₱${totalRevenue.toFixed(2)}`
+  }
+
+  // Growth percentage
+  if (document.getElementById("totalRetailerOrdersGrowth")) {
+    const growthElement = document.getElementById("totalRetailerOrdersGrowth")
+    const growth = Number.parseFloat(stats.growth_percentage) || 0
+
+    if (growth > 0) {
+      growthElement.textContent = `+${growth}%`
+      growthElement.parentElement.className = "text-success small"
+      growthElement.parentElement.innerHTML = `<i class="bi bi-graph-up"></i> <span>+${growth}%</span>`
+    } else if (growth < 0) {
+      growthElement.textContent = `${growth}%`
+      growthElement.parentElement.className = "text-danger small"
+      growthElement.parentElement.innerHTML = `<i class="bi bi-graph-down"></i> <span>${growth}%</span>`
+    } else {
+      growthElement.textContent = `0%`
+      growthElement.parentElement.className = "text-muted small"
+      growthElement.parentElement.innerHTML = `<i class="bi bi-dash"></i> <span>0%</span>`
+    }
+  }
+}
+
+// Render retailer pagination
+function renderRetailerPagination() {
+  const pagination = document.getElementById("retailerOrdersPagination")
+  if (!pagination) return
+
+  pagination.innerHTML = ""
+
+  if (retailerTotalPages <= 1) {
+    return
+  }
+
+  // Previous button
+  const prevLi = document.createElement("li")
+  prevLi.className = `page-item ${retailerCurrentPage === 1 ? "disabled" : ""}`
+  prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>`
+  pagination.appendChild(prevLi)
+
+  if (retailerCurrentPage > 1) {
+    prevLi.addEventListener("click", (e) => {
+      e.preventDefault()
+      retailerCurrentPage--
+      loadRetailerOrders()
+    })
+  }
+
+  // Page numbers
+  const maxPages = 5 // Maximum number of page links to show
+  let startPage = Math.max(1, retailerCurrentPage - Math.floor(maxPages / 2))
+  const endPage = Math.min(retailerTotalPages, startPage + maxPages - 1)
+
+  if (endPage - startPage + 1 < maxPages) {
+    startPage = Math.max(1, endPage - maxPages + 1)
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const pageLi = document.createElement("li")
+    pageLi.className = `page-item ${i === retailerCurrentPage ? "active" : ""}`
+    pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`
+
+    pageLi.addEventListener("click", (e) => {
+      e.preventDefault()
+      retailerCurrentPage = i
+      loadRetailerOrders()
+    })
+
+    pagination.appendChild(pageLi)
+  }
+
+  // Next button
+  const nextLi = document.createElement("li")
+  nextLi.className = `page-item ${retailerCurrentPage === retailerTotalPages ? "disabled" : ""}`
+  nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>`
+  pagination.appendChild(nextLi)
+
+  if (retailerCurrentPage < retailerTotalPages) {
+    nextLi.addEventListener("click", (e) => {
+      e.preventDefault()
+      retailerCurrentPage++
+      loadRetailerOrders()
+    })
+  }
+}
+
+// View retailer order details
+function viewRetailerOrder(orderId) {
+  // Show loading in modal
+  const viewOrderModalBody = document.querySelector("#viewOrderModal .modal-body")
+  if (viewOrderModalBody) {
+    viewOrderModalBody.innerHTML = `
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Loading retailer order details...</p>
+      </div>
+    `
+  }
+
+  // Show modal
+  const viewOrderModal = new bootstrap.Modal(document.getElementById("viewOrderModal"))
+  viewOrderModal.show()
+
+  // Fetch retailer order details
+  fetch(`get_retailer_order_details.php?order_id=${orderId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        renderRetailerOrderDetails(data.order, data.items)
+      } else {
+        viewOrderModalBody.innerHTML = `
+          <div class="text-center py-5">
+            <div class="text-danger">
+              <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+              <p>Error loading retailer order details. Please try again.</p>
+            </div>
+          </div>
+        `
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading retailer order details:", error)
+      viewOrderModalBody.innerHTML = `
+        <div class="text-center py-5">
+          <div class="text-danger">
+            <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+            <p>Error loading retailer order details. Please try again.</p>
+          </div>
+        </div>
+      `
+    })
+}
+
+// Render retailer order details in the view modal
+function renderRetailerOrderDetails(order, items) {
+  const viewOrderModalBody = document.querySelector("#viewOrderModal .modal-body")
+  if (!viewOrderModalBody) return
+
+  // Format date
+  const orderDate = new Date(order.order_date)
+  const formattedDate = orderDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+
+  // Status badge class
+  let statusClass = ""
+  switch (order.status) {
+    case "order":
+      statusClass = "bg-warning text-dark"
+      break
+    case "confirmed":
+      statusClass = "bg-success"
+      break
+    default:
+      statusClass = "bg-secondary"
+  }
+
+  // Build items table
+  let itemsHtml = ""
+  items.forEach((item, index) => {
+    itemsHtml += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>
+          <div class="fw-medium">${item.product_name}</div>
+          <div class="small text-muted">${item.product_sku || "No SKU"}</div>
+        </td>
+        <td>${item.quantity}</td>
+        <td>₱${Number.parseFloat(item.unit_price).toFixed(2)}</td>
+        <td>₱${Number.parseFloat(item.subtotal).toFixed(2)}</td>
+      </tr>
+    `
+  })
+
+  // Set modal title
+  document.getElementById("viewOrderModalLabel").textContent = `Retailer Order #${order.order_id}`
+
+  // Build modal content
+  viewOrderModalBody.innerHTML = `
+    <div class="order-details">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <h6 class="text-muted mb-2">Order Information</h6>
+          <div class="card">
+            <div class="card-body">
+              <div class="mb-3">
+                <div class="small text-muted">Order ID</div>
+                <div>${order.order_id}</div>
+              </div>
+              <div class="mb-3">
+                <div class="small text-muted">PO Number</div>
+                <div>${order.po_number || "N/A"}</div>
+              </div>
+              <div class="mb-3">
+                <div class="small text-muted">Order Date</div>
+                <div>${formattedDate}</div>
+              </div>
+              <div class="mb-3">
+                <div class="small text-muted">Status</div>
+                <div><span class="badge ${statusClass}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span></div>
+              </div>
+              <div>
+                <div class="small text-muted">Delivery Mode</div>
+                <div>${order.delivery_mode || "Not specified"}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <h6 class="text-muted mb-2">Retailer Information</h6>
+          <div class="card">
+            <div class="card-body">
+              <div class="mb-3">
+                <div class="small text-muted">Retailer Name</div>
+                <div>${order.retailer_name}</div>
+              </div>
+              <div class="mb-3">
+                <div class="small text-muted">Email</div>
+                <div>${order.retailer_email || "Not provided"}</div>
+              </div>
+              <div class="mb-3">
+                <div class="small text-muted">Contact</div>
+                <div>${order.retailer_contact || "Not provided"}</div>
+              </div>
+              <div>
+                <div class="small text-muted">Pickup Location</div>
+                <div>${order.pickup_location || "Not provided"}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h6 class="text-muted mb-2">Order Items</h6>
+      <div class="card mb-4">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Unit Price</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <h6 class="text-muted mb-2">Notes</h6>
+          <div class="card">
+            <div class="card-body">
+              <p class="mb-0">${order.notes || "No notes for this order."}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <h6 class="text-muted mb-2">Order Summary</h6>
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Subtotal:</span>
+                <span>₱${Number.parseFloat(order.subtotal).toFixed(2)}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Tax:</span>
+                <span>₱${Number.parseFloat(order.tax).toFixed(2)}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Discount:</span>
+                <span>-₱${Number.parseFloat(order.discount).toFixed(2)}</span>
+              </div>
+              <hr>
+              <div class="d-flex justify-content-between fw-bold">
+                <span>Total:</span>
+                <span>₱${Number.parseFloat(order.total_amount).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+}
+
+// Edit retailer order
+function editRetailerOrder(orderId) {
+  // Reset form
+  resetRetailerOrderForm()
+
+  // Set modal title
+  document.getElementById("retailerOrderModalLabel").textContent = "Edit Retailer Order"
+
+  // Show loading in form
+  const orderFormContent = document.getElementById("retailerOrderFormContent")
+  if (orderFormContent) {
+    orderFormContent.innerHTML = `
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Loading order data...</p>
+      </div>
+    `
+  }
+
+  // Show modal
+  const orderModal = new bootstrap.Modal(document.getElementById("retailerOrderModal"))
+  orderModal.show()
+
+  // Fetch order details
+  fetch(`get_retailer_order_details.php?order_id=${orderId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        // Populate form with order data
+        populateRetailerOrderForm(data.order, data.items)
+      } else {
+        orderFormContent.innerHTML = `
+          <div class="text-center py-5">
+            <div class="text-danger">
+              <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+              <p>Error loading order data. Please try again.</p>
+            </div>
+          </div>
+        `
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading order data:", error)
+      orderFormContent.innerHTML = `
+        <div class="text-center py-5">
+          <div class="text-danger">
+            <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+            <p>Error loading order data. Please try again.</p>
+          </div>
+        </div>
+      `
+    })
+}
+
+// Populate retailer order form with data
+function populateRetailerOrderForm(order, items) {
+  // Reset form content
+  resetRetailerOrderForm()
+
+  // Set order ID in hidden field
+  document.getElementById("retailerOrderId").value = order.order_id
+
+  // Retailer information
+  document.getElementById("retailerName").value = order.retailer_name
+  document.getElementById("retailerEmail").value = order.retailer_email || ""
+  document.getElementById("retailerContact").value = order.retailer_contact || ""
+  document.getElementById("poNumber").value = order.po_number || ""
+
+  // Order information
+  document.getElementById("orderDate").value = order.order_date.split(" ")[0] // Get just the date part
+  document.getElementById("expectedDelivery").value = order.expected_delivery
+    ? order.expected_delivery.split(" ")[0]
+    : ""
+  document.getElementById("orderStatus").value = order.status
+  document.getElementById("deliveryMode").value = order.delivery_mode || ""
+  document.getElementById("pickupLocation").value = order.pickup_location || ""
+  document.getElementById("orderNotes").value = order.notes || ""
+
+  // Order items
+  const itemsContainer = document.getElementById("orderItems")
+  itemsContainer.innerHTML = "" // Clear existing items
+
+  items.forEach((item, index) => {
+    addOrderItemRowFunc(item, index)
+  })
+
+  // Calculate totals
+  calculateOrderTotalsFunc()
+}
+
+// Add order item row to form
+const addOrderItemRowFunc = (item = null, index = null) => {
+  const itemsContainer = document.getElementById("orderItems")
+  const rowIndex = index !== null ? index : itemsContainer.children.length
+
+  const row = document.createElement("div")
+  row.className = "order-item-row mb-3 p-3 border rounded"
+  row.dataset.index = rowIndex
+
+  row.innerHTML = `
+    <div class="row g-2">
+      <div class="col-md-5">
+        <label class="form-label small">Product</label>
+        <select class="form-select product-select" name="items[${rowIndex}][product_id]" required>
+          <option value="">Select Product</option>
+          <!-- Products will be loaded dynamically -->
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Quantity</label>
+        <input type="number" class="form-control item-quantity" name="items[${rowIndex}][quantity]" min="1" value="${item ? item.quantity : 1}" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Unit Price</label>
+        <input type="number" class="form-control item-price" name="items[${rowIndex}][unit_price]" step="0.01" min="0" value="${item ? item.unit_price : 0}" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Subtotal</label>
+        <input type="text" class="form-control item-subtotal" value="${item ? Number.parseFloat(item.subtotal).toFixed(2) : "0.00"}" readonly>
+      </div>
+      <div class="col-md-1 d-flex align-items-end">
+        <button type="button" class="btn btn-outline-danger remove-item-btn" data-index="${rowIndex}">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+  `
+
+  itemsContainer.appendChild(row)
+
+  // Load products for the select dropdown
+  loadProductsForSelectInner(row.querySelector(".product-select"), item ? item.product_id : null)
+
+  // Add event listeners for calculations
+  const quantityInput = row.querySelector(".item-quantity")
+  const priceInput = row.querySelector(".item-price")
+
+  quantityInput.addEventListener("input", () => {
+    updateItemSubtotalFunc(row)
+    calculateOrderTotalsFunc()
+  })
+
+  priceInput.addEventListener("input", () => {
+    updateItemSubtotalFunc(row)
+    calculateOrderTotalsFunc()
+  })
+
+  // Add event listener for remove button
+  const removeBtn = row.querySelector(".remove-item-btn")
+  removeBtn.addEventListener("click", () => {
+    row.remove()
+    calculateOrderTotalsFunc()
+  })
+}
+
+// Update item subtotal
+const updateItemSubtotalFunc = (row) => {
+  const quantity = Number.parseFloat(row.querySelector(".item-quantity").value) || 0
+  const price = Number.parseFloat(row.querySelector(".item-price").value) || 0
+  const subtotal = quantity * price
+
+  row.querySelector(".item-subtotal").value = subtotal.toFixed(2)
+}
+
+// Calculate order totals
+const calculateOrderTotalsFunc = () => {
+  const itemRows = document.querySelectorAll(".order-item-row")
+  let subtotal = 0
+
+  itemRows.forEach((row) => {
+    subtotal += Number.parseFloat(row.querySelector(".item-subtotal").value) || 0
+  })
+
+  // Get tax rate and discount
+  const taxRate = Number.parseFloat(document.getElementById("taxRate").value) || 0
+  const discount = Number.parseFloat(document.getElementById("discount").value) || 0
+
+  // Calculate tax amount
+  const taxAmount = subtotal * (taxRate / 100)
+
+  // Calculate total
+  const total = subtotal + taxAmount - discount
+
+  // Update form fields
+  document.getElementById("subtotal").value = subtotal.toFixed(2)
+  document.getElementById("taxAmount").value = taxAmount.toFixed(2)
+  document.getElementById("total").value = total.toFixed(2)
+}
+
+// Load products for select dropdown
+function loadProductsForSelectInner(selectElement, selectedProductId = null) {
+  // Fetch products from server
+  fetch("get_products.php")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        // Clear existing options except the first one
+        selectElement.innerHTML = '<option value="">Select Product</option>'
+
+        // Add product options
+        data.products.forEach((product) => {
+          const option = document.createElement("option")
+          option.value = product.product_id
+          option.textContent = `${product.product_name} (₱${Number.parseFloat(product.price).toFixed(2)})`
+          option.dataset.price = product.price
+
+          if (selectedProductId && product.product_id == selectedProductId) {
+            option.selected = true
+          }
+
+          selectElement.appendChild(option)
+        })
+
+        // Add change event listener
+        selectElement.addEventListener("change", function () {
+          const selectedOption = this.options[this.selectedIndex]
+          const price = selectedOption.dataset.price || 0
+
+          // Update price field
+          const row = this.closest(".order-item-row")
+          row.querySelector(".item-price").value = price
+
+          // Update subtotal
+          updateItemSubtotalFunc(row)
+          calculateOrderTotalsFunc()
+        })
+      } else {
+        console.error("Failed to load products:", data.message)
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading products:", error)
+    })
+}
+
+// Reset retailer order form
+function resetRetailerOrderForm() {
+  const orderForm = document.getElementById("retailerOrderForm")
+  if (orderForm) {
+    orderForm.reset()
+
+    // Clear order ID
+    document.getElementById("retailerOrderId").value = ""
+
+    // Set default date to today
+    const today = new Date().toISOString().split("T")[0]
+    document.getElementById("orderDate").value = today
+
+    // Clear order items
+    document.getElementById("orderItems").innerHTML = ""
+
+    // Add one empty item row
+    addOrderItemRowFunc()
+
+    // Reset totals
+    document.getElementById("subtotal").value = "0.00"
+    document.getElementById("taxAmount").value = "0.00"
+    document.getElementById("total").value = "0.00"
+
+    // Reset form content
+    const orderFormContent = document.getElementById("retailerOrderFormContent")
+    if (orderFormContent) {
+      orderFormContent.innerHTML = `
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <h6 class="mb-3">Retailer Information</h6>
+            <div class="mb-3">
+              <label for="retailerName" class="form-label">Retailer Name</label>
+              <input type="text" class="form-control" id="retailerName" name="retailer_name" required>
+            </div>
+            <div class="mb-3">
+              <label for="retailerEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="retailerEmail" name="retailer_email">
+            </div>
+            <div class="mb-3">
+              <label for="retailerContact" class="form-label">Contact</label>
+              <input type="text" class="form-control" id="retailerContact" name="retailer_contact">
+            </div>
+            <div class="mb-3">
+              <label for="poNumber" class="form-label">PO Number</label>
+              <input type="text" class="form-control" id="poNumber" name="po_number">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="mb-3">Order Information</h6>
+            <div class="mb-3">
+              <label for="orderDate" class="form-label">Order Date</label>
+              <input type="date" class="form-control" id="orderDate" name="order_date" required>
+            </div>
+            <div class="mb-3">
+              <label for="expectedDelivery" class="form-label">Expected Delivery</label>
+              <input type="date" class="form-control" id="expectedDelivery" name="expected_delivery">
+            </div>
+            <div class="mb-3">
+              <label for="orderStatus" class="form-label">Status</label>
+              <select class="form-select" id="orderStatus" name="status" required>
+                <option value="order">Order</option>
+                <option value="confirmed">Confirmed</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="deliveryMode" class="form-label">Delivery Mode</label>
+              <select class="form-select" id="deliveryMode" name="delivery_mode">
+                <option value="pickup">Pickup</option>
+                <option value="delivery">Delivery</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="pickupLocation" class="form-label">Pickup Location</label>
+              <input type="text" class="form-control" id="pickupLocation" name="pickup_location">
+            </div>
+            <div class="mb-3">
+              <label for="orderNotes" class="form-label">Notes</label>
+              <textarea class="form-control" id="orderNotes" name="notes" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <h6 class="mb-3">Order Items</h6>
+        <div id="orderItems" class="mb-3">
+          <!-- Order items will be added here -->
+        </div>
+        
+        <div class="text-end mb-3">
+          <button type="button" class="btn btn-outline-primary" id="addItemBtn">
+            <i class="bi bi-plus-circle me-1"></i> Add Item
+          </button>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <!-- Empty column for spacing -->
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="card-title">Order Summary</h6>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="subtotal" class="col-form-label">Subtotal:</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="text" class="form-control text-end" id="subtotal" name="subtotal" value="0.00" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="taxRate" class="col-form-label">Tax Rate (%):</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <input type="number" class="form-control text-end" id="taxRate" name="tax_rate" value="12" min="0" step="0.01">
+                        <span class="input-group-text">%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="taxAmount" class="col-form-label">Tax Amount:</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="text" class="form-control text-end" id="taxAmount" name="tax" value="0.00" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="discount" class="col-form-label">Discount:</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="number" class="form-control text-end" id="discount" name="discount" value="0" min="0" step="0.01">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <hr>
+                <div class="mb-3">
+                  <div class="row g-2 align-items-center">
+                    <div class="col-6">
+                      <label for="total" class="col-form-label fw-bold">Total:</label>
+                    </div>
+                    <div class="col-6">
+                      <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="text" class="form-control text-end fw-bold" id="total" name="total_amount" value="0.00" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+
+      // Re-add event listeners
+      const addItemBtn = document.getElementById("addItemBtn")
+      if (addItemBtn) {
+        addItemBtn.addEventListener("click", addOrderItemRowFunc)
+      }
+
+      // Add event listeners for tax rate and discount
+      const taxRateInput = document.getElementById("taxRate")
+      const discountInput = document.getElementById("discount")
+
+      if (taxRateInput) {
+        taxRateInput.addEventListener("input", calculateOrderTotalsFunc)
+      }
+      if (discountInput) {
+        discountInput.addEventListener("input", calculateOrderTotalsFunc)
+      }
+    }
+  }
+}
+
+// Save retailer order
+function saveRetailerOrder() {
+  // Show loading indicator
+  const saveBtn = document.querySelector("#retailerOrderForm button[type='submit']")
+  const originalBtnText = saveBtn.innerHTML
+  saveBtn.disabled = true
+  saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...`
+
+  // Get form data
+  const formData = new FormData(document.getElementById("retailerOrderForm"))
+
+  // Send to server
+  fetch("save_retailer_order.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        // Close modal
+        const orderModalElement = document.getElementById("retailerOrderModal")
+        if (orderModalElement) {
+          const orderModal = bootstrap.Modal.getInstance(orderModalElement)
+          if (orderModal) {
+            orderModal.hide()
+          } else {
+            console.warn("Retailer order modal instance not found.")
+          }
+        } else {
+          console.warn("Retailer order modal element not found.")
+        }
+
+        // Show success message
+        showAlert("success", data.message || "Retailer order saved successfully")
+
+        // Reload retailer orders
+        loadRetailerOrders()
+      } else {
+        // Show error message
+        showAlert("danger", data.message || "Failed to save retailer order")
+
+        // Reset button
+        saveBtn.disabled = false
+        saveBtn.innerHTML = originalBtnText
+      }
+    })
+    .catch((error) => {
+      console.error("Error saving retailer order:", error)
+      showAlert("danger", "Error saving retailer order. Please try again.")
+
+      // Reset button
+      saveBtn.disabled = false
+      saveBtn.innerHTML = originalBtnText
+    })
+}
+
+// Confirm delete retailer order
+function confirmDeleteRetailerOrder(orderId) {
+  // Set order ID in hidden field
+  document.getElementById("deleteOrderId").value = orderId
+
+  // Show confirmation modal
+  const deleteOrderModal = new bootstrap.Modal(document.getElementById("deleteOrderModal"))
+  deleteOrderModal.show()
+}
+
+// Delete retailer order
+function deleteRetailerOrder(orderId) {
+  // Show loading indicator
+  showAlert("info", "Deleting retailer order...")
+
+  // Send delete request
+  fetch(`delete_retailer_order.php?order_id=${orderId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        // Show success message
+        showAlert("success", data.message || "Retailer order deleted successfully")
+
+        // Reload retailer orders
+        loadRetailerOrders()
+      } else {
+        // Show error message
+        showAlert("danger", data.message || "Failed to delete retailer order")
+      }
+    })
+    .catch((error) => {
+      console.error("Error deleting retailer order:", error)
+      showAlert("danger", "Error deleting retailer order. Please try again.")
+    })
+}
+
+// Export retailer orders to CSV
+function exportRetailerOrders() {
+  // Show a loading indicator
+  showAlert("info", "Preparing export file...")
+
+  // Apply current filters
+  let queryString = `export_retailer_orders.php?status=${retailerFilters.status}`
+
+  if (retailerFilters.search) {
+    queryString += `&search=${encodeURIComponent(retailerFilters.search)}`
+  }
+
+  // Get current date for filename
+  const today = new Date()
+  const dateString = today.toISOString().split("T")[0] // YYYY-MM-DD format
+
+  // Create download link with a more descriptive filename
+  const downloadLink = document.createElement("a")
+  downloadLink.href = queryString
+  downloadLink.download = `retailer_orders_${dateString}.csv`
+  document.body.appendChild(downloadLink)
+  downloadLink.click()
+  document.body.removeChild(downloadLink)
+
+  // Show success message after a short delay
+  setTimeout(() => {
+    showAlert("success", "Export completed successfully")
+  }, 1000)
+}
+
+// Function to display alerts
+function showAlert(type, message) {
+  const alertContainer = document.getElementById("alertContainer")
+  if (!alertContainer) {
+    console.warn("Alert container not found")
+    return
+  }
+
+  const alertDiv = document.createElement("div")
+  alertDiv.className = `alert alert-${type} alert-dismissible fade show`
+  alertDiv.setAttribute("role", "alert")
+  alertDiv.textContent = message
+
+  const closeButton = document.createElement("button")
+  closeButton.setAttribute("type", "button")
+  closeButton.className = "btn-close"
+  closeButton.setAttribute("data-bs-dismiss", "alert")
+  closeButton.setAttribute("aria-label", "Close")
+
+  alertDiv.appendChild(closeButton)
+  alertContainer.appendChild(alertDiv)
+}
+
+// Make sure the showAlert function is properly defined and accessible
+// Add this at the end of the file if it's not already defined elsewhere
+window.showAlert = showAlert
+window.loadRetailerOrders = loadRetailerOrders

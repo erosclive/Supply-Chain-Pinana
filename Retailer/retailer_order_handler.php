@@ -14,657 +14,472 @@ if (session_status() === PHP_SESSION_NONE) {
 // Set header to return JSON
 header('Content-Type: application/json');
 
+// Initialize response array
+$response = ['success' => false, 'message' => ''];
+
+// Get user ID from session
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
 // Get action from request
 $action = isset($_GET['action']) ? $_GET['action'] : '';
-
-// Test database connection if requested
-if (isset($_GET['test'])) {
-    if ($conn) {
-        echo "Database connection successful";
-    } else {
-        echo "Database connection failed: " . mysqli_connect_error();
-    }
-    exit;
-}
-
-// Check if user is logged in
-$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
 // Handle different actions
 switch ($action) {
     case 'get_orders':
-        getOrders($user_id);
-        break;
-    case 'create_order':
-        createOrder($user_id);
-        break;
-    case 'update_status':
-        updateOrderStatus($user_id);
-        break;
-    case 'delete_order':
-        deleteOrder($user_id);
+        getOrders($conn, $user_id);
         break;
     case 'get_products':
-        getProducts();
+        getProducts($conn);
+        break;
+    case 'update_status':
+        updateOrderStatus($conn, $user_id);
+        break;
+    case 'delete_order':
+        deleteOrder($conn, $user_id);
         break;
     default:
-        echo json_encode(['success' => false, 'message' => 'Invalid action']);
+        $response['message'] = 'Invalid action';
+        echo json_encode($response);
         break;
 }
 
-// Modify the getOrders function to handle product_id = 0
-function getOrders($user_id = null) {
-    global $conn;
-    
-    // Check if user is logged in
-    if (!$user_id) {
-        echo json_encode(['success' => false, 'message' => 'User not logged in']);
-        return;
-    }
-    
-    // Get filter parameters
-    $status = isset($_GET['status']) ? $_GET['status'] : 'all';
-    $search = isset($_GET['search']) ? $_GET['search'] : '';
-    $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : null;
-    $endDate = isset($_GET['end_date']) ? $_GET['end_date'] : null;
-    $dateRange = isset($_GET['date_range']) ? $_GET['date_range'] : 'all';
-    
-    // Start building the query - UPDATED to filter by user_id
-    $query = "SELECT ro.* FROM retailer_orders ro 
-              JOIN users u ON ro.retailer_email = u.email 
-              WHERE u.id = ?";
-    $params = [$user_id];
-    $types = "i"; // integer for user_id
-    
-    // Add status filter
-    if ($status !== 'all') {
-        $query .= " AND ro.status = ?";
-        $params[] = $status;
-        $types .= "s"; // string for status
-    }
-    
-    // Add date range filter based on predefined ranges
-    if ($dateRange === 'today') {
-        $query .= " AND DATE(ro.order_date) = CURDATE()";
-    } else if ($dateRange === 'week') {
-        $query .= " AND YEARWEEK(ro.order_date, 1) = YEARWEEK(CURDATE(), 1)";
-    } else if ($dateRange === 'month') {
-        $query .= " AND MONTH(ro.order_date) = MONTH(CURDATE()) AND YEAR(ro.order_date) = YEAR(CURDATE())";
-    } else if ($dateRange === 'custom' && $startDate && $endDate) {
-        $query .= " AND ro.order_date BETWEEN ? AND ?";
-        $params[] = $startDate;
-        $params[] = $endDate;
-        $types .= "ss"; // two strings for dates
-    }
-    
-    // Add search filter
-    if (!empty($search)) {
-        $query .= " AND (ro.po_number LIKE ? OR ro.retailer_name LIKE ? OR ro.notes LIKE ?)";
-        $searchTerm = "%$search%";
-        $params[] = $searchTerm;
-        $params[] = $searchTerm;
-        $params[] = $searchTerm;
-        $types .= "sss"; // three strings for search terms
-    }
-    
-    // Add order by
-    $query .= " ORDER BY ro.order_date DESC";
-    
-    // Log the query for debugging
-    error_log("Orders query: $query with user_id: $user_id");
-    
-    // Prepare and execute the query
-    $stmt = mysqli_prepare($conn, $query);
-    
-    if (!$stmt) {
-        echo json_encode(['success' => false, 'message' => 'Query preparation failed: ' . mysqli_error($conn)]);
-        return;
-    }
-    
-    // Bind parameters
-    mysqli_stmt_bind_param($stmt, $types, ...$params);
-    
-    // Execute the query
-    if (!mysqli_stmt_execute($stmt)) {
-        echo json_encode(['success' => false, 'message' => 'Query execution failed: ' . mysqli_stmt_error($stmt)]);
-        return;
-    }
-    
-    $result = mysqli_stmt_get_result($stmt);
-    
-    // Fetch all orders
-    $orders = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        // Get order items with product information
-        $itemsQuery = "SELECT roi.* FROM retailer_order_items roi WHERE roi.order_id = ?";
-        $itemsStmt = mysqli_prepare($conn, $itemsQuery);
-        mysqli_stmt_bind_param($itemsStmt, "i", $row['order_id']);
-        mysqli_stmt_execute($itemsStmt);
-        $itemsResult = mysqli_stmt_get_result($itemsStmt);
-        
-        $items = [];
-        $itemCount = 0;
-        while ($item = mysqli_fetch_assoc($itemsResult)) {
-            // Look up the product name from the products table
-            $productName = "Piñana Gourmet Product"; // Default name
-            
-            if (!empty($item['product_id'])) {
-                $productQuery = "SELECT product_name FROM products WHERE product_id = ?";
-                $productStmt = mysqli_prepare($conn, $productQuery);
-                mysqli_stmt_bind_param($productStmt, "s", $item['product_id']);
-                mysqli_stmt_execute($productStmt);
-                $productResult = mysqli_stmt_get_result($productStmt);
-                
-                if ($productRow = mysqli_fetch_assoc($productResult)) {
-                    $productName = $productRow['product_name'];
-                }
-            }
-            
-            $items[] = [
-                'item_id' => $item['item_id'],
-                'product_id' => $item['product_id'],
-                'product_name' => $productName,
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'total_price' => $item['total_price']
-            ];
-            $itemCount += $item['quantity']; // Sum up quantities for total item count
-        }
-        
-        $row['items'] = $items;
-        $row['item_count'] = $itemCount;
-        
-        // Get status history
-        $historyQuery = "SELECT * FROM retailer_order_status_history WHERE order_id = ? ORDER BY created_at ASC";
-        $historyStmt = mysqli_prepare($conn, $historyQuery);
-        mysqli_stmt_bind_param($historyStmt, "i", $row['order_id']);
-        mysqli_stmt_execute($historyStmt);
-        $historyResult = mysqli_stmt_get_result($historyStmt);
-        
-        $statusHistory = [];
-        while ($history = mysqli_fetch_assoc($historyResult)) {
-            $statusHistory[] = $history;
-        }
-        
-        $row['status_history'] = $statusHistory;
-        
-        $orders[] = $row;
-    }
-    
-    echo json_encode(['success' => true, 'orders' => $orders]);
-}
-
-// Function to create a new order
-function createOrder($user_id = null) {
-    global $conn;
-    
-    // Check if user is logged in
-    if (!$user_id) {
-        echo json_encode(['success' => false, 'message' => 'User not logged in']);
-        return;
-    }
-    
-    // Get JSON data from request
-    $jsonData = file_get_contents('php://input');
-    
-    // Log the received data for debugging
-    error_log("Received order data: " . $jsonData);
-    
-    $data = json_decode($jsonData, true);
-    
-    if (!$data) {
-        echo json_encode(['success' => false, 'message' => 'Invalid data format']);
-        error_log("JSON decode failed: " . json_last_error_msg());
-        return;
-    }
+// Function to get orders for the current user
+function getOrders($conn, $user_id = null) {
+    // Initialize response array
+    $response = ['success' => false, 'message' => '', 'orders' => []];
     
     try {
-        // Start transaction
-        mysqli_begin_transaction($conn);
+        // Check if user is logged in
+        if (!$user_id) {
+            throw new Exception("User not logged in");
+        }
         
-        // Check if this is an update or new order
-        $orderId = isset($data['order_id']) ? $data['order_id'] : null;
+        // Log the user ID for debugging
+        error_log("Getting orders for user ID: $user_id");
         
-        if ($orderId) {
-            // Verify the order belongs to this user
-            $checkQuery = "SELECT ro.order_id FROM retailer_orders ro 
-                          JOIN users u ON ro.retailer_email = u.email 
-                          WHERE ro.order_id = ? AND u.id = ?";
-            $checkStmt = mysqli_prepare($conn, $checkQuery);
-            mysqli_stmt_bind_param($checkStmt, "ii", $orderId, $user_id);
-            mysqli_stmt_execute($checkStmt);
-            mysqli_stmt_store_result($checkStmt);
+        // Build the query based on filters - IMPORTANT: Filter by retailer_email matching user's email
+        $userQuery = "SELECT email FROM users WHERE id = ?";
+        $userStmt = $conn->prepare($userQuery);
+        
+        if (!$userStmt) {
+            throw new Exception("Prepare failed for user query: " . $conn->error);
+        }
+        
+        $userStmt->bind_param("i", $user_id);
+        
+        if (!$userStmt->execute()) {
+            throw new Exception("Execute failed for user query: " . $userStmt->error);
+        }
+        
+        $userResult = $userStmt->get_result();
+        
+        if ($userRow = $userResult->fetch_assoc()) {
+            $userEmail = $userRow['email'];
             
-            if (mysqli_stmt_num_rows($checkStmt) === 0) {
+            // Now get orders where retailer_email matches the user's email
+            $query = "SELECT o.* FROM retailer_orders o WHERE o.retailer_email = ?";
+            $params = [$userEmail];
+            $types = "s"; // string for email
+            
+            // Filter by status if provided
+            if (isset($_GET['status']) && $_GET['status'] != 'all') {
+                $query .= " AND o.status = ?";
+                $params[] = $_GET['status'];
+                $types .= "s";
+            }
+            
+            // Filter by date range if provided
+            if (isset($_GET['date_range'])) {
+                switch ($_GET['date_range']) {
+                    case 'today':
+                        $query .= " AND DATE(o.order_date) = CURDATE()";
+                        break;
+                    case 'week':
+                        $query .= " AND YEARWEEK(o.order_date, 1) = YEARWEEK(CURDATE(), 1)";
+                        break;
+                    case 'month':
+                        $query .= " AND MONTH(o.order_date) = MONTH(CURDATE()) AND YEAR(o.order_date) = YEAR(CURDATE())";
+                        break;
+                }
+            } else if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
+                $query .= " AND o.order_date BETWEEN ? AND ?";
+                $params[] = $_GET['start_date'];
+                $params[] = $_GET['end_date'];
+                $types .= "ss";
+            }
+            
+            // Search functionality
+            if (isset($_GET['search']) && !empty($_GET['search'])) {
+                $search = $_GET['search'];
+                $query .= " AND (o.po_number LIKE ? OR o.retailer_name LIKE ? OR o.notes LIKE ?)";
+                $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $types .= "sss";
+            }
+            
+            // Order by most recent first
+            $query .= " ORDER BY o.order_date DESC";
+            
+            // Log the query for debugging
+            error_log("Orders query: $query with user email: $userEmail");
+            
+            // Prepare and execute the query
+            $stmt = $conn->prepare($query);
+            
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+            
+            $stmt->bind_param($types, ...$params);
+            
+            if (!$stmt->execute()) {
+                throw new Exception("Execute failed: " . $stmt->error);
+            }
+            
+            $result = $stmt->get_result();
+            
+            // Fetch all orders
+            $orders = [];
+            while ($row = $result->fetch_assoc()) {
+                // Get order items with product information
+                $itemsQuery = "SELECT oi.* FROM retailer_order_items oi WHERE oi.order_id = ?";
+                $itemsStmt = $conn->prepare($itemsQuery);
+                
+                if (!$itemsStmt) {
+                    throw new Exception("Prepare failed for items query: " . $conn->error);
+                }
+                
+                $itemsStmt->bind_param("i", $row['order_id']);
+                
+                if (!$itemsStmt->execute()) {
+                    throw new Exception("Execute failed for items query: " . $itemsStmt->error);
+                }
+                
+                $itemsResult = $itemsStmt->get_result();
+                
+                $items = [];
+                $itemCount = 0;
+                while ($itemRow = $itemsResult->fetch_assoc()) {
+                    // First try to use the product_name from the order_items table
+                    $productName = $itemRow['product_name'];
+                    
+                    // If product_name is empty or NULL, look it up from the products table
+                    if (empty($productName) && !empty($itemRow['product_id'])) {
+                        $productQuery = "SELECT product_name FROM products WHERE product_id = ?";
+                        $productStmt = $conn->prepare($productQuery);
+                        $productStmt->bind_param("s", $itemRow['product_id']);
+                        $productStmt->execute();
+                        $productResult = $productStmt->get_result();
+                        
+                        if ($productRow = $productResult->fetch_assoc()) {
+                            $productName = $productRow['product_name'];
+                            
+                            // Update the product_name in the order_items table for future use
+                            $updateQuery = "UPDATE retailer_order_items SET product_name = ? WHERE item_id = ?";
+                            $updateStmt = $conn->prepare($updateQuery);
+                            $updateStmt->bind_param("si", $productName, $itemRow['item_id']);
+                            $updateStmt->execute();
+                        } else {
+                            $productName = "Unknown Product";
+                        }
+                    } else if (empty($productName)) {
+                        $productName = "Unknown Product";
+                    }
+                    
+                    $items[] = [
+                        'item_id' => $itemRow['item_id'],
+                        'product_id' => $itemRow['product_id'],
+                        'product_name' => $productName,
+                        'quantity' => $itemRow['quantity'],
+                        'unit_price' => $itemRow['unit_price'],
+                        'total_price' => $itemRow['total_price'] ?? ($itemRow['quantity'] * $itemRow['unit_price'])
+                    ];
+                    $itemCount += $itemRow['quantity']; // Sum up quantities for total item count
+                }
+                
+                $row['items'] = $items;
+                $row['item_count'] = $itemCount;
+                
+                // Get status history
+                $historyQuery = "SELECT * FROM retailer_order_status_history WHERE order_id = ? ORDER BY created_at DESC";
+                $historyStmt = $conn->prepare($historyQuery);
+                $historyStmt->bind_param("i", $row['order_id']);
+                $historyStmt->execute();
+                $historyResult = $historyStmt->get_result();
+                
+                $statusHistory = [];
+                while ($historyRow = $historyResult->fetch_assoc()) {
+                    $statusHistory[] = $historyRow;
+                }
+                
+                $row['status_history'] = $statusHistory;
+                
+                // Set default delivery mode if not set
+                if (!isset($row['delivery_mode']) || empty($row['delivery_mode'])) {
+                    $row['delivery_mode'] = 'delivery';
+                }
+                
+                $orders[] = $row;
+            }
+            
+            $response['success'] = true;
+            $response['orders'] = $orders;
+            
+        } else {
+            throw new Exception("User email not found");
+        }
+        
+    } catch (Exception $e) {
+        $response['message'] = "Error: " . $e->getMessage();
+        error_log("Error fetching orders: " . $e->getMessage());
+    }
+    
+    echo json_encode($response);
+}
+
+// Function to update order status - ensure user can only update their own orders
+function updateOrderStatus($conn, $user_id = null) {
+    // Initialize response array
+    $response = ['success' => false, 'message' => ''];
+    
+    try {
+        // Check if user is logged in
+        if (!$user_id) {
+            throw new Exception("User not logged in");
+        }
+        
+        // Get JSON data from request
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        if (!isset($data['order_id']) || !isset($data['status'])) {
+            throw new Exception("Missing required fields");
+        }
+        
+        // Verify the order belongs to this user
+        $userQuery = "SELECT email FROM users WHERE id = ?";
+        $userStmt = $conn->prepare($userQuery);
+        $userStmt->bind_param("i", $user_id);
+        $userStmt->execute();
+        $userResult = $userStmt->get_result();
+        
+        if ($userRow = $userResult->fetch_assoc()) {
+            $userEmail = $userRow['email'];
+            
+            // Check if the order belongs to this user
+            $checkQuery = "SELECT order_id FROM retailer_orders WHERE order_id = ? AND retailer_email = ?";
+            $checkStmt = $conn->prepare($checkQuery);
+            $checkStmt->bind_param("is", $data['order_id'], $userEmail);
+            $checkStmt->execute();
+            $checkResult = $checkStmt->get_result();
+            
+            if ($checkResult->num_rows === 0) {
                 throw new Exception("You don't have permission to update this order");
             }
             
-            // Update existing order
-            updateOrder($data, $orderId);
+            // Start transaction
+            $conn->begin_transaction();
+            
+            // Update order status
+            $updateQuery = "UPDATE retailer_orders SET status = ?, updated_at = NOW() WHERE order_id = ?";
+            $updateStmt = $conn->prepare($updateQuery);
+            
+            if (!$updateStmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+            
+            $updateStmt->bind_param("si", $data['status'], $data['order_id']);
+            
+            if (!$updateStmt->execute()) {
+                throw new Exception("Execute failed: " . $updateStmt->error);
+            }
+            
+            if ($updateStmt->affected_rows <= 0 && $updateStmt->errno != 0) {
+                throw new Exception("Failed to update order status");
+            }
+            
+            // Add status history entry
+            $historyQuery = "INSERT INTO retailer_order_status_history (order_id, status, notes, created_at) VALUES (?, ?, ?, NOW())";
+            $historyStmt = $conn->prepare($historyQuery);
+            
+            if (!$historyStmt) {
+                throw new Exception("Prepare failed for history: " . $conn->error);
+            }
+            
+            $notes = isset($data['notes']) ? $data['notes'] : '';
+            $historyStmt->bind_param("iss", $data['order_id'], $data['status'], $notes);
+            
+            if (!$historyStmt->execute()) {
+                throw new Exception("Execute failed for history: " . $historyStmt->error);
+            }
+            
+            // Commit transaction
+            $conn->commit();
+            
+            $response['success'] = true;
+            $response['message'] = "Order status updated successfully";
         } else {
-            // Create new order
-            insertOrder($data, $user_id);
+            throw new Exception("User email not found");
         }
         
-        // Commit transaction
-        mysqli_commit($conn);
-        
-        echo json_encode(['success' => true, 'message' => $orderId ? 'Order updated successfully' : 'Order created successfully']);
     } catch (Exception $e) {
         // Rollback transaction on error
-        mysqli_rollback($conn);
-        
-        error_log("Order creation error: " . $e->getMessage());
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-    }
-}
-
-// Function to insert a new order
-function insertOrder($data, $user_id) {
-    global $conn;
-    
-    // Get user information
-    $userQuery = "SELECT * FROM users WHERE id = ?";
-    $userStmt = mysqli_prepare($conn, $userQuery);
-    mysqli_stmt_bind_param($userStmt, "i", $user_id);
-    mysqli_stmt_execute($userStmt);
-    $userResult = mysqli_stmt_get_result($userStmt);
-    $user = mysqli_fetch_assoc($userResult);
-    
-    if (!$user) {
-        throw new Exception("User information not found");
-    }
-    
-    // Generate PO number (format: RO-YYYYMMDD-XXX)
-    $poNumber = 'RO-' . date('Ymd') . '-' . sprintf('%03d', rand(1, 999));
-    
-    // Prepare order data
-    $retailerName = $data['retailer_name'] ?: $user['full_name'];
-    $retailerEmail = $data['retailer_email'] ?: $user['email'];
-    $retailerContact = $data['retailer_contact'] ?: '';
-    $orderDate = $data['order_date'];
-    $expectedDelivery = $data['expected_delivery'];
-    $status = $data['status'];
-    $subtotal = $data['subtotal'];
-    $tax = isset($data['tax']) ? $data['tax'] : 0;
-    $discount = $data['discount'];
-    $totalAmount = $data['total_amount'];
-    $notes = isset($data['notes']) ? $data['notes'] : '';
-    
-    // Log the data being inserted
-    error_log("Inserting order with PO: $poNumber, Status: $status, User ID: $user_id");
-    
-    // Insert order
-    $query = "INSERT INTO retailer_orders (
-                po_number, 
-                retailer_name, 
-                retailer_email, 
-                retailer_contact, 
-                order_date, 
-                expected_delivery, 
-                status, 
-                subtotal, 
-                tax, 
-                discount, 
-                total_amount, 
-                notes, 
-                created_at,
-                updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
-    
-    $stmt = mysqli_prepare($conn, $query);
-    if (!$stmt) {
-        throw new Exception("Prepare failed: " . mysqli_error($conn));
-    }
-    
-    mysqli_stmt_bind_param(
-        $stmt, 
-        "ssssssddddss", 
-        $poNumber, 
-        $retailerName, 
-        $retailerEmail, 
-        $retailerContact, 
-        $orderDate, 
-        $expectedDelivery, 
-        $status, 
-        $subtotal, 
-        $tax, 
-        $discount, 
-        $totalAmount, 
-        $notes
-    );
-    
-    if (!mysqli_stmt_execute($stmt)) {
-        throw new Exception("Error creating order: " . mysqli_error($conn) . " (Query: $query)");
-    }
-    
-    $orderId = mysqli_insert_id($conn);
-    if (!$orderId) {
-        throw new Exception("Failed to get insert ID after creating order");
-    }
-    
-    error_log("Order created with ID: $orderId");
-    
-    // Insert order items
-    insertOrderItems($data['items'], $orderId);
-    
-    // Insert status history
-    insertStatusHistory($orderId, $status, $notes);
-    
-    return $orderId;
-}
-
-// Function to update an existing order
-function updateOrder($data, $orderId) {
-    global $conn;
-    
-    // Prepare order data
-    $retailerName = $data['retailer_name'];
-    $retailerEmail = $data['retailer_email'];
-    $retailerContact = $data['retailer_contact'];
-    $orderDate = $data['order_date'];
-    $expectedDelivery = $data['expected_delivery'];
-    $status = $data['status'];
-    $subtotal = $data['subtotal'];
-    $tax = isset($data['tax']) ? $data['tax'] : 0;
-    $discount = $data['discount'];
-    $totalAmount = $data['total_amount'];
-    $notes = isset($data['notes']) ? $data['notes'] : '';
-    
-    // Update order
-    $query = "UPDATE retailer_orders SET 
-                retailer_name = ?, 
-                retailer_email = ?, 
-                retailer_contact = ?, 
-                order_date = ?, 
-                expected_delivery = ?, 
-                status = ?, 
-                subtotal = ?, 
-                tax = ?, 
-                discount = ?, 
-                total_amount = ?, 
-                notes = ?,
-                updated_at = NOW()
-            WHERE order_id = ?";
-    
-    $stmt = mysqli_prepare($conn, $query);
-    if (!$stmt) {
-        throw new Exception("Prepare failed: " . mysqli_error($conn));
-    }
-    
-    mysqli_stmt_bind_param(
-        $stmt, 
-        "ssssssddddsi", 
-        $retailerName, 
-        $retailerEmail, 
-        $retailerContact, 
-        $orderDate, 
-        $expectedDelivery, 
-        $status, 
-        $subtotal, 
-        $tax, 
-        $discount, 
-        $totalAmount, 
-        $notes,
-        $orderId
-    );
-    
-    if (!mysqli_stmt_execute($stmt)) {
-        throw new Exception("Error updating order: " . mysqli_error($conn));
-    }
-    
-    // Delete existing order items
-    $deleteQuery = "DELETE FROM retailer_order_items WHERE order_id = ?";
-    $deleteStmt = mysqli_prepare($conn, $deleteQuery);
-    mysqli_stmt_bind_param($deleteStmt, "i", $orderId);
-    
-    if (!mysqli_stmt_execute($deleteStmt)) {
-        throw new Exception("Error deleting order items: " . mysqli_error($conn));
-    }
-    
-    // Insert new order items
-    insertOrderItems($data['items'], $orderId);
-    
-    // Check if status has changed
-    $statusQuery = "SELECT status FROM retailer_orders WHERE order_id = ?";
-    $statusStmt = mysqli_prepare($conn, $statusQuery);
-    mysqli_stmt_bind_param($statusStmt, "i", $orderId);
-    mysqli_stmt_execute($statusStmt);
-    $statusResult = mysqli_stmt_get_result($statusStmt);
-    $currentStatus = mysqli_fetch_assoc($statusResult)['status'];
-    
-    if ($currentStatus !== $status) {
-        insertStatusHistory($orderId, $status, $notes);
-    }
-    
-    return true;
-}
-
-// Function to insert order items
-function insertOrderItems($items, $orderId) {
-    global $conn;
-    
-    if (empty($items)) {
-        error_log("No items to insert for order ID: $orderId");
-        return;
-    }
-    
-    error_log("Inserting " . count($items) . " items for order ID: $orderId");
-    
-    foreach ($items as $item) {
-        $productId = $item['product_id'];
-        $quantity = $item['quantity'];
-        $unitPrice = $item['unit_price'];
-        $totalPrice = $quantity * $unitPrice;
-        
-        error_log("Inserting item: Product ID: $productId, Quantity: $quantity, Unit Price: $unitPrice");
-        
-        $query = "INSERT INTO retailer_order_items (
-                    order_id, 
-                    product_id, 
-                    quantity, 
-                    unit_price,
-                    total_price,
-                    created_at
-                ) VALUES (?, ?, ?, ?, ?, NOW())";
-        
-        $stmt = mysqli_prepare($conn, $query);
-        if (!$stmt) {
-            throw new Exception("Prepare failed for item insert: " . mysqli_error($conn));
+        if (isset($conn) && $conn->ping()) {
+            $conn->rollback();
         }
-        
-        mysqli_stmt_bind_param($stmt, "isidd", $orderId, $productId, $quantity, $unitPrice, $totalPrice);
-        
-        if (!mysqli_stmt_execute($stmt)) {
-            throw new Exception("Error adding order item: " . mysqli_error($conn));
-        }
+        $response['message'] = "Error: " . $e->getMessage();
+        error_log("Error updating order status: " . $e->getMessage());
     }
+    
+    echo json_encode($response);
 }
 
-// Function to insert status history
-function insertStatusHistory($orderId, $status, $notes = '') {
-    global $conn;
-    
-    error_log("Inserting status history for order ID: $orderId, Status: $status");
-    
-    $query = "INSERT INTO retailer_order_status_history (order_id, status, notes, created_at) VALUES (?, ?, ?, NOW())";
-    $stmt = mysqli_prepare($conn, $query);
-    if (!$stmt) {
-        throw new Exception("Prepare failed for status history: " . mysqli_error($conn));
-    }
-    
-    mysqli_stmt_bind_param($stmt, "iss", $orderId, $status, $notes);
-    
-    if (!mysqli_stmt_execute($stmt)) {
-        throw new Exception("Error adding status history: " . mysqli_error($conn));
-    }
-}
-
-// Function to update order status
-function updateOrderStatus($user_id = null) {
-    global $conn;
-    
-    // Check if user is logged in
-    if (!$user_id) {
-        echo json_encode(['success' => false, 'message' => 'User not logged in']);
-        return;
-    }
-    
-    // Get JSON data from request
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    if (!$data || !isset($data['order_id']) || !isset($data['status'])) {
-        echo json_encode(['success' => false, 'message' => 'Invalid data format']);
-        return;
-    }
+// Function to delete order - ensure user can only delete their own orders
+function deleteOrder($conn, $user_id = null) {
+    // Initialize response array
+    $response = ['success' => false, 'message' => ''];
     
     try {
-        // Start transaction
-        mysqli_begin_transaction($conn);
+        // Check if user is logged in
+        if (!$user_id) {
+            throw new Exception("User not logged in");
+        }
         
-        $orderId = $data['order_id'];
-        $status = $data['status'];
-        $notes = isset($data['notes']) ? $data['notes'] : '';
+        // Get JSON data from request
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        if (!isset($data['order_id'])) {
+            throw new Exception("Missing order ID");
+        }
         
         // Verify the order belongs to this user
-        $checkQuery = "SELECT ro.order_id FROM retailer_orders ro 
-                      JOIN users u ON ro.retailer_email = u.email 
-                      WHERE ro.order_id = ? AND u.id = ?";
-        $checkStmt = mysqli_prepare($conn, $checkQuery);
-        mysqli_stmt_bind_param($checkStmt, "ii", $orderId, $user_id);
-        mysqli_stmt_execute($checkStmt);
-        mysqli_stmt_store_result($checkStmt);
+        $userQuery = "SELECT email FROM users WHERE id = ?";
+        $userStmt = $conn->prepare($userQuery);
+        $userStmt->bind_param("i", $user_id);
+        $userStmt->execute();
+        $userResult = $userStmt->get_result();
         
-        if (mysqli_stmt_num_rows($checkStmt) === 0) {
-            throw new Exception("You don't have permission to update this order");
+        if ($userRow = $userResult->fetch_assoc()) {
+            $userEmail = $userRow['email'];
+            
+            // Check if the order belongs to this user
+            $checkQuery = "SELECT order_id FROM retailer_orders WHERE order_id = ? AND retailer_email = ?";
+            $checkStmt = $conn->prepare($checkQuery);
+            $checkStmt->bind_param("is", $data['order_id'], $userEmail);
+            $checkStmt->execute();
+            $checkResult = $checkStmt->get_result();
+            
+            if ($checkResult->num_rows === 0) {
+                throw new Exception("You don't have permission to delete this order");
+            }
+            
+            // Start transaction
+            $conn->begin_transaction();
+            
+            // Delete order items first (foreign key constraint)
+            $deleteItemsQuery = "DELETE FROM retailer_order_items WHERE order_id = ?";
+            $deleteItemsStmt = $conn->prepare($deleteItemsQuery);
+            
+            if (!$deleteItemsStmt) {
+                throw new Exception("Prepare failed for delete items: " . $conn->error);
+            }
+            
+            $deleteItemsStmt->bind_param("i", $data['order_id']);
+            
+            if (!$deleteItemsStmt->execute()) {
+                throw new Exception("Execute failed for delete items: " . $deleteItemsStmt->error);
+            }
+            
+            // Delete status history
+            $deleteHistoryQuery = "DELETE FROM retailer_order_status_history WHERE order_id = ?";
+            $deleteHistoryStmt = $conn->prepare($deleteHistoryQuery);
+            
+            if (!$deleteHistoryStmt) {
+                throw new Exception("Prepare failed for delete history: " . $conn->error);
+            }
+            
+            $deleteHistoryStmt->bind_param("i", $data['order_id']);
+            
+            if (!$deleteHistoryStmt->execute()) {
+                throw new Exception("Execute failed for delete history: " . $deleteHistoryStmt->error);
+            }
+            
+            // Delete the order
+            $deleteOrderQuery = "DELETE FROM retailer_orders WHERE order_id = ?";
+            $deleteOrderStmt = $conn->prepare($deleteOrderQuery);
+            
+            if (!$deleteOrderStmt) {
+                throw new Exception("Prepare failed for delete order: " . $conn->error);
+            }
+            
+            $deleteOrderStmt->bind_param("i", $data['order_id']);
+            
+            if (!$deleteOrderStmt->execute()) {
+                throw new Exception("Execute failed for delete order: " . $deleteOrderStmt->error);
+            }
+            
+            if ($deleteOrderStmt->affected_rows <= 0) {
+                throw new Exception("Order not found or already deleted");
+            }
+            
+            // Commit transaction
+            $conn->commit();
+            
+            $response['success'] = true;
+            $response['message'] = "Order deleted successfully";
+        } else {
+            throw new Exception("User email not found");
         }
         
-        // Update order status
-        $query = "UPDATE retailer_orders SET status = ?, updated_at = NOW() WHERE order_id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "si", $status, $orderId);
-        
-        if (!mysqli_stmt_execute($stmt)) {
-            throw new Exception("Error updating order status: " . mysqli_error($conn));
-        }
-        
-        // Insert status history
-        insertStatusHistory($orderId, $status, $notes);
-        
-        // Commit transaction
-        mysqli_commit($conn);
-        
-        echo json_encode(['success' => true, 'message' => 'Order status updated successfully']);
     } catch (Exception $e) {
         // Rollback transaction on error
-        mysqli_rollback($conn);
-        
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-    }
-}
-
-// Function to delete an order
-function deleteOrder($user_id = null) {
-    global $conn;
-    
-    // Check if user is logged in
-    if (!$user_id) {
-        echo json_encode(['success' => false, 'message' => 'User not logged in']);
-        return;
+        if (isset($conn) && $conn->ping()) {
+            $conn->rollback();
+        }
+        $response['message'] = "Error: " . $e->getMessage();
+        error_log("Error deleting order: " . $e->getMessage());
     }
     
-    // Get JSON data from request
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    if (!$data || !isset($data['order_id'])) {
-        echo json_encode(['success' => false, 'message' => 'Invalid data format']);
-        return;
-    }
-    
-    try {
-        // Start transaction
-        mysqli_begin_transaction($conn);
-        
-        $orderId = $data['order_id'];
-        
-        // Verify the order belongs to this user
-        $checkQuery = "SELECT ro.order_id FROM retailer_orders ro 
-                      JOIN users u ON ro.retailer_email = u.email 
-                      WHERE ro.order_id = ? AND u.id = ?";
-        $checkStmt = mysqli_prepare($conn, $checkQuery);
-        mysqli_stmt_bind_param($checkStmt, "ii", $orderId, $user_id);
-        mysqli_stmt_execute($checkStmt);
-        mysqli_stmt_store_result($checkStmt);
-        
-        if (mysqli_stmt_num_rows($checkStmt) === 0) {
-            throw new Exception("You don't have permission to delete this order");
-        }
-        
-        // Delete order items
-        $deleteItemsQuery = "DELETE FROM retailer_order_items WHERE order_id = ?";
-        $deleteItemsStmt = mysqli_prepare($conn, $deleteItemsQuery);
-        mysqli_stmt_bind_param($deleteItemsStmt, "i", $orderId);
-        
-        if (!mysqli_stmt_execute($deleteItemsStmt)) {
-            throw new Exception("Error deleting order items: " . mysqli_error($conn));
-        }
-        
-        // Delete status history
-        $deleteHistoryQuery = "DELETE FROM retailer_order_status_history WHERE order_id = ?";
-        $deleteHistoryStmt = mysqli_prepare($conn, $deleteHistoryQuery);
-        mysqli_stmt_bind_param($deleteHistoryStmt, "i", $orderId);
-        
-        if (!mysqli_stmt_execute($deleteHistoryStmt)) {
-            throw new Exception("Error deleting status history: " . mysqli_error($conn));
-        }
-        
-        // Delete order
-        $deleteOrderQuery = "DELETE FROM retailer_orders WHERE order_id = ?";
-        $deleteOrderStmt = mysqli_prepare($conn, $deleteOrderQuery);
-        mysqli_stmt_bind_param($deleteOrderStmt, "i", $orderId);
-        
-        if (!mysqli_stmt_execute($deleteOrderStmt)) {
-            throw new Exception("Error deleting order: " . mysqli_error($conn));
-        }
-        
-        // Commit transaction
-        mysqli_commit($conn);
-        
-        echo json_encode(['success' => true, 'message' => 'Order deleted successfully']);
-    } catch (Exception $e) {
-        // Rollback transaction on error
-        mysqli_rollback($conn);
-        
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-    }
+    echo json_encode($response);
 }
 
 // Function to get products
-function getProducts() {
-    global $conn;
+function getProducts($conn) {
+    // Initialize response array
+    $response = ['success' => false, 'message' => '', 'products' => []];
     
-    $query = "SELECT 
-                p.product_id,
-                p.product_name,
-                p.price as retail_price,
-                p.stocks as available_stock,
-                p.batch_tracking
-            FROM products p
-            WHERE p.stocks > 0
-            ORDER BY p.product_name";
-    
-    $result = mysqli_query($conn, $query);
-    
-    if (!$result) {
-        echo json_encode(['success' => false, 'message' => 'Error fetching products: ' . mysqli_error($conn)]);
-        return;
+    try {
+        // Query to get all active products
+        $query = "SELECT 
+                    p.product_id,
+                    p.product_name,
+                    p.price as retail_price,
+                    p.stocks as available_stock,
+                    p.batch_tracking
+                  FROM products p
+                  WHERE p.stocks > 0
+                  ORDER BY p.product_name";
+        
+        $result = $conn->query($query);
+        
+        if (!$result) {
+            throw new Exception("Query failed: " . $conn->error);
+        }
+        
+        $products = [];
+        while ($row = $result->fetch_assoc()) {
+            $products[] = $row;
+        }
+        
+        $response['success'] = true;
+        $response['products'] = $products;
+        
+    } catch (Exception $e) {
+        $response['message'] = "Error: " . $e->getMessage();
+        error_log("Error fetching products: " . $e->getMessage());
     }
     
-    $products = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $products[] = $row;
-    }
-    
-    echo json_encode(['success' => true, 'products' => $products]);
+    echo json_encode($response);
 }
 ?>

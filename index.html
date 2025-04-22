@@ -17,105 +17,120 @@
         }
 
         html, body {
-          height: 100%;
-          margin: 0;
-          padding: 0;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          position: relative;
-        }
-      
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: whitesmoke;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0.6; /* Adjust opacity (0 = fully transparent, 1 = fully opaque) */
-            z-index: -1;
-        }
-      
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 0px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            z-index: 100;
-            box-shadow: 0 2px 4px rgba(156, 156, 156, 0.05);
-        }
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
 
-        .login-container {
-          right: 100px;
-            width: 100%;
-            height: 100vh;
-            position: relative;
-            overflow: hidden;
-            padding-top: 70px;
-            filter: drop-shadow(5px 5px 5px rgba(177, 177, 177, 0.5));
-        }
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: whitesmoke;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    z-index: -1;
+}
 
-        .background-circle {
-            position: absolute;
-            width: 800px;
-            height: 800px;
-            border-radius: 50%;
-            background-color: var(--pinana-light-yellow);
-            bottom: -400px;
-            left: -100px;
-            z-index: -1;
-        }
+.login-container {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
 
-        .logo-container {
-            position: relative;
-            width: 50%;
-            height: 100%;
-        }
+.content-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-        .logo {
-            width: 120px;
-        }
+.top-logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
 
-        .pineapple-large {
-          position: absolute;
-          left: 300px;
-          top: 50px;
-          z-index: 0;
-          overflow: visible;
-          filter: drop-shadow(10px 10px 20px rgba(0, 0, 0, 0.5)); /* Shadow effect */
-        }
-      
-        .square-light-img {
-            width: 500px; /* Made bigger */
-        }
+.logo {
+    width: 150px;
+    height: auto;
+}
 
-        .icon-cup {
-            position: absolute;
-            top: 200px;
-            left: 180px;
-            color: var(--pinana-yellow);
-            font-size: 24px;
-        }
+.main-content {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
 
-        .icon-bulb {
-            position: absolute;
-            bottom: 200px;
-            left: 400px;
-            color: var(--pinana-yellow);
-            font-size: 24px;
-        }
+.background-circle {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    background-color: var(--pinana-light-yellow);
+    bottom: -400px;
+    left: -100px;
+    z-index: -1;
+}
 
+.logo-container {
+    position: relative;
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.pineapple-large {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 0;
+}
+
+.square-light-img {
+    max-width: 100%;
+    height: auto;
+    filter: drop-shadow(10px 10px 20px rgba(0, 0, 0, 0.5));
+}
+
+.icon-bulb {
+    position: absolute;
+    bottom: 20%;
+    right: 20%;
+    color: var(--pinana-yellow);
+    font-size: 24px;
+}
+
+.form-area {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+        
         .login-form-container {
-            width: 400px;
-            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
             border-radius: 8px;
             border: 1px solid #ddbd3e;
             background-color: white;
@@ -198,18 +213,6 @@
         .form-check-input:focus {
             border-color: var(--pinana-yellow);
             box-shadow: 0 0 0 0.25rem rgba(242, 208, 69, 0.25);
-        }
-
-        .form-area {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 50%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding-top: 70px; /* Added to account for the fixed header */
         }
         
         .error-message {
@@ -425,48 +428,279 @@
             border-radius: 3px;
         }
 
-        @media (max-width: 992px) {
-            .logo-container {
-                display: none;
-            }
-            .form-area {
-                width: 100%;
-                padding: 20px;
-            }
-            .background-circle {
-                width: 600px;
-                height: 600px;
-                bottom: -300px;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-            .login-form-container {
-                width: 100%;
-                max-width: 400px;
-            }
-            .modal-dialog {
-                max-width: 95%;
-                margin: 10px auto;
-            }
-        }
+        /* Responsive styles */
+@media (max-width: 1200px) {
+    .square-light-img {
+        width: 400px;
+    }
+}
+
+@media (max-width: 992px) {
+    .main-content {
+        flex-direction: column;
+        position: relative;
+    }
+    
+    .logo-container {
+        width: 100%;
+        height: auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: visible;
+        margin-bottom: 0;
+    }
+    
+    .pineapple-large {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+    
+    .form-area {
+        width: 100%;
+        padding: 20px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .icon-bulb {
+        display: none;
+    }
+    
+    .login-form-container {
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(221, 189, 62, 0.7);
+    }
+}
+
+@media (max-width: 768px) {
+    .top-logo {
+        margin-bottom: 20px;
+    }
+    
+    .logo {
+        width: 130px;
+    }
+    
+    .logo-container {
+        height: 150px;
+    }
+    
+    .pineapple-large {
+        transform: scale(0.7);
+    }
+    
+    .square-light-img {
+        width: 550px;
+    }
+    
+    .login-form-container {
+        padding: 20px;
+    }
+    
+    .login-form-container h2 {
+        font-size: 24px;
+        margin-bottom: 0px;
+    }
+    
+    .form-control, .btn-primary, .register-retailer-btn {
+        height: 45px;
+    }
+    
+    .modal-dialog {
+        margin: 10px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .registration-progress {
+        margin-bottom: 20px;
+    }
+    
+    .progress-step-text {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .top-logo {
+        margin-bottom: 15px;
+    }
+    
+    .logo {
+        width: 120px;
+    }
+    
+    .logo-container {
+        height: 120px;
+    }
+    
+    .pineapple-large {
+        transform: scale(0.6);
+    }
+    
+    .square-light-img {
+        width: 750px;
+    }
+    
+    .login-form-container {
+        padding: 15px;
+    }
+    
+    .login-form-container h2 {
+        font-size: 22px;
+        margin-bottom: 15px;
+    }
+    
+    .form-control, .btn-primary, .register-retailer-btn {
+        height: 40px;
+        font-size: 14px;
+    }
+    
+    .form-label {
+        font-size: 14px;
+    }
+    
+    .forgot-password {
+        font-size: 12px;
+    }
+    
+    .form-check-label {
+        font-size: 14px;
+    }
+    
+    .modal-title {
+        font-size: 18px;
+    }
+    
+    .form-section-title {
+        font-size: 16px;
+    }
+    
+    .progress-step-number {
+        width: 25px;
+        height: 25px;
+        font-size: 12px;
+    }
+    
+    .progress-step-text {
+        font-size: 9px;
+    }
+    
+    /* Adjust form rows on mobile */
+    .row .col-md-6 {
+        margin-bottom: 15px;
+    }
+    
+    /* Make buttons more touch-friendly */
+    .btn {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+}
+
+/* Fix for very small screens */
+@media (max-width: 360px) {
+    .top-logo {
+        margin-bottom: 10px;
+    }
+    
+    .logo {
+        width: 100px;
+    }
+    
+    .logo-container {
+        height: 100px;
+    }
+    
+    .pineapple-large {
+        transform: scale(0.5);
+    }
+    
+    .square-light-img {
+        width: 200px;
+    }
+    
+    .login-form-container {
+        padding: 10px;
+    }
+    
+    .login-form-container h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+    
+    .form-control, .btn-primary, .register-retailer-btn {
+        height: 38px;
+        font-size: 13px;
+    }
+    
+    .d-flex.justify-content-between.align-items-center {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .forgot-password {
+        margin-top: 10px;
+    }
+}
+
+.form-logo-container {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.form-logo {
+    width: 180px;
+    height: auto;
+    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+    .form-logo {
+        width: 150px;
+    }
+}
+
+@media (max-width: 576px) {
+    .form-logo {
+        width: 130px;
+    }
+    
+    .form-logo-container {
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 360px) {
+    .form-logo {
+        width: 120px;
+    }
+    
+    .form-logo-container {
+        margin-bottom: 15px;
+    }
+}
     </style>
 </head>
 <body>
-    <!-- Header with logo and staff button -->
-    <header>
-        <div>
-            <img src="images/final-light.png" alt="Piñana Gourmet" class="logo">
-        </div>
-        <!-- <div>
-            <a href="#" class="btn btn-staff">Apply as Staff</a>
-        </div> -->
-    </header>
-
+    
     <div class="login-container">
-        <div class="background-circle"></div>
-        
+    <div class="background-circle"></div>
+    
+    <div class="content-wrapper">
+    <!-- Main content -->
+    <div class="main-content">
         <!-- Logo and decorative elements -->
-        <div class="logo-container d-none d-lg-block">
+        <div class="logo-container">
             <div class="pineapple-large">
                <img src="images/square-light.png" alt="" class="square-light-img">
             </div>
@@ -481,44 +715,48 @@
         <!-- Sign in form -->
         <div class="form-area">
             <div class="login-form-container">
-                <h2>Sign in</h2>
+                <div class="form-logo-container">
+                    <img src="images/final-light.png" alt="Piñana Gourmet" class="form-logo">
+                </div>
                 <div id="errorMessage" class="error-message">Invalid username or password</div>
-                <form id="loginForm" method="POST" action="process_login.php">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                            <span class="input-group-text" id="togglePassword" style="cursor: pointer; background-color: #f5f5f5; border: 1px solid #e0e0e0;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
-                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                                </svg>
-                            </span>
+                    <form id="loginForm" method="POST" action="process_login.php">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
                         </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
-                            <label class="form-check-label" for="rememberMe">
-                                Remember me
-                            </label>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                                <span class="input-group-text" id="togglePassword" style="cursor: pointer; background-color: #f5f5f5; border: 1px solid #e0e0e0;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                    </svg>
+                                </span>
+                            </div>
                         </div>
-                        <a href="#" class="forgot-password">Forgot password?</a>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Sign in</button>
-                </form>
-                
-                <!-- Register as Retailer Button -->
-                <button type="button" class="btn register-retailer-btn w-100" data-bs-toggle="modal" data-bs-target="#retailerRegistrationModal">
-                    <i class="bi bi-shop"></i> Register as a Retailer
-                </button>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
+                                <label class="form-check-label" for="rememberMe">
+                                    Remember me
+                                </label>
+                            </div>
+                            <a href="#" class="forgot-password">Forgot password?</a>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign in</button>
+                    </form>
+                    
+                    <!-- Register as Retailer Button -->
+                    <button type="button" class="btn register-retailer-btn w-100" data-bs-toggle="modal" data-bs-target="#retailerRegistrationModal">
+                        <i class="bi bi-shop"></i> Register as a Retailer
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Retailer Registration Modal -->
     <div class="modal fade" id="retailerRegistrationModal" tabindex="-1" aria-labelledby="retailerRegistrationModalLabel" aria-hidden="true">

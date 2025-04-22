@@ -85,26 +85,28 @@ a {
   padding: 0 10px;
 }
 
+/* Fixed logo container with specific dimensions */
 .logo-container {
   padding: 0;
   margin-bottom: 5px;
   border-bottom: 1px solid var(--sidebar-divider);
-  align-items: center; /* Centers content horizontally */
-  justify-content: center; /* Centers content vertically */
-  height: 100%; /* Ensures the sidebar takes full height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px; /* Fixed height */
+  width: 100%; /* Fixed width to match sidebar */
 }
 
 .pineapple-logo {
   width: 150px;
   height: 105px;
+  object-fit: contain; /* Ensures the logo maintains its aspect ratio */
 }
-
 .logo-text {
   color: var(--text-color);
   font-weight: 600;
   transition: opacity var(--transition-speed) ease;
 }
-
 .sidebar-divider {
   display: flex;
   align-items: center;
@@ -2149,3 +2151,585 @@ a {
   background-color: #f8d8d8;
 }
 
+/* Delivery Tracking Styles */
+
+/* Main container for delivery tracking */
+.delivery-tracking {
+  padding: 1rem 0;
+}
+
+/* Steps container */
+.delivery-steps {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  margin: 1.5rem 0;
+  padding: 0.5rem 0;
+}
+
+/* Vertical line connecting steps */
+.delivery-steps::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 2px;
+  background-color: #e9ecef;
+  z-index: 0;
+}
+
+/* Individual step */
+.step {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  z-index: 1;
+}
+
+/* Step icon container */
+.step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  border: 2px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #6c757d;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+/* Active step styling */
+.step-active .step-icon {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+  box-shadow: 0 0 0 5px rgba(40, 167, 69, 0.1);
+}
+
+/* Current step styling */
+.step-current .step-icon {
+  animation: pulse 2s infinite;
+}
+
+/* Step text container */
+.step-text {
+  flex: 1;
+  padding-top: 0.25rem;
+}
+
+/* Step name */
+.step-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #343a40;
+  margin-bottom: 0.25rem;
+}
+
+/* Step timestamp */
+.step-time {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Inactive step styling */
+.step:not(.step-active) .step-name {
+  color: #6c757d;
+}
+
+/* Completed line for active steps */
+.step-active::before {
+  content: '';
+  position: absolute;
+  top: -2.5rem;
+  bottom: 0;
+  left: 20px;
+  width: 2px;
+  background-color: #28a745;
+  z-index: 0;
+  height: 2.5rem;
+}
+
+/* First step doesn't need a line above it */
+.step:first-child::before {
+  display: none;
+}
+
+/* Delivery details card */
+.delivery-details-card {
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: all 0.3s ease;
+}
+
+.delivery-details-card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Status update section */
+.status-update-section {
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 50rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.status-badge i {
+  margin-right: 0.5rem;
+}
+
+.status-badge-confirmed {
+  background-color: #cff4fc;
+  color: #055160;
+}
+
+.status-badge-preparing {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.status-badge-out-for-delivery {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-badge-delivered {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+/* Map container for delivery tracking */
+.delivery-map-container {
+  height: 250px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin: 1rem 0;
+  border: 1px solid #dee2e6;
+}
+
+/* Delivery info list */
+.delivery-info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.delivery-info-list li {
+  display: flex;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.delivery-info-list li:last-child {
+  border-bottom: none;
+}
+
+.delivery-info-list .info-label {
+  font-weight: 600;
+  width: 40%;
+  color: #495057;
+}
+
+.delivery-info-list .info-value {
+  width: 60%;
+}
+
+/* Pulse animation for current step */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .delivery-steps {
+    gap: 2rem;
+  }
+  
+  .step {
+    gap: 1rem;
+  }
+  
+  .step-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  
+  .delivery-steps::before {
+    left: 16px;
+  }
+  
+  .step-active::before {
+    left: 16px;
+  }
+  
+  .step-name {
+    font-size: 0.9rem;
+  }
+  
+  .step-time {
+    font-size: 0.8rem;
+  }
+}
+
+/* Enhanced card styles for delivery tracking */
+.tracking-card {
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.tracking-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+}
+
+.tracking-card .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1rem 1.25rem;
+}
+
+.tracking-card .card-title {
+  margin-bottom: 0;
+  font-weight: 600;
+  color: #343a40;
+}
+
+/* Delivery mode icons */
+.delivery-mode-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.delivery-mode-pickup {
+  color: #20c997;
+}
+
+.delivery-mode-delivery {
+  color: #0d6efd;
+}
+
+/* Delivery mode selection cards */
+.delivery-mode-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.delivery-mode-card:hover {
+  border-color: #dee2e6;
+}
+
+.delivery-mode-card.selected {
+  border-color: #0d6efd;
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Notification form styles */
+.notification-form {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.notification-icon {
+  font-size: 3rem;
+  color: #ffc107;
+  margin-bottom: 1rem;
+}
+
+/* Timeline for delivery history */
+.delivery-timeline {
+  position: relative;
+  padding-left: 2rem;
+  margin: 1.5rem 0;
+}
+
+.delivery-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.5rem;
+  width: 2px;
+  background-color: #dee2e6;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -1.5rem;
+  top: 0.25rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #adb5bd;
+  border: 2px solid #fff;
+  z-index: 1;
+}
+
+.timeline-item.active::before {
+  background-color: #28a745;
+}
+
+.timeline-content {
+  padding-left: 0.5rem;
+}
+
+.timeline-date {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.timeline-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.timeline-description {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Status history timeline styling */
+.status-history-timeline {
+  position: relative;
+  padding: 20px 0;
+}
+
+.status-history-timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 2px;
+  background-color: #e9ecef;
+}
+
+.history-item {
+  position: relative;
+  margin-bottom: 20px;
+  padding-left: 45px;
+}
+
+.history-item::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 2px solid #6c757d;
+}
+
+.history-item:last-child {
+  margin-bottom: 0;
+}
+
+.history-time {
+  display: block;
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 5px;
+}
+
+.history-status {
+  display: block;
+}
+
+/* Status dropdown styling */
+.status-dropdown {
+  min-width: 120px;
+}
+
+/* Status badge colors */
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+.badge.bg-success {
+  background-color: #28a745 !important;
+}
+
+.badge.bg-primary {
+  background-color: #0d6efd !important;
+}
+
+.badge.bg-info {
+  background-color: #17a2b8 !important;
+}
+
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.badge.bg-secondary {
+  background-color: #6c757d !important;
+}
+
+/* Delivery Tracking Styles */
+.tracking-timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.tracking-timeline::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #dee2e6;
+}
+
+.tracking-step {
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.tracking-step:last-child {
+  padding-bottom: 0;
+}
+
+.tracking-step::before {
+  content: "";
+  position: absolute;
+  left: -30px;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 2px solid #dee2e6;
+}
+
+.tracking-step.active::before {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.tracking-step.completed::before {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.tracking-step.cancelled::before {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.tracking-step-content {
+  padding: 0 0 0 10px;
+}
+
+.tracking-map {
+  height: 200px;
+  background-color: #f8f9fa;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.tracking-map-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6c757d;
+}
+
+.pickup-status {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.pickup-status-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.pickup-status-icon i {
+  font-size: 1.2rem;
+}
+
+.pickup-status-text {
+  flex: 1;
+}
+
+.delivery-progress {
+  margin: 20px 0;
+}
+
+.delivery-progress-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+
+.delivery-progress-step {
+  text-align: center;
+  flex: 1;
+  position: relative;
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.delivery-progress-step.active {
+  color: #0d6efd;
+  font-weight: 500;
+}
+
+.delivery-progress-step.completed {
+  color: #198754;
+  font-weight: 500;
+}

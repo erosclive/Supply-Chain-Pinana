@@ -13,3 +13,5 @@
 2025-04-12 02:34:05 - Generated URL: http://localhost/SupplyChainCapstone/verify_email.php?token=ff65db45b7cb26729412b2691ef86819961e11dfb58a5f4adef731ea011cd34b
 2025-04-12 02:34:12 - Generated URL: http://localhost/SupplyChainCapstone/verify_email.php?token=830dc28466a5c4cbdf8a87dda92d5e11708a7bc6b080efb5d7350d3a5b99df5e
 2025-04-16 15:38:27 - Generated URL: http://localhost/SupplyChainCapstone/verify_email.php?token=b0c7c7d6319671e54bdf46f44f9ba201da80fe3a95f1d45bba6e8de4e93725f4
+2025-04-22 07:28:33 - Generated URL: http://localhost/SupplyChainCapstone/verify_email.php?token=f6415807a8e980ccdac0f894f28e057011d847a83b8e5209fa037b8698a91934
+2025-04-22 07:28:42 - Generated URL: http://localhost/SupplyChainCapstone/verify_email.php?token=f3479c9e35ac5d3c2d0d42b85f48f816e24d92231c64c6ebb3a65261f81f3dde

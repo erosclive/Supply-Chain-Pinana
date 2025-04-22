@@ -45,8 +45,8 @@ try {
     
     // Now get retailer-specific information
     $retailerQuery = "SELECT r.* 
-                      FROM retailer_profiles r 
-                      WHERE r.user_id = ?";
+                  FROM retailer_profiles r 
+                  WHERE r.user_id = ?";
     
     $stmt = $conn->prepare($retailerQuery);
     $stmt->bind_param("i", $userId);

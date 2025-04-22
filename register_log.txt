@@ -621,3 +621,37 @@
 2025-04-12 02:34:04 - Testing email connection before sending verification email
 2025-04-12 02:34:12 - Verification email sent successfully to: vanngaming2003@gmail.com
 2025-04-12 02:34:12 - Registration successful
+2025-04-22 07:28:29 - POST data: Array
+(
+    [firstName] => Fyave
+    [lastName] => Targaryen
+    [birthday] => 2001-06-13
+    [age] => 23
+    [nationality] => Filipino
+    [businessName] => Fyaveorite
+    [businessType] => Cafe
+    [province] => Laguna
+    [city] => Calauan
+    [barangay] => San Isidro
+    [houseNumber] => purok 5
+    [addressNotes] => inc
+    [phone] => +639495027266
+    [email] => fyavetargaryen@gmail.com
+    [facebook] => Fyave Targaryen
+    [instagram] => 
+    [tiktok] => 
+    [reg_username] => fyaver
+    [reg_password] => targaryenfam12
+    [termsAgreement] => on
+)
+
+2025-04-22 07:28:29 - Extracted data: firstName: Fyave, lastName: Targaryen, username: fyaver, email: fyavetargaryen@gmail.com
+2025-04-22 07:28:29 - Database connection: Connected
+2025-04-22 07:28:30 - Before user insert
+2025-04-22 07:28:30 - User inserted with ID: 21
+2025-04-22 07:28:30 - Before profile insert
+2025-04-22 07:28:30 - Profile inserted successfully
+2025-04-22 07:28:32 - Email connection test: Successful
+2025-04-22 07:28:32 - Testing email connection before sending verification email
+2025-04-22 07:28:42 - Verification email sent successfully to: fyavetargaryen@gmail.com
+2025-04-22 07:28:42 - Registration successful
