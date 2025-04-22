@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Successful Transactions - Piñana Gourmet</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="successful-transactions.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+                <div class="sidebar-inner">
+                    <div class="logo-container d-flex align-items-center mb-4 mt-3">
+                        <img src="images/final-light.png" class="pineapple-logo">
+                    </div>
+                    
+                    <div class="sidebar-divider">
+                        <span>MAIN MENU</span>
+                    </div>
+                    
+                    <ul class="nav flex-column sidebar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html" data-page="index">
+                                <div class="nav-icon">
+                                    <i class="bi bi-grid"></i>
+                                </div>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="inventory.html" data-page="inventory">
+                                <div class="nav-icon">
+                                    <i class="bi bi-box"></i>
+                                </div>
+                                <span>Inventory</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="orders.html" data-page="orders">
+                                <div class="nav-icon">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <span>Orders</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="delivery.html" data-page="delivery">
+                                <div class="nav-icon">
+                                    <i class="bi bi-truck"></i>
+                                </div>
+                                <span>Delivery</span>
+                            </a>
+                        </li>
+                        
+                        <div class="sidebar-divider">
+                            <span>SALES</span>
+                        </div>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="pos.html" data-page="pos">
+                                <div class="nav-icon">
+                                    <i class="bi bi-credit-card"></i>
+                                </div>
+                                <span>POS</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="reports.html" data-page="reports">
+                                <div class="nav-icon">
+                                    <i class="bi bi-bar-chart"></i>
+                                </div>
+                                <span>Reports</span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="sidebar-footer">
+                        <div class="sidebar-divider">
+                            <span>ACCOUNT</span>
+                        </div>
+                        <div class="user-info d-flex align-items-center">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+                            <div class="user-details">
+                                <div class="user-name">Admin User</div>
+                                <div class="user-role">Administrator</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main content -->
+            <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <!-- Header -->
+                <div class="fixed-top-header">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <div class="d-flex align-items-center">
+                            <button class="navbar-toggler d-md-none collapsed me-2" type="button" id="sidebarToggle">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <h5 class="mb-0">Supply Chain Management</h5>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="notification-icon me-3 position-relative">
+                                <i class="bi bi-bell"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    3
+                                </span>
+                            </div>
+                            <div class="user-profile">
+                                <div class="profile-circle">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="main-content-inner">
+                    <!-- Transaction Content -->
+                    <div class="transaction-section">
+                        <!-- Transaction Header -->
+                        <div class="transaction-header">
+                            <h2><i class="bi bi-check-circle-fill text-success me-2"></i> Successful Transactions</h2>
+                            <p>View all completed and delivered orders</p>
+                        </div>
+                        
+                        
+                        <!-- Transaction Table -->
+                        <div class="transaction-table-container">
+                            <div class="transaction-table-header">
+                                <h3>Delivered Orders</h3>
+                                <div class="transaction-table-actions">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshTransactionsBtn">
+                                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="exportTransactionsBtn">
+                                        <i class="bi bi-download"></i> Export
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="printTransactionsBtn">
+                                        <i class="bi bi-printer"></i> Print
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table transaction-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Date</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="successful-transactions-body">
+                                        <!-- Table content will be loaded dynamically -->
+                                        <tr>
+                                            <td colspan="6" class="text-center py-4">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <p class="mt-2">Loading transactions...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="transaction-pagination">
+                                <div class="page-info" id="transactionCount">Showing 0 transactions</div>
+                                <nav aria-label="Transaction pagination">
+                                    <ul class="pagination pagination-sm" id="transactionPagination">
+                                        <!-- Pagination will be added dynamically -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                        
+                        <a href="orders.html" class="back-to-orders">
+                            <i class="bi bi-arrow-left"></i> Back to Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Transaction Modal -->
+    <div class="modal fade" id="viewTransactionModal" tabindex="-1" aria-labelledby="viewTransactionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewTransactionModalLabel">Transaction Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Order Information</h6>
+                            <p class="mb-1"><strong>Order ID:</strong> <span id="viewOrderId"></span></p>
+                            <p class="mb-1"><strong>Date:</strong> <span id="viewOrderDate"></span></p>
+                            <p class="mb-1"><strong>Status:</strong> <span class="badge bg-success">Delivered</span></p>
+                            <p class="mb-1"><strong>Payment Method:</strong> <span id="viewPaymentMethod"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Customer Information</h6>
+                            <p class="mb-1"><strong>Name:</strong> <span id="viewCustomerName"></span></p>
+                            <p class="mb-1"><strong>Email:</strong> <span id="viewCustomerEmail"></span></p>
+                            <p class="mb-1"><strong>Phone:</strong> <span id="viewCustomerPhone"></span></p>
+                            <p class="mb-1"><strong>Address:</strong> <span id="viewShippingAddress"></span></p>
+                        </div>
+                    </div>
+                    
+                    <h6 class="text-muted mb-2">Order Items</h6>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="viewOrderItems">
+                                <!-- Order items will be loaded dynamically -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                    <td class="text-end" id="viewOrderSubtotal">₱0.00</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Tax (12%):</strong></td>
+                                    <td class="text-end" id="viewOrderTax">₱0.00</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Discount:</strong></td>
+                                    <td class="text-end" id="viewOrderDiscount">₱0.00</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end fw-bold" id="viewOrderTotal">₱0.00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Notes</h6>
+                        <p id="viewOrderNotes">No notes available.</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Delivery Timeline</h6>
+                        <div class="delivery-timeline" id="orderTimeline">
+                            <!-- Timeline will be loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-primary" id="printOrderBtn">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="successful-transactions.js"></script>
+</body>
+</html>

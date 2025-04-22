@@ -1,0 +1,6 @@
+[13-Apr-2025 17:56:09 Europe/Berlin] Received order data: {"order_id":"","po_number":null,"retailer_name":"Van Clive","retailer_email":"vanngaming2003@gmail.com","retailer_contact":"+639749374734","order_date":"2025-04-13","expected_delivery":"2025-04-29","status":"order","subtotal":50,"tax":6,"discount":0,"total_amount":56,"notes":"","items":[{"product_id":"P030","product_name":"Piña Putoseko","quantity":1,"unit_price":50}],"supplier":"pinana-main"}
+[13-Apr-2025 17:56:09 Europe/Berlin] Inserting order with PO: RO-20250413-245, Status: order
+[13-Apr-2025 17:56:09 Europe/Berlin] Order created with ID: 1
+[13-Apr-2025 17:56:09 Europe/Berlin] Inserting 1 items for order ID: 1
+[13-Apr-2025 17:56:09 Europe/Berlin] Inserting item: Product ID: P030, Quantity: 1, Unit Price: 50
+[13-Apr-2025 17:56:09 Europe/Berlin] Inserting status history for order ID: 1, Status: order

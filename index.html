@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piñana Gourmet - Sign In</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Intl Tel Input CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
+    <style>
+        :root {
+            --pinana-yellow: #f2d045;
+            --pinana-green: #0b7a3e;
+            --pinana-light-yellow: #fff5d6;
+        }
+
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          position: relative;
+        }
+      
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: whitesmoke;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.6; /* Adjust opacity (0 = fully transparent, 1 = fully opaque) */
+            z-index: -1;
+        }
+      
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 0px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(156, 156, 156, 0.05);
+        }
+
+        .login-container {
+          right: 100px;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            padding-top: 70px;
+            filter: drop-shadow(5px 5px 5px rgba(177, 177, 177, 0.5));
+        }
+
+        .background-circle {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            background-color: var(--pinana-light-yellow);
+            bottom: -400px;
+            left: -100px;
+            z-index: -1;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 50%;
+            height: 100%;
+        }
+
+        .logo {
+            width: 120px;
+        }
+
+        .pineapple-large {
+          position: absolute;
+          left: 300px;
+          top: 50px;
+          z-index: 0;
+          overflow: visible;
+          filter: drop-shadow(10px 10px 20px rgba(0, 0, 0, 0.5)); /* Shadow effect */
+        }
+      
+        .square-light-img {
+            width: 500px; /* Made bigger */
+        }
+
+        .icon-cup {
+            position: absolute;
+            top: 200px;
+            left: 180px;
+            color: var(--pinana-yellow);
+            font-size: 24px;
+        }
+
+        .icon-bulb {
+            position: absolute;
+            bottom: 200px;
+            left: 400px;
+            color: var(--pinana-yellow);
+            font-size: 24px;
+        }
+
+        .login-form-container {
+            width: 400px;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #ddbd3e;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .login-form-container h2 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-control {
+            height: 50px;
+            padding: 10px 15px;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+            border: 1px solid #e0e0e0;
+        }
+        
+        /* Fix for the input group */
+        .input-group .form-control {
+            margin-bottom: 0;
+        }
+        
+        /* Add margin to the input group instead */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .btn-primary {
+            background-color: var(--pinana-yellow);
+            border-color: var(--pinana-yellow);
+            width: 100%;
+            height: 50px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-primary:hover {
+            background-color: #e0c040;
+            border-color: #e0c040;
+        }
+
+        .btn-staff {
+            background-color: var(--pinana-yellow);
+            border-color: var(--pinana-yellow);
+            color: #333;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 4px;
+        }
+
+        .btn-staff:hover {
+            background-color: #e0c040;
+            border-color: #e0c040;
+        }
+
+        .forgot-password {
+            color: #4A5AEF;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--pinana-yellow);
+            border-color: var(--pinana-yellow);
+        }
+
+        .form-check-input:focus {
+            border-color: var(--pinana-yellow);
+            box-shadow: 0 0 0 0.25rem rgba(242, 208, 69, 0.25);
+        }
+
+        .form-area {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 70px; /* Added to account for the fixed header */
+        }
+        
+        .error-message {
+            color: #dc3545;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        /* Retailer Registration Button */
+        .register-retailer-btn {
+            background-color: white;
+            border: 2px solid var(--pinana-yellow);
+            color: #333;
+            font-weight: 500;
+            margin-top: 20px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .register-retailer-btn:hover {
+            background-color: var(--pinana-light-yellow);
+            border-color: var(--pinana-yellow);
+        }
+
+        /* Modal Styles */
+        .modal-header {
+            background-color: var(--pinana-yellow);
+            color: #333;
+            border-bottom: none;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 20px 30px;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 15px 30px 25px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-section-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .required-field::after {
+            content: "*";
+            color: #dc3545;
+            margin-left: 4px;
+        }
+
+        /* IntlTelInput custom styles */
+        .iti {
+            width: 100%;
+        }
+
+        /* Social media inputs */
+        .social-media-input {
+            position: relative;
+        }
+
+        .social-media-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+        }
+
+        .social-media-input .form-control {
+            padding-left: 45px;
+        }
+
+        .facebook-icon {
+            color: #1877F2;
+        }
+
+        .instagram-icon {
+            color: #E1306C;
+        }
+
+        .tiktok-icon {
+            color: #000000;
+        }
+
+        /* Age display */
+        .age-display {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            background-color: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 10px 15px;
+            font-weight: 500;
+        }
+
+        /* Progress indicator */
+        .registration-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .registration-progress::before {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #e0e0e0;
+            z-index: 1;
+        }
+
+        .progress-step {
+            position: relative;
+            z-index: 2;
+            background-color: white;
+            padding: 0 10px;
+        }
+
+        .progress-step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin: 0 auto 8px;
+        }
+
+        .progress-step-text {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        .progress-step.active .progress-step-number {
+            background-color: var(--pinana-yellow);
+            color: #333;
+        }
+
+        .progress-step.active .progress-step-text {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .progress-step.completed .progress-step-number {
+            background-color: #28a745;
+            color: white;
+        }
+
+        /* Success Modal */
+        .success-icon {
+            font-size: 5rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+
+        .success-message {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        /* Verification Modal */
+        .verification-icon {
+            font-size: 5rem;
+            color: #ffc107;
+            margin-bottom: 1rem;
+        }
+        
+        .verification-message {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .email-highlight {
+            font-weight: bold;
+            color: #333;
+            background-color: var(--pinana-light-yellow);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 992px) {
+            .logo-container {
+                display: none;
+            }
+            .form-area {
+                width: 100%;
+                padding: 20px;
+            }
+            .background-circle {
+                width: 600px;
+                height: 600px;
+                bottom: -300px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .login-form-container {
+                width: 100%;
+                max-width: 400px;
+            }
+            .modal-dialog {
+                max-width: 95%;
+                margin: 10px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with logo and staff button -->
+    <header>
+        <div>
+            <img src="images/final-light.png" alt="Piñana Gourmet" class="logo">
+        </div>
+        <!-- <div>
+            <a href="#" class="btn btn-staff">Apply as Staff</a>
+        </div> -->
+    </header>
+
+    <div class="login-container">
+        <div class="background-circle"></div>
+        
+        <!-- Logo and decorative elements -->
+        <div class="logo-container d-none d-lg-block">
+            <div class="pineapple-large">
+               <img src="images/square-light.png" alt="" class="square-light-img">
+            </div>
+            
+            <div class="icon-bulb">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1z"/>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Sign in form -->
+        <div class="form-area">
+            <div class="login-form-container">
+                <h2>Sign in</h2>
+                <div id="errorMessage" class="error-message">Invalid username or password</div>
+                <form id="loginForm" method="POST" action="process_login.php">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                            <span class="input-group-text" id="togglePassword" style="cursor: pointer; background-color: #f5f5f5; border: 1px solid #e0e0e0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                                Remember me
+                            </label>
+                        </div>
+                        <a href="#" class="forgot-password">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign in</button>
+                </form>
+                
+                <!-- Register as Retailer Button -->
+                <button type="button" class="btn register-retailer-btn w-100" data-bs-toggle="modal" data-bs-target="#retailerRegistrationModal">
+                    <i class="bi bi-shop"></i> Register as a Retailer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Retailer Registration Modal -->
+    <div class="modal fade" id="retailerRegistrationModal" tabindex="-1" aria-labelledby="retailerRegistrationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="retailerRegistrationModalLabel">
+                        <i class="bi bi-shop me-2"></i>Retailer Registration
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Progress Indicator -->
+                    <div class="registration-progress">
+                        <div class="progress-step active" id="step1-indicator">
+                            <div class="progress-step-number">1</div>
+                            <div class="progress-step-text">Basic Info</div>
+                        </div>
+                        <div class="progress-step" id="step2-indicator">
+                            <div class="progress-step-number">2</div>
+                            <div class="progress-step-text">Business Info</div>
+                        </div>
+                        <div class="progress-step" id="step3-indicator">
+                            <div class="progress-step-number">3</div>
+                            <div class="progress-step-text">Contact Info</div>
+                        </div>
+                    </div>
+                    
+                    <form id="retailerRegistrationForm" action="register_retailer.php" method="post">
+                        <!-- Step 1: Basic Information -->
+                        <div id="step1" class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="bi bi-person-badge"></i> Basic Information
+                            </h5>
+                            <div class="form-section-divider"></div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="firstName" class="form-label required-field">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="lastName" class="form-label required-field">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="birthday" class="form-label required-field">Birthday</label>
+                                    <input type="date" class="form-control" id="birthday" name="birthday" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="age" class="form-label">Age (Auto-calculated)</label>
+                                    <div class="age-display" id="ageDisplay">
+                                        <span id="calculatedAge">--</span> years old
+                                    </div>
+                                    <input type="hidden" id="age" name="age">
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nationality" class="form-label required-field">Nationality</label>
+                                    <select class="form-select" id="nationality" name="nationality" required>
+                                        <option value="" selected disabled>Select nationality</option>
+                                        <option value="Filipino">Filipino</option>
+                                        <option value="American">American</option>
+                                        <option value="Chinese">Chinese</option>
+                                        <option value="Japanese">Japanese</option>
+                                        <option value="Korean">Korean</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="button" class="btn btn-primary" id="step1NextBtn">
+                                    Next <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2: Business Information -->
+                        <div id="step2" class="form-section" style="display: none;">
+                            <h5 class="form-section-title">
+                                <i class="bi bi-building"></i> Business Information
+                            </h5>
+                            <div class="form-section-divider"></div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="businessName" class="form-label required-field">Business/Store Name</label>
+                                    <input type="text" class="form-control" id="businessName" name="businessName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="businessType" class="form-label required-field">Business Type</label>
+                                    <select class="form-select" id="businessType" name="businessType" required>
+                                        <option value="" selected disabled>Select business type</option>
+                                        <option value="Retail Store">Retail Store</option>
+                                        <option value="Restaurant">Restaurant</option>
+                                        <option value="Cafe">Cafe</option>
+                                        <option value="Supermarket">Supermarket</option>
+                                        <option value="Online Shop">Online Shop</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- New Address Fields -->
+                            <h6 class="mt-4 mb-3">Business Address</h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="province" class="form-label required-field">Province</label>
+                                    <select class="form-select" id="province" name="province" required>
+                                        <option value="" selected disabled>Select province</option>
+                                        <option value="Laguna">Laguna</option>
+                                        <option value="Batangas">Batangas</option>
+                                        <option value="Cavite">Cavite</option>
+                                        <option value="Rizal">Rizal</option>
+                                        <option value="Quezon">Quezon</option>
+                                        <option value="Metro Manila">Metro Manila</option>
+                                        <!-- Add more provinces as needed -->
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="city" class="form-label required-field">City/Municipality</label>
+                                    <select class="form-select" id="city" name="city" required>
+                                        <option value="" selected disabled>Select city/municipality</option>
+                                        <!-- Options will be populated based on province selection -->
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="barangay" class="form-label required-field">Barangay</label>
+                                    <select class="form-select" id="barangay" name="barangay" required>
+                                        <option value="" selected disabled>Select barangay</option>
+                                        <!-- Options will be populated based on city selection -->
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="houseNumber" class="form-label required-field">House/Building Number & Street</label>
+                                    <input type="text" class="form-control" id="houseNumber" name="houseNumber" placeholder="e.g., 123 Main Street" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="addressNotes" class="form-label">Additional Address Information (Optional)</label>
+                                <textarea class="form-control" id="addressNotes" name="addressNotes" rows="2" placeholder="Landmark, floor, unit number, etc."></textarea>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary" id="step2PrevBtn">
+                                    <i class="bi bi-arrow-left"></i> Previous
+                                </button>
+                                <button type="button" class="btn btn-primary" id="step2NextBtn">
+                                    Next <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Contact Information -->
+                        <div id="step3" class="form-section" style="display: none;">
+                            <h5 class="form-section-title">
+                                <i class="bi bi-telephone"></i> Contact Information
+                            </h5>
+                            <div class="form-section-divider"></div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label required-field">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label required-field">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                            </div>
+                            
+                            <h6 class="mt-4 mb-3">Social Media Accounts (Optional)</h6>
+                            
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="facebook" class="form-label">Facebook</label>
+                                    <div class="social-media-input">
+                                        <i class="bi bi-facebook social-media-icon facebook-icon"></i>
+                                        <input type="text" class="form-control" id="facebook" name="facebook" placeholder="Facebook page or profile URL">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="instagram" class="form-label">Instagram</label>
+                                    <div class="social-media-input">
+                                        <i class="bi bi-instagram social-media-icon instagram-icon"></i>
+                                        <input type="text" class="form-control" id="instagram" name="instagram" placeholder="Instagram handle (e.g., @yourbusiness)">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="tiktok" class="form-label">TikTok</label>
+                                    <div class="social-media-input">
+                                        <i class="bi bi-tiktok social-media-icon tiktok-icon"></i>
+                                        <input type="text" class="form-control" id="tiktok" name="tiktok" placeholder="TikTok handle (e.g., @yourbusiness)">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h6 class="mt-4 mb-3">Account Information</h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="reg_username" class="form-label required-field">Username</label>
+                                    <input type="text" class="form-control" id="reg_username" name="reg_username" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="reg_password" class="form-label required-field">Password</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="reg_password" name="reg_password" required>
+                                        <span class="input-group-text" id="toggleRegPassword" style="cursor: pointer; background-color: #f5f5f5; border: 1px solid #e0e0e0;">
+                                            <i class="bi bi-eye"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="termsAgreement" name="termsAgreement" required>
+                                <label class="form-check-label" for="termsAgreement">
+                                    I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> and <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+                                </label>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary" id="step3PrevBtn">
+                                    <i class="bi bi-arrow-left"></i> Previous
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <i class="bi bi-check-lg"></i> Complete Registration
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Success Modal -->
+    <div class="modal fade" id="registrationSuccessModal" tabindex="-1" aria-labelledby="registrationSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5">
+                    <div class="success-icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h4 class="modal-title mb-3" id="registrationSuccessModalLabel">Registration Successful!</h4>
+                    <p class="success-message">Your retailer account has been created successfully. You can now login with your credentials.</p>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        <i class="bi bi-check-lg me-2"></i>Got it!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Email Verification Required Modal -->
+    <div class="modal fade" id="verificationRequiredModal" tabindex="-1" aria-labelledby="verificationRequiredModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5">
+                    <div class="verification-icon">
+                        <i class="bi bi-envelope-exclamation-fill"></i>
+                    </div>
+                    <h4 class="modal-title mb-3" id="verificationRequiredModalLabel">Email Verification Required</h4>
+                    <p class="verification-message">
+                        Your account has been created, but you need to verify your email address before you can log in.
+                    </p>
+                    <p class="verification-message">
+                        We've sent a verification link to <span class="email-highlight" id="verificationEmail"></span>. 
+                        Please check your inbox and click the verification link to activate your account.
+                    </p>
+                    <p class="verification-message">
+                        If you don't see the email, please check your spam folder.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Login
+                        </button>
+                        <a href="#" id="resendVerificationLink" class="btn btn-primary">
+                            <i class="bi bi-envelope me-2"></i>Resend Verification Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- IntlTelInput JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password visibility toggle
+            const togglePassword = document.querySelector('#togglePassword');
+            const password = document.querySelector('#password');
+            
+            togglePassword.addEventListener('click', function() {
+                // Toggle the type attribute
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                
+                // Toggle the eye icon
+                this.innerHTML = type === 'password' ? 
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>' : 
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16"><path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/><path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12-.708.708z"/></svg>';
+            });
+            
+            // Registration password toggle
+            const toggleRegPassword = document.querySelector('#toggleRegPassword');
+            const regPassword = document.querySelector('#reg_password');
+            
+            if (toggleRegPassword && regPassword) {
+                toggleRegPassword.addEventListener('click', function() {
+                    const type = regPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+                    regPassword.setAttribute('type', type);
+                    
+                    // Toggle the eye icon
+                    const eyeIcon = this.querySelector('i');
+                    eyeIcon.classList.toggle('bi-eye');
+                    eyeIcon.classList.toggle('bi-eye-slash');
+                });
+            }
+            
+            // Check for error parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('error')) {
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+            
+            // Initialize phone input with country selector
+            const phoneInput = document.getElementById('phone');
+            let iti;
+            if (phoneInput) {
+                iti = window.intlTelInput(phoneInput, {
+                    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+                    preferredCountries: ['ph', 'us'],
+                    separateDialCode: true
+                });
+            }
+            
+            // Age calculation from birthday
+            const birthdayInput = document.getElementById('birthday');
+            const ageDisplay = document.getElementById('calculatedAge');
+            const ageInput = document.getElementById('age');
+            
+            if (birthdayInput && ageDisplay && ageInput) {
+                birthdayInput.addEventListener('change', function() {
+                    const birthDate = new Date(this.value);
+                    const today = new Date();
+                    
+                    let age = today.getFullYear() - birthDate.getFullYear();
+                    const monthDiff = today.getMonth() - birthDate.getMonth();
+                    
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+                    
+                    if (age < 0) {
+                        age = 0;
+                    }
+                    
+                    ageDisplay.textContent = age;
+                    ageInput.value = age;
+                    
+                    // Set max date to today (can't select future dates)
+                    const maxDate = new Date().toISOString().split('T')[0];
+                    birthdayInput.setAttribute('max', maxDate);
+                });
+                
+                // Set max date to today (can't select future dates)
+                const maxDate = new Date().toISOString().split('T')[0];
+                birthdayInput.setAttribute('max', maxDate);
+            }
+            
+            // Multi-step form navigation
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            
+            const step1Indicator = document.getElementById('step1-indicator');
+            const step2Indicator = document.getElementById('step2-indicator');
+            const step3Indicator = document.getElementById('step3-indicator');
+            
+            const step1NextBtn = document.getElementById('step1NextBtn');
+            const step2PrevBtn = document.getElementById('step2PrevBtn');
+            const step2NextBtn = document.getElementById('step2NextBtn');
+            const step3PrevBtn = document.getElementById('step3PrevBtn');
+            
+            if (step1NextBtn) {
+                step1NextBtn.addEventListener('click', function() {
+                    // Validate step 1 fields
+                    const firstName = document.getElementById('firstName');
+                    const lastName = document.getElementById('lastName');
+                    const birthday = document.getElementById('birthday');
+                    const nationality = document.getElementById('nationality');
+                    
+                    if (!firstName.value || !lastName.value || !birthday.value || !nationality.value) {
+                        alert('Please fill in all required fields in Basic Information.');
+                        return;
+                    }
+                    
+                    // Move to step 2
+                    step1.style.display = 'none';
+                    step2.style.display = 'block';
+                    
+                    // Update progress indicators
+                    step1Indicator.classList.remove('active');
+                    step1Indicator.classList.add('completed');
+                    step2Indicator.classList.add('active');
+                });
+            }
+            
+            if (step2PrevBtn) {
+                step2PrevBtn.addEventListener('click', function() {
+                    // Move back to step 1
+                    step2.style.display = 'none';
+                    step1.style.display = 'block';
+                    
+                    // Update progress indicators
+                    step2Indicator.classList.remove('active');
+                    step1Indicator.classList.remove('completed');
+                    step1Indicator.classList.add('active');
+                });
+            }
+            
+            if (step2NextBtn) {
+                step2NextBtn.addEventListener('click', function() {
+                    // Validate step 2 fields
+                    const businessName = document.getElementById('businessName');
+                    const businessType = document.getElementById('businessType');
+                    const province = document.getElementById('province');
+                    const city = document.getElementById('city');
+                    const barangay = document.getElementById('barangay');
+                    const houseNumber = document.getElementById('houseNumber');
+                    
+                    if (!businessName.value || !businessType.value || !province.value || 
+                        !city.value || !barangay.value || !houseNumber.value) {
+                        alert('Please fill in all required fields in Business Information.');
+                        return;
+                    }
+                    
+                    // Move to step 3
+                    step2.style.display = 'none';
+                    step3.style.display = 'block';
+                    
+                    // Update progress indicators
+                    step2Indicator.classList.remove('active');
+                    step2Indicator.classList.add('completed');
+                    step3Indicator.classList.add('active');
+                });
+            }
+            
+            if (step3PrevBtn) {
+                step3PrevBtn.addEventListener('click', function() {
+                    // Move back to step 2
+                    step3.style.display = 'none';
+                    step2.style.display = 'block';
+                    
+                    // Update progress indicators
+                    step3Indicator.classList.remove('active');
+                    step2Indicator.classList.remove('completed');
+                    step2Indicator.classList.add('active');
+                });
+            }
+            
+            // Location dropdowns (Province, City, Barangay)
+            const provinceSelect = document.getElementById('province');
+            const citySelect = document.getElementById('city');
+            const barangaySelect = document.getElementById('barangay');
+            
+            // Sample location data - in a real implementation, this would come from a database or API
+            const locationData = {
+                'Laguna': {
+                    cities: ['Calamba', 'Santa Rosa', 'San Pablo', 'Biñan', 'Cabuyao', 'Calauan'],
+                    barangays: {
+                        'Calauan': ['San Isidro', 'Lamot', 'Dayap', 'Imok', 'Hanggan', 'Masiit']
+                    }
+                },
+                'Batangas': {
+                    cities: ['Batangas City', 'Lipa', 'Tanauan', 'Santo Tomas'],
+                    barangays: {
+                        'Lipa': ['Poblacion', 'Sabang', 'Tambo', 'Lodlod']
+                    }
+                },
+                'Metro Manila': {
+                    cities: ['Manila', 'Quezon City', 'Makati', 'Taguig', 'Pasig'],
+                    barangays: {
+                        'Quezon City': ['Batasan Hills', 'Commonwealth', 'Fairview', 'Tandang Sora']
+                    }
+                }
+            };
+            
+            // Update city options based on province selection
+            if (provinceSelect) {
+                provinceSelect.addEventListener('change', function() {
+                    const selectedProvince = this.value;
+                    
+                    // Clear city and barangay dropdowns
+                    citySelect.innerHTML = '<option value="" selected disabled>Select city/municipality</option>';
+                    barangaySelect.innerHTML = '<option value="" selected disabled>Select barangay</option>';
+                    
+                    // Populate city dropdown
+                    if (selectedProvince && locationData[selectedProvince]) {
+                        locationData[selectedProvince].cities.forEach(city => {
+                            const option = document.createElement('option');
+                            option.value = city;
+                            option.textContent = city;
+                            citySelect.appendChild(option);
+                        });
+                    }
+                });
+            }
+            
+            // Update barangay options based on city selection
+            if (citySelect) {
+                citySelect.addEventListener('change', function() {
+                    const selectedProvince = provinceSelect.value;
+                    const selectedCity = this.value;
+                    
+                    // Clear barangay dropdown
+                    barangaySelect.innerHTML = '<option value="" selected disabled>Select barangay</option>';
+                    
+                    // Populate barangay dropdown
+                    if (selectedProvince && selectedCity && 
+                        locationData[selectedProvince] && 
+                        locationData[selectedProvince].barangays && 
+                        locationData[selectedProvince].barangays[selectedCity]) {
+                        
+                        locationData[selectedProvince].barangays[selectedCity].forEach(barangay => {
+                            const option = document.createElement('option');
+                            option.value = barangay;
+                            option.textContent = barangay;
+                            barangaySelect.appendChild(option);
+                        });
+                    }
+                });
+            }
+            
+            // Form submission
+            const retailerForm = document.getElementById('retailerRegistrationForm');
+            if (retailerForm) {
+                retailerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Validate all required fields
+                    const requiredFields = retailerForm.querySelectorAll('[required]');
+                    let isValid = true;
+                    
+                    requiredFields.forEach(field => {
+                        if (!field.value) {
+                            isValid = false;
+                            field.classList.add('is-invalid');
+                        } else {
+                            field.classList.remove('is-invalid');
+                        }
+                    });
+                    
+                    // Check terms agreement
+                    const termsAgreement = document.getElementById('termsAgreement');
+                    if (!termsAgreement.checked) {
+                        isValid = false;
+                        termsAgreement.classList.add('is-invalid');
+                        alert('Please agree to the Terms and Conditions to continue.');
+                        return;
+                    }
+                    
+                    if (!isValid) {
+                        alert('Please fill in all required fields.');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    const submitBtn = document.getElementById('submitBtn');
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+                    submitBtn.disabled = true;
+                    
+                    // Get the full phone number with country code
+                    if (iti) {
+                        const fullNumber = iti.getNumber();
+                        phoneInput.value = fullNumber;
+                    }
+                    
+                    // Submit the form
+                    const formData = new FormData(retailerForm);
+                    
+                    fetch('register_retailer.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Reset loading state
+                        submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Complete Registration';
+                        submitBtn.disabled = false;
+                        
+                        console.log('Registration response:', data); // For debugging
+                        
+                        if (data.success) {
+                            // Close the registration modal
+                            const registrationModal = bootstrap.Modal.getInstance(document.getElementById('retailerRegistrationModal'));
+                            registrationModal.hide();
+                            
+                            // Check if verification is required
+                            if (data.requiresVerification) {
+                                // Set the email in the verification modal
+                                document.getElementById('verificationEmail').textContent = data.email;
+                                
+                                // Set up resend link
+                                const resendLink = document.getElementById('resendVerificationLink');
+                                resendLink.href = 'resend_verification.php?email=' + encodeURIComponent(data.email);
+                                
+                                // Attempt to trigger email sending again
+                                fetch('resend_verification.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                    },
+                                    body: 'email=' + encodeURIComponent(data.email)
+                                }).then(response => {
+                                    console.log('Verification email resent automatically');
+                                }).catch(error => {
+                                    console.error('Error resending verification email:', error);
+                                });
+                                
+                                // Show verification modal
+                                const verificationModal = new bootstrap.Modal(document.getElementById('verificationRequiredModal'));
+                                verificationModal.show();
+                            } else {
+                                // Show success modal
+                                const successModal = new bootstrap.Modal(document.getElementById('registrationSuccessModal'));
+                                successModal.show();
+                            }
+                            
+                            // Reset the form
+                            retailerForm.reset();
+                            
+                            // Reset the steps
+                            step3.style.display = 'none';
+                            step2.style.display = 'none';
+                            step1.style.display = 'block';
+                            
+                            // Reset progress indicators
+                            step3Indicator.classList.remove('active');
+                            step2Indicator.classList.remove('active', 'completed');
+                            step1Indicator.classList.remove('completed');
+                            step1Indicator.classList.add('active');
+                            
+                            // Reset age display
+                            if (ageDisplay) {
+                                ageDisplay.textContent = '--';
+                            }
+                        } else {
+                            // Show detailed error message
+                            let errorMsg = 'Registration failed';
+                            if (data.error) {
+                                errorMsg += ': ' + data.error;
+                            }
+                            
+                            // Create a more user-friendly alert
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                            alertDiv.innerHTML = `
+                                <strong>Registration Error</strong><br>
+                                ${errorMsg}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            `;
+                            
+                            // Insert at the top of the form
+                            const modalBody = document.querySelector('.modal-body');
+                            modalBody.insertBefore(alertDiv, modalBody.firstChild);
+                            
+                            // Auto-dismiss after 5 seconds
+                            setTimeout(() => {
+                                const bsAlert = new bootstrap.Alert(alertDiv);
+                                bsAlert.close();
+                            }, 5000);
+                        }
+                    })
+                    .catch(error => {
+                        // Reset loading state
+                        submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Complete Registration';
+                        submitBtn.disabled = false;
+                        
+                        console.error('Error:', error);
+                        alert('An error occurred during registration. Please try again.');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
