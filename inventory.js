@@ -1514,86 +1514,133 @@ function fetchProductBatches(productId) {
     })
 }
 
-// Render batch table
+// Override the original renderBatchTable function to display expiration duration including custom
 function renderBatchTable(batches) {
-  const batchTableBody = document.getElementById("batch-table-body")
-  if (!batchTableBody) return
-
+  const batchTableBody = document.getElementById("batch-table-body");
+  if (!batchTableBody) return;
+  
   if (batches.length === 0) {
     batchTableBody.innerHTML = `
-    <tr>
-      <td colspan="6" class="text-center py-3">
-        No batches found for this product. Add your first batch!
-      </td>
-    </tr>
-  `
-    return
+      <tr>
+        <td colspan="6" class="text-center py-3">
+          No batches found for this product. Add your first batch!
+        </td>
+      </tr>
+    `;
+    return;
   }
-
-  let html = ""
-
+  
+  let html = "";
+  
   batches.forEach((batch) => {
     // Calculate expiry status
-    const today = new Date()
-    const expiryDate = new Date(batch.expiration_date)
-    const daysUntilExpiry = Math.floor((expiryDate - today) / (1000 * 60 * 60 * 24))
-
-    let expiryStatus, expiryClass, expiryIcon
-
-    if (daysUntilExpiry < 0) {
-      expiryStatus = "Expired"
-      expiryClass = "text-danger"
-      expiryIcon = "bi-exclamation-triangle-fill"
-    } else if (daysUntilExpiry <= 30) {
-      expiryStatus = `Expires in ${daysUntilExpiry} days`
-      expiryClass = "text-warning"
-      expiryIcon = "bi-clock-fill"
-    } else {
-      expiryStatus = "Good"
-      expiryClass = "text-success"
-      expiryIcon = "bi-check-circle-fill"
+    const today = new Date();
+    
+    // Ensure dates are properly parsed
+    let expiryDate = null;
+    try {
+      if (batch.expiration_date && batch.expiration_date !== "0000-00-00") {
+        expiryDate = new Date(batch.expiration_date);
+      } else {
+        // Generate expiration date from manufacturing date if available
+        if (batch.manufacturing_date && batch.manufacturing_date !== "0000-00-00") {
+          const mfgDate = new Date(batch.manufacturing_date);
+          mfgDate.setMonth(mfgDate.getMonth() + 2);
+          expiryDate = mfgDate;
+        } else {
+          // Default to 2 months from today
+          expiryDate = new Date();
+          expiryDate.setMonth(expiryDate.getMonth() + 2);
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing expiration date:", error);
+      expiryDate = new Date();
+      expiryDate.setMonth(expiryDate.getMonth() + 2);
     }
-
-    // Format dates
-    const formattedExpiryDate = new Date(batch.expiration_date).toLocaleDateString()
-    const formattedManufacturingDate = batch.manufacturing_date
-      ? new Date(batch.manufacturing_date).toLocaleDateString()
-      : "N/A"
-
+    
+    const daysUntilExpiry = Math.floor((expiryDate - today) / (1000 * 60 * 60 * 24));
+    
+    let expiryStatus, expiryClass, expiryIcon;
+    
+    if (daysUntilExpiry < 0) {
+      expiryStatus = "Expired";
+      expiryClass = "text-danger";
+      expiryIcon = "bi-exclamation-triangle-fill";
+    } else if (daysUntilExpiry <= 30) {
+      expiryStatus = `Expires in ${daysUntilExpiry} days`;
+      expiryClass = "text-warning";
+      expiryIcon = "bi-clock-fill";
+    } else {
+      expiryStatus = "Good";
+      expiryClass = "text-success";
+      expiryIcon = "bi-check-circle-fill";
+    }
+    
+    // Format dates for display
+    let formattedExpiryDate = "N/A";
+    if (expiryDate) {
+      formattedExpiryDate = formatDateForDisplay(expiryDate);
+    }
+    
+    let formattedManufacturingDate = "N/A";
+    if (batch.manufacturing_date && batch.manufacturing_date !== "0000-00-00") {
+      formattedManufacturingDate = formatDateForDisplay(batch.manufacturing_date);
+    }
+    
+    // Determine expiration duration for display
+    let durationText = "";
+    if (batch.expiration_duration) {
+      switch(batch.expiration_duration) {
+        case "2w": durationText = "(2 Weeks)"; break;
+        case "5m": durationText = "(5 Months)"; break;
+        case "8m": durationText = "(8 Months)"; break;
+        case "1y": durationText = "(1 Year)"; break;
+        case "custom": 
+          if (batch.custom_duration_days) {
+            durationText = `(${batch.custom_duration_days} Days)`;
+          } else {
+            durationText = "(Custom)";
+          }
+          break;
+        default: durationText = "";
+      }
+    }
+    
     html += `
-    <tr>
-      <td>${batch.batch_code}</td>
-      <td>${batch.quantity}</td>
-      <td>${formattedManufacturingDate}</td>
-      <td>${formattedExpiryDate}</td>
-      <td>
-        <div class="${expiryClass}">
-          <i class="bi ${expiryIcon} me-1"></i>
-          ${expiryStatus}
-        </div>
-      </td>
-      <td>
-        <div class="action-buttons">
-          <button class="action-btn action-btn-edit edit-batch-btn" title="Edit Batch" 
-            data-batch-id="${batch.batch_id}" 
-            data-product-id="${batch.product_id}">
-            <i class="bi bi-pencil"></i>
-          </button>
-          <button class="action-btn action-btn-delete delete-batch-btn" title="Delete Batch" 
-            data-batch-id="${batch.batch_id}" 
-            data-product-id="${batch.product_id}">
-            <i class="bi bi-trash"></i>
-          </button>
-        </div>
-      </td>
-    </tr>
-  `
-  })
-
-  batchTableBody.innerHTML = html
-
+      <tr>
+        <td>${batch.batch_code}</td>
+        <td>${batch.quantity}</td>
+        <td>${formattedManufacturingDate}</td>
+        <td>${formattedExpiryDate} <span class="text-muted small">${durationText}</span></td>
+        <td>
+          <div class="${expiryClass}">
+            <i class="bi ${expiryIcon} me-1"></i>
+            ${expiryStatus}
+          </div>
+        </td>
+        <td>
+          <div class="action-buttons">
+            <button class="action-btn action-btn-edit edit-batch-btn" title="Edit Batch" 
+              data-batch-id="${batch.batch_id}" 
+              data-product-id="${batch.product_id}">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="action-btn action-btn-delete delete-batch-btn" title="Delete Batch" 
+              data-batch-id="${batch.batch_id}" 
+              data-product-id="${batch.product_id}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+  
+  batchTableBody.innerHTML = html;
+  
   // Add event listeners to batch action buttons
-  setupBatchActionButtons()
+  setupBatchActionButtons();
 }
 
 // Set up batch action buttons
@@ -1617,117 +1664,391 @@ function setupBatchActionButtons() {
   })
 }
 
-// Function to edit a batch
 function editBatch(batchId, productId) {
   // Close any existing modals first
-  closeAllModals()
+  closeAllModals();
 
   // Fetch batch details
   fetch(`get_batch.php?batch_id=${batchId}`)
     .then((response) => {
       if (!response.ok) {
-        throw new Error("Network response was not ok")
+        throw new Error("Network response was not ok");
       }
-      return response.json()
+      return response.json();
     })
     .then((data) => {
       if (data.success) {
-        // Populate the edit form with batch data
-        const batch = data.batch
-
-        // Set form values
-        document.getElementById("edit-batch-id").value = batch.batch_id
-        document.getElementById("edit-product-id").value = batch.product_id
-        document.getElementById("edit-batch-code").value = batch.batch_code
-        document.getElementById("edit-batch-quantity").value = batch.quantity
-
-        // Format dates properly for input fields
-        document.getElementById("edit-manufacturing-date").value = formatDateForInput(batch.manufacturing_date)
-        document.getElementById("edit-expiration-date").value = formatDateForInput(batch.expiration_date)
-
-        // Show the edit modal
-        const bootstrap = window.bootstrap
-        const editBatchModal = new bootstrap.Modal(document.getElementById("editBatchModal"))
-        editBatchModal.show()
+        // Create and show edit modal
+        const batch = data.batch;
+        if (batch.manufacturing_date) {
+          batch.manufacturing_date = formatDateForInput(batch.manufacturing_date);
+        }
+        if (batch.expiration_date) {
+          batch.expiration_date = formatDateForInput(batch.expiration_date);
+        }
+        
+        // Create and show edit modal with enhanced UI
+        const modalHtml = `
+          <div class="modal-overlay batch-edit-overlay">
+            <div class="modal-container batch-edit-container">
+              <div class="modal-header bg-primary text-white p-3 rounded-top d-flex justify-content-between align-items-center">
+                <h3 class="m-0 fs-5"><i class="bi bi-box-seam me-2"></i>Edit Batch</h3>
+                <button class="modal-close-btn btn-close btn-close-white" aria-label="Close"></button>
+              </div>
+              <div class="modal-body p-4">
+                <form id="edit-batch-form" class="batch-form">
+                  <input type="hidden" name="batchId" value="${batch.batch_id}">
+                  <input type="hidden" name="productId" value="${batch.product_id}">
+                  
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="edit-batch-code" class="form-label fw-bold">Batch Code</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                        <input type="text" id="edit-batch-code" name="batchCode" class="form-control" value="${batch.batch_code}" required>
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                      <label for="edit-batch-quantity" class="form-label fw-bold">Quantity</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-123"></i></span>
+                        <input type="number" id="edit-batch-quantity" name="quantity" class="form-control" value="${batch.quantity}" min="1" required>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="edit-manufacturing-date" class="form-label fw-bold">Manufacturing Date</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                        <input type="date" id="edit-manufacturing-date" name="manufacturingDate" class="form-control" value="${batch.manufacturing_date}" readonly>
+                      </div>
+                      <small class="text-muted">Manufacturing date cannot be changed</small>
+                    </div>
+                    
+                    <div class="col-md-6">
+                      <label for="edit-expiration-duration" class="form-label fw-bold">Expiration Duration</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-hourglass-split"></i></span>
+                        <select id="edit-expiration-duration" name="expirationDuration" class="form-select" required>
+                          <option value="" disabled>Select duration</option>
+                          <option value="2w">2 Weeks</option>
+                          <option value="5m">5 Months</option>
+                          <option value="8m">8 Months</option>
+                          <option value="1y">1 Year</option>
+                          <option value="custom">Custom</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="row mb-3" id="edit-custom-duration-row" style="display: none;">
+                    <div class="col-md-12">
+                      <label for="edit-custom-duration-value" class="form-label fw-bold">Custom Duration</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                        <input type="number" id="edit-custom-duration-value" name="customDurationValue" class="form-control" min="1" max="100" placeholder="Enter value">
+                        <select class="form-select" id="edit-custom-duration-unit" name="customDurationUnit" style="max-width: 120px;">
+                          <option value="days">Days</option>
+                          <option value="months">Months</option>
+                          <option value="years">Years</option>
+                        </select>
+                      </div>
+                      <div class="form-text">Specify a custom duration for product expiration</div>
+                    </div>
+                  </div>
+                  
+                  <div class="row mb-4">
+                    <div class="col-md-12">
+                      <label for="edit-expiration-date" class="form-label fw-bold">Calculated Expiration Date</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
+                        <input type="date" id="edit-expiration-date" name="expirationDate" class="form-control" value="${batch.expiration_date}" readonly>
+                      </div>
+                      <div class="form-text">Auto-calculated based on duration</div>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <button type="button" class="btn btn-outline-secondary modal-close-btn">
+                      <i class="bi bi-x-circle me-1"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      <i class="bi bi-check-circle me-1"></i> Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        const modalContainer = document.getElementById("edit-batch-modal-container");
+        modalContainer.innerHTML = modalHtml;
+        modalContainer.style.display = "block";
+        
+        // Try to determine the duration from the expiration date
+        const mfgDate = new Date(batch.manufacturing_date);
+        const expDate = new Date(batch.expiration_date);
+        const diffTime = Math.abs(expDate - mfgDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        // Set the appropriate duration option
+        const durationSelect = document.getElementById("edit-expiration-duration");
+        if (durationSelect) {
+          if (batch.expiration_duration) {
+            // If we have a stored duration, use it
+            durationSelect.value = batch.expiration_duration;
+            
+            // If it's custom, show the custom duration row and set the value
+            if (batch.expiration_duration === "custom") {
+              const customDurationRow = document.getElementById("edit-custom-duration-row");
+              if (customDurationRow) {
+                customDurationRow.style.display = "block";
+                
+                // Set custom duration value and unit
+                const customValueInput = document.getElementById("edit-custom-duration-value");
+                const customUnitSelect = document.getElementById("edit-custom-duration-unit");
+                
+                if (customValueInput && customUnitSelect) {
+                  // If we have stored custom duration data
+                  if (batch.custom_duration_value !== null && batch.custom_duration_unit) {
+                    customValueInput.value = batch.custom_duration_value;
+                    customUnitSelect.value = batch.custom_duration_unit;
+                  } else if (batch.custom_duration_days !== null) {
+                    // If only days stored, determine appropriate unit
+                    const days = batch.custom_duration_days;
+                    if (days < 30) {
+                      customValueInput.value = days;
+                      customUnitSelect.value = "days";
+                    } else if (days < 365) {
+                      customValueInput.value = Math.round(days / 30);
+                      customUnitSelect.value = "months";
+                    } else {
+                      customValueInput.value = Math.round(days / 365 * 10) / 10;
+                      customUnitSelect.value = "years";
+                    }
+                  } else {
+                    // If no stored value, try to determine from date difference
+                    if (diffDays <= 90) {
+                      // If less than 3 months, show in days
+                      customValueInput.value = diffDays;
+                      customUnitSelect.value = "days";
+                    } else if (diffDays <= 730) {
+                      // If less than 2 years, show in months
+                      customValueInput.value = Math.round(diffDays / 30);
+                      customUnitSelect.value = "months";
+                    } else {
+                      // Otherwise show in years
+                      customValueInput.value = Math.round(diffDays / 365 * 10) / 10;
+                      customUnitSelect.value = "years";
+                    }
+                  }
+                }
+              }
+            }
+          } else {
+            // If no stored duration, try to determine from the date difference
+            if (diffDays <= 14) {
+              durationSelect.value = "2w";
+            } else if (diffDays <= 150) { // ~5 months
+              durationSelect.value = "5m";
+            } else if (diffDays <= 240) { // ~8 months
+              durationSelect.value = "8m";
+            } else if (diffDays <= 365) { // ~1 year
+              durationSelect.value = "1y";
+            } else {
+              // If it doesn't match standard durations, set as custom
+              durationSelect.value = "custom";
+              // Show custom duration row
+              const customDurationRow = document.getElementById("edit-custom-duration-row");
+              if (customDurationRow) {
+                customDurationRow.style.display = "block";
+                
+                // Set custom duration value and unit
+                const customValueInput = document.getElementById("edit-custom-duration-value");
+                const customUnitSelect = document.getElementById("edit-custom-duration-unit");
+                
+                if (customValueInput && customUnitSelect) {
+                  if (diffDays <= 90) {
+                    // If less than 3 months, show in days
+                    customValueInput.value = diffDays;
+                    customUnitSelect.value = "days";
+                  } else if (diffDays <= 730) {
+                    // If less than 2 years, show in months
+                    customValueInput.value = Math.round(diffDays / 30);
+                    customUnitSelect.value = "months";
+                  } else {
+                    // Otherwise show in years
+                    customValueInput.value = Math.round(diffDays / 365 * 10) / 10;
+                    customUnitSelect.value = "years";
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+        // Add event listeners for form interactions
+        setupEditBatchFormListeners();
+        
+        // Add event listener for form submission
+        const editForm = document.getElementById("edit-batch-form");
+        if (editForm) {
+          editForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            updateBatch(this);
+          });
+        }
+        
+        // Add event listener for close buttons
+        document.querySelectorAll(".modal-close-btn").forEach(btn => {
+          btn.addEventListener("click", function() {
+            const editModalContainer = document.getElementById("edit-batch-modal-container");
+            if (editModalContainer) {
+              editModalContainer.style.display = "none";
+              editModalContainer.innerHTML = "";
+            }
+          });
+        });
+        
+        // Add event listener for clicking outside the modal
+        document.querySelector(".batch-edit-overlay").addEventListener("click", function(e) {
+          if (e.target === this) {
+            const editModalContainer = document.getElementById("edit-batch-modal-container");
+            if (editModalContainer) {
+              editModalContainer.style.display = "none";
+              editModalContainer.innerHTML = "";
+            }
+          }
+        });
       } else {
-        throw new Error(data.error || "Failed to fetch batch details")
+        showResponseMessage("danger", data.error || "Failed to fetch batch details");
       }
     })
     .catch((error) => {
-      console.error("Error fetching batch details:", error)
-      showResponseMessage("danger", "Error fetching batch details. Please try again.")
-    })
+      console.error("Error fetching batch details:", error);
+      showResponseMessage("danger", "Error fetching batch details. Please try again.");
+    });
 }
 
-// Function to update batch
-function updateBatch() {
-  const form = document.getElementById("edit-batch-form")
-  if (!form) return
-
-  // Validate form
-  if (!form.checkValidity()) {
-    form.reportValidity()
-    return
+// Function to set up event listeners for the edit batch form
+function setupEditBatchFormListeners() {
+  const expirationDurationInput = document.getElementById("edit-expiration-duration");
+  const customDurationRow = document.getElementById("edit-custom-duration-row");
+  const manufacturingDateInput = document.getElementById("edit-manufacturing-date");
+  const customDurationValueInput = document.getElementById("edit-custom-duration-value");
+  const customDurationUnitSelect = document.getElementById("edit-custom-duration-unit");
+  const expirationDateInput = document.getElementById("edit-expiration-date");
+  
+  if (expirationDurationInput && customDurationRow) {
+    // Toggle custom duration input visibility
+    expirationDurationInput.addEventListener("change", function() {
+      customDurationRow.style.display = this.value === "custom" ? "block" : "none";
+      
+      // Update expiration date when duration changes
+      if (manufacturingDateInput && manufacturingDateInput.value) {
+        const customValue = this.value === "custom" && customDurationValueInput ? customDurationValueInput.value : null;
+        const customUnit = this.value === "custom" && customDurationUnitSelect ? customDurationUnitSelect.value : "days";
+        expirationDateInput.value = calculateExpirationDate(manufacturingDateInput.value, this.value, customValue, customUnit);
+      }
+    });
   }
-
-  // Get form data
-  const formData = new FormData(form)
-
-  // Ensure dates are properly formatted
-  const manufacturingDate = document.getElementById("edit-manufacturing-date").value
-  const expirationDate = document.getElementById("edit-expiration-date").value
-
-  // Format manufacturing date
-  if (manufacturingDate) {
-    formData.set("manufacturingDate", formatDateForServer(manufacturingDate))
+  
+  if (customDurationValueInput && customDurationUnitSelect && manufacturingDateInput && expirationDurationInput && expirationDateInput) {
+    // Update expiration date when custom duration value changes
+    customDurationValueInput.addEventListener("input", function() {
+      if (manufacturingDateInput.value && expirationDurationInput.value === "custom") {
+        expirationDateInput.value = calculateExpirationDate(manufacturingDateInput.value, "custom", this.value, customDurationUnitSelect.value);
+      }
+    });
+    
+    // Update expiration date when custom duration unit changes
+    customDurationUnitSelect.addEventListener("change", function() {
+      if (manufacturingDateInput.value && expirationDurationInput.value === "custom") {
+        expirationDateInput.value = calculateExpirationDate(manufacturingDateInput.value, "custom", customDurationValueInput.value, this.value);
+      }
+    });
   }
+}
 
-  // Format expiration date
-  if (expirationDate) {
-    formData.set("expirationDate", formatDateForServer(expirationDate))
-  } else {
-    // If expiration date is missing, generate it from manufacturing date
-    const newExpirationDate = generateExpirationDate(manufacturingDate)
-    formData.set("expirationDate", formatDateForServer(newExpirationDate))
+// Function to update batch with proper date formatting and expiration duration including custom duration
+function updateBatch(form) {
+  const formData = new FormData(form);
+  
+  // CRITICAL FIX: Ensure dates are properly formatted
+  const manufacturingDate = document.getElementById("edit-manufacturing-date").value;
+  const expirationDuration = document.getElementById("edit-expiration-duration").value;
+  
+  // Format manufacturing date - CRITICAL FIX
+  formData.set("manufacturingDate", formatDateForServer(manufacturingDate));
+  
+  // Handle custom duration
+  let customDurationDays = null;
+  if (expirationDuration === "custom") {
+    customDurationDays = document.getElementById("edit-custom-duration-days").value;
+    if (!customDurationDays || isNaN(customDurationDays) || customDurationDays < 1) {
+      alert("Please enter a valid number of days for custom duration");
+      return;
+    }
+    formData.set("customDurationDays", customDurationDays);
   }
-
+  
+  // Calculate and format expiration date based on duration
+  const calculatedExpirationDate = calculateExpirationDate(manufacturingDate, expirationDuration, customDurationDays);
+  formData.set("expirationDate", formatDateForServer(calculatedExpirationDate));
+  
+  // Store the duration for reference
+  formData.set("expirationDuration", expirationDuration);
+  
+  // Log the data being sent for debugging
+  console.log("Updating batch with data:", {
+    manufacturingDate: formData.get("manufacturingDate"),
+    expirationDuration: formData.get("expirationDuration"),
+    customDurationDays: formData.get("customDurationDays"),
+    expirationDate: formData.get("expirationDate"),
+  });
+  
   // Send request
   fetch("save_batch.php", {
     method: "POST",
     body: formData,
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok")
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    return response.json();
+  })
+  .then((data) => {
+    if (data.success) {
+      showResponseMessage("success", data.message || "Batch updated successfully!");
+      
+      // Close only the edit modal, not the batch management modal
+      const editModalContainer = document.getElementById("edit-batch-modal-container");
+      if (editModalContainer) {
+        editModalContainer.style.display = "none";
+        editModalContainer.innerHTML = "";
       }
-      return response.json()
-    })
-    .then((data) => {
-      if (data.success) {
-        // Show success message
-        showResponseMessage("success", data.message || "Batch updated successfully!")
-
-        // Close modal
-        const bootstrap = window.bootstrap
-        const editBatchModal = bootstrap.Modal.getInstance(document.getElementById("editBatchModal"))
-        if (editBatchModal) {
-          editBatchModal.hide()
-        }
-
-        // Refresh batch table
-        const productId = formData.get("productId")
-        fetchProductBatches(productId)
-
-        // Refresh inventory table
-        fetchInventoryData(currentPage, currentFilter, currentSort, currentSearch)
-      } else {
-        throw new Error(data.error || "Failed to update batch")
+      
+      // Refresh batch table
+      const productId = formData.get("productId");
+      fetchProductBatches(productId);
+      
+      // Refresh inventory table if needed
+      if (typeof fetchInventoryData === "function") {
+        fetchInventoryData(currentPage, currentFilter, currentSort, currentSearch);
       }
-    })
-    .catch((error) => {
-      console.error("Error updating batch:", error)
-      showResponseMessage("danger", "Error updating batch. Please try again.")
-    })
+    } else {
+      throw new Error(data.error || "Failed to update batch");
+    }
+  })
+  .catch((error) => {
+    console.error("Error updating batch:", error);
+    showResponseMessage("danger", "Error updating batch. Please try again.");
+  });
 }
 
 // Delete batch
@@ -1825,76 +2146,93 @@ function showBatchForm(batch = null) {
   batchModalForm.scrollIntoView({ behavior: "smooth" })
 }
 
-// Save batch with proper date formatting
+// Save batch with proper date formatting and expiration duration including custom duration
 function saveBatch() {
-  const form = document.getElementById("add-batch-form")
-  if (!form) return
+  const form = document.getElementById("add-batch-form");
+  if (!form) return;
 
   // Validate form
   if (!form.checkValidity()) {
-    form.reportValidity()
-    return
+    form.reportValidity();
+    return;
   }
 
   // Get form data
-  const formData = new FormData(form)
-
-  // Ensure dates are properly formatted (YYYY-MM-DD)
-  const manufacturingDate = document.getElementById("batch-manufacturing-date").value
-  const expirationDate = document.getElementById("batch-expiration-date").value
-
-  // Format manufacturing date
+  const formData = new FormData(form);
+  
+  // CRITICAL FIX: Ensure dates are properly formatted
+  const manufacturingDate = document.getElementById("batch-manufacturing-date").value;
+  const expirationDuration = document.getElementById("batch-expiration-duration").value;
+  
+  // Format manufacturing date - CRITICAL FIX
   if (manufacturingDate) {
-    const formattedDate = formatDateForInput(manufacturingDate)
-    formData.set("manufacturingDate", formattedDate)
+    formData.set("manufacturingDate", formatDateForServer(manufacturingDate));
   }
-
-  // Format expiration date
-  if (expirationDate) {
-    const formattedDate = formatDateForInput(expirationDate)
-    formData.set("expirationDate", formattedDate)
-  } else {
-    // If expiration date is missing, generate it from manufacturing date
-    const newExpirationDate = generateExpirationDate(manufacturingDate)
-    formData.set("expirationDate", newExpirationDate)
+  
+  // Handle custom duration
+  let customDurationDays = null;
+  if (expirationDuration === "custom") {
+    customDurationDays = document.getElementById("batch-custom-duration-days").value;
+    if (!customDurationDays || isNaN(customDurationDays) || customDurationDays < 1) {
+      alert("Please enter a valid number of days for custom duration");
+      return;
+    }
+    formData.set("customDurationDays", customDurationDays);
   }
-
+  
+  // Calculate and format expiration date based on duration
+  const calculatedExpirationDate = calculateExpirationDate(manufacturingDate, expirationDuration, customDurationDays);
+  formData.set("expirationDate", formatDateForServer(calculatedExpirationDate));
+  
+  // Store the duration for reference
+  formData.set("expirationDuration", expirationDuration);
+  
+  // Log the data being sent for debugging
+  console.log("Sending batch data:", {
+    manufacturingDate: formData.get("manufacturingDate"),
+    expirationDuration: formData.get("expirationDuration"),
+    customDurationDays: formData.get("customDurationDays"),
+    expirationDate: formData.get("expirationDate"),
+  });
+  
   // Send request
   fetch("save_batch.php", {
     method: "POST",
     body: formData,
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok")
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    return response.json();
+  })
+  .then((data) => {
+    if (data.success) {
+      // Show success message
+      showResponseMessage("success", data.message || "Batch saved successfully!");
+      
+      // Hide form
+      document.getElementById("batch-modal-form").style.display = "none";
+      
+      // Reset form
+      form.reset();
+      
+      // Refresh batch table
+      const productId = document.getElementById("batch-product-id-input").value;
+      fetchProductBatches(productId);
+      
+      // Refresh inventory table
+      if (typeof fetchInventoryData === "function") {
+        fetchInventoryData(currentPage, currentFilter, currentSort, currentSearch);
       }
-      return response.json()
-    })
-    .then((data) => {
-      if (data.success) {
-        // Show success message
-        showResponseMessage("success", data.message || "Batch saved successfully!")
-
-        // Hide form
-        document.getElementById("batch-modal-form").style.display = "none"
-
-        // Reset form
-        form.reset()
-
-        // Refresh batch table
-        const productId = document.getElementById("batch-product-id-input").value
-        fetchProductBatches(productId)
-
-        // Refresh inventory table
-        fetchInventoryData(currentPage, currentFilter, currentSort, currentSearch)
-      } else {
-        throw new Error(data.error || "Failed to save batch")
-      }
-    })
-    .catch((error) => {
-      console.error("Error saving batch:", error)
-      showResponseMessage("danger", "Error saving batch. Please try again.")
-    })
+    } else {
+      throw new Error(data.error || "Failed to save batch");
+    }
+  })
+  .catch((error) => {
+    console.error("Error saving batch:", error);
+    showResponseMessage("danger", "Error saving batch. Please try again.");
+  });
 }
 
 // Show response message
@@ -2144,4 +2482,85 @@ document.addEventListener("DOMContentLoaded", () => {
   setupNormalTrackFormValidation()
   setupBatchTrackFormValidation()
   setupEditFormsValidation()
+  setupCustomDurationFunctionality();
 })
+
+// Function to set up custom duration functionality
+function setupCustomDurationFunctionality() {
+  // Setup event listeners for the batch track modal
+  const expirationDuration = document.getElementById("expirationDuration");
+  const customDurationRow = document.getElementById("customDurationRow");
+  const manufacturingDate = document.getElementById("manufacturingDate");
+  const customDurationValue = document.getElementById("customDurationValue");
+  const customDurationUnit = document.getElementById("customDurationUnit");
+  const expirationDate = document.getElementById("expirationDate");
+  
+  if (expirationDuration && customDurationRow) {
+    // Toggle custom duration input visibility
+    expirationDuration.addEventListener("change", function() {
+      customDurationRow.style.display = this.value === "custom" ? "block" : "none";
+      
+      // Update expiration date when duration changes
+      if (manufacturingDate && manufacturingDate.value) {
+        const value = this.value === "custom" && customDurationValue ? customDurationValue.value : null;
+        const unit = this.value === "custom" && customDurationUnit ? customDurationUnit.value : "days";
+        expirationDate.value = calculateExpirationDate(manufacturingDate.value, this.value, value, unit);
+      }
+    });
+  }
+  
+  if (customDurationValue && customDurationUnit && manufacturingDate && expirationDuration && expirationDate) {
+    // Update expiration date when custom duration value changes
+    customDurationValue.addEventListener("input", function() {
+      if (manufacturingDate.value && expirationDuration.value === "custom") {
+        expirationDate.value = calculateExpirationDate(manufacturingDate.value, "custom", this.value, customDurationUnit.value);
+      }
+    });
+    
+    // Update expiration date when custom duration unit changes
+    customDurationUnit.addEventListener("change", function() {
+      if (manufacturingDate.value && expirationDuration.value === "custom") {
+        expirationDate.value = calculateExpirationDate(manufacturingDate.value, "custom", customDurationValue.value, this.value);
+      }
+    });
+  }
+  
+  // Setup event listeners for the batch management modal
+  const batchExpirationDuration = document.getElementById("batch-expiration-duration");
+  const batchCustomDurationRow = document.getElementById("batch-custom-duration-row");
+  const batchManufacturingDate = document.getElementById("batch-manufacturing-date");
+  const batchCustomDurationValue = document.getElementById("batch-custom-duration-value");
+  const batchCustomDurationUnit = document.getElementById("batch-custom-duration-unit");
+  const batchExpirationDate = document.getElementById("batch-expiration-date");
+  
+  if (batchExpirationDuration && batchCustomDurationRow) {
+    // Toggle custom duration input visibility
+    batchExpirationDuration.addEventListener("change", function() {
+      batchCustomDurationRow.style.display = this.value === "custom" ? "block" : "none";
+      
+      // Update expiration date when duration changes
+      if (batchManufacturingDate && batchManufacturingDate.value) {
+        const value = this.value === "custom" && batchCustomDurationValue ? batchCustomDurationValue.value : null;
+        const unit = this.value === "custom" && batchCustomDurationUnit ? batchCustomDurationUnit.value : "days";
+        batchExpirationDate.value = calculateExpirationDate(batchManufacturingDate.value, this.value, value, unit);
+      }
+    });
+  }
+  
+  if (batchCustomDurationValue && batchCustomDurationUnit && batchManufacturingDate && batchExpirationDuration && batchExpirationDate) {
+    // Update expiration date when custom duration value changes
+    batchCustomDurationValue.addEventListener("input", function() {
+      if (batchManufacturingDate.value && batchExpirationDuration.value === "custom") {
+        batchExpirationDate.value = calculateExpirationDate(batchManufacturingDate.value, "custom", this.value, batchCustomDurationUnit.value);
+      }
+    });
+    
+    // Update expiration date when custom duration unit changes
+    batchCustomDurationUnit.addEventListener("change", function() {
+      if (batchManufacturingDate.value && batchExpirationDuration.value === "custom") {
+        batchExpirationDate.value = calculateExpirationDate(batchManufacturingDate.value, "custom", batchCustomDurationValue.value, this.value);
+      }
+    });
+  }
+}
+

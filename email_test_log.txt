@@ -10,3 +10,7 @@
 2025-04-12 02:34:04 - SMTP connection successful
 2025-04-22 07:28:30 - Testing email connection
 2025-04-22 07:28:32 - SMTP connection successful
+2025-04-23 05:16:23 - Testing email connection
+2025-04-23 05:16:23 - Error testing connection: SMTP Error: Could not connect to SMTP host. Failed to connect to server
+2025-04-23 12:13:04 - Testing email connection
+2025-04-23 12:13:07 - SMTP connection successful

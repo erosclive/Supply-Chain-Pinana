@@ -1,1403 +1,1301 @@
 // Global variables
-let allProducts = []
-let filteredProducts = []
-let currentPage = 1
-const itemsPerPage = 12
-let totalPages = 1
-let currentView = "table"
-let currentFilters = {
-  search: "",
-  category: "all",
-  stock: "all",
-  expiry: "all",
-  sort: "name-asc",
+let completedOrders = []
+let inventoryProducts = []
+
+// Declare bootstrap variable if it's not already declared
+if (typeof bootstrap === "undefined") {
+  bootstrap = window.bootstrap
 }
 
-// Initialize the page
+// Initialize the inventory page
 document.addEventListener("DOMContentLoaded", () => {
-  // Initialize sidebar toggle for mobile
-  initSidebar()
+  console.log("Initializing inventory page")
 
-  // Initialize date pickers
-  initDatePickers()
+  // Set up tab change event listeners
+  setupTabListeners()
 
-  // Initialize view toggle
-  initViewToggle()
+  // Fetch products for the products tab (since it's active by default)
+  fetchProducts()
 
-  // Initialize filters
-  initFilters()
-
-  // Initialize product form
-  initProductForm()
-
-  // Load products
-  loadProducts()
-
-  // Initialize event listeners
-  initEventListeners()
+  // Set up event listeners
+  setupEventListeners()
 })
 
-// Initialize sidebar toggle for mobile
-function initSidebar() {
-  const sidebarToggle = document.getElementById("sidebarToggle")
-  const sidebar = document.getElementById("sidebar")
-
-  if (sidebarToggle && sidebar) {
-    sidebarToggle.addEventListener("click", () => {
-      sidebar.classList.toggle("show")
-    })
-
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener("click", (event) => {
-      if (
-        window.innerWidth < 768 &&
-        !sidebar.contains(event.target) &&
-        !sidebarToggle.contains(event.target) &&
-        sidebar.classList.contains("show")
-      ) {
-        sidebar.classList.remove("show")
+// Set up tab change event listeners
+function setupTabListeners() {
+  const tabs = document.querySelectorAll('button[data-bs-toggle="tab"]')
+  tabs.forEach((tab) => {
+    tab.addEventListener("shown.bs.tab", (event) => {
+      const targetId = event.target.getAttribute("data-bs-target")
+      if (targetId === "#products") {
+        // Refresh products when switching to products tab
+        fetchProducts()
+      } else if (targetId === "#consignment") {
+        // Refresh consignment orders when switching to consignment tab
+        fetchCompletedOrders()
       }
     })
-  }
-}
-
-// Initialize date pickers
-function initDatePickers() {
-  try {
-    if (typeof flatpickr !== "undefined") {
-      flatpickr("#batchManufacturingDate", {
-        enableTime: false,
-        dateFormat: "Y-m-d",
-        maxDate: "today",
-      })
-
-      flatpickr("#batchExpiryDate", {
-        enableTime: false,
-        dateFormat: "Y-m-d",
-        minDate: "today",
-      })
-    } else {
-      console.warn("flatpickr is not defined. Date pickers may not work properly.")
-    }
-  } catch (error) {
-    console.error("Error initializing date pickers:", error)
-  }
-}
-
-// Initialize view toggle
-function initViewToggle() {
-  const tableViewBtn = document.getElementById("tableViewBtn")
-  const cardViewBtn = document.getElementById("cardViewBtn")
-  const tableView = document.getElementById("tableView")
-  const cardView = document.getElementById("cardView")
-
-  if (tableViewBtn && cardViewBtn && tableView && cardView) {
-    tableViewBtn.addEventListener("click", () => {
-      tableViewBtn.classList.add("active")
-      cardViewBtn.classList.remove("active")
-      tableView.classList.remove("d-none")
-      cardView.classList.add("d-none")
-      currentView = "table"
-      renderProducts()
-    })
-
-    cardViewBtn.addEventListener("click", () => {
-      cardViewBtn.classList.add("active")
-      tableViewBtn.classList.remove("active")
-      cardView.classList.remove("d-none")
-      tableView.classList.add("d-none")
-      currentView = "card"
-      renderProducts()
-    })
-  }
-}
-
-// Initialize filters
-function initFilters() {
-  // Category filter
-  const categoryFilters = document.querySelectorAll(".category-filter")
-  categoryFilters.forEach((filter) => {
-    filter.addEventListener("click", function (e) {
-      e.preventDefault()
-      const category = this.getAttribute("data-category")
-
-      // Update active state
-      categoryFilters.forEach((f) => f.classList.remove("active"))
-      this.classList.add("active")
-
-      // Update dropdown button text
-      document.getElementById("categoryFilter").innerHTML =
-        `<i class="bi bi-tag me-1"></i> Category: ${category === "all" ? "All" : category.charAt(0).toUpperCase() + category.slice(1)}`
-
-      // Apply filter
-      currentFilters.category = category
-      applyFilters()
-    })
-  })
-
-  // Stock filter
-  const stockFilters = document.querySelectorAll(".stock-filter")
-  stockFilters.forEach((filter) => {
-    filter.addEventListener("click", function (e) {
-      e.preventDefault()
-      const stock = this.getAttribute("data-stock")
-
-      // Update active state
-      stockFilters.forEach((f) => f.classList.remove("active"))
-      this.classList.add("active")
-
-      // Update dropdown button text
-      let statusText = "All"
-      if (stock === "in-stock") statusText = "In Stock"
-      if (stock === "low-stock") statusText = "Low Stock"
-      if (stock === "out-of-stock") statusText = "Out of Stock"
-
-      document.getElementById("stockFilter").innerHTML = `<i class="bi bi-layers me-1"></i> Status: ${statusText}`
-
-      // Apply filter
-      currentFilters.stock = stock
-      applyFilters()
-    })
-  })
-
-  // Expiry filter
-  const expiryFilters = document.querySelectorAll(".expiry-filter")
-  expiryFilters.forEach((filter) => {
-    filter.addEventListener("click", function (e) {
-      e.preventDefault()
-      const expiry = this.getAttribute("data-expiry")
-
-      // Update active state
-      expiryFilters.forEach((f) => f.classList.remove("active"))
-      this.classList.add("active")
-
-      // Update dropdown button text
-      let expiryText = "All"
-      if (expiry === "expiring-soon") expiryText = "Expiring Soon"
-      if (expiry === "expired") expiryText = "Expired"
-
-      document.getElementById("expiryFilter").innerHTML = `<i class="bi bi-calendar-x me-1"></i> Expiry: ${expiryText}`
-
-      // Apply filter
-      currentFilters.expiry = expiry
-      applyFilters()
-    })
-  })
-
-  // Sort by
-  const sortByFilters = document.querySelectorAll(".sort-by")
-  sortByFilters.forEach((filter) => {
-    filter.addEventListener("click", function (e) {
-      e.preventDefault()
-      const sort = this.getAttribute("data-sort")
-
-      // Update active state
-      sortByFilters.forEach((f) => f.classList.remove("active"))
-      this.classList.add("active")
-
-      // Update dropdown button text
-      let sortText = "Name"
-      if (sort === "name-asc") sortText = "Name (A-Z)"
-      if (sort === "name-desc") sortText = "Name (Z-A)"
-      if (sort === "stock-asc") sortText = "Stock (Low to High)"
-      if (sort === "stock-desc") sortText = "Stock (High to Low)"
-      if (sort === "expiry-asc") sortText = "Expiry (Earliest First)"
-      if (sort === "expiry-desc") sortText = "Expiry (Latest First)"
-
-      document.getElementById("sortByFilter").innerHTML =
-        `<i class="bi bi-sort-alpha-down me-1"></i> Sort By: ${sortText.split(" ")[0]}`
-
-      // Apply filter
-      currentFilters.sort = sort
-      applyFilters()
-    })
-  })
-
-  // Search
-  document.getElementById("searchInventoryBtn").addEventListener("click", () => {
-    const searchTerm = document.getElementById("inventorySearch").value.trim()
-    currentFilters.search = searchTerm
-    applyFilters()
-  })
-
-  // Search on Enter key
-  document.getElementById("inventorySearch").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      document.getElementById("searchInventoryBtn").click()
-    }
-  })
-
-  // Reset filters
-  document.getElementById("resetFiltersBtn").addEventListener("click", () => {
-    resetFilters()
-  })
-
-  // Clear all filters
-  document.getElementById("clearAllFilters").addEventListener("click", () => {
-    resetFilters()
   })
 }
 
-// Reset all filters to default
-function resetFilters() {
-  // Reset search input
-  document.getElementById("inventorySearch").value = ""
-
-  // Reset category filter
-  document.querySelectorAll(".category-filter").forEach((f) => {
-    f.classList.remove("active")
-    if (f.getAttribute("data-category") === "all") {
-      f.classList.add("active")
-    }
-  })
-  document.getElementById("categoryFilter").innerHTML = `<i class="bi bi-tag me-1"></i> Category: All`
-
-  // Reset stock filter
-  document.querySelectorAll(".stock-filter").forEach((f) => {
-    f.classList.remove("active")
-    if (f.getAttribute("data-stock") === "all") {
-      f.classList.add("active")
-    }
-  })
-  document.getElementById("stockFilter").innerHTML = `<i class="bi bi-layers me-1"></i> Status: All`
-
-  // Reset expiry filter
-  document.querySelectorAll(".expiry-filter").forEach((f) => {
-    f.classList.remove("active")
-    if (f.getAttribute("data-expiry") === "all") {
-      f.classList.add("active")
-    }
-  })
-  document.getElementById("expiryFilter").innerHTML = `<i class="bi bi-calendar-x me-1"></i> Expiry: All`
-
-  // Reset sort by
-  document.querySelectorAll(".sort-by").forEach((f) => {
-    f.classList.remove("active")
-    if (f.getAttribute("data-sort") === "name-asc") {
-      f.classList.add("active")
-    }
-  })
-  document.getElementById("sortByFilter").innerHTML = `<i class="bi bi-sort-alpha-down me-1"></i> Sort By: Name`
-
-  // Reset filter object
-  currentFilters = {
-    search: "",
-    category: "all",
-    stock: "all",
-    expiry: "all",
-    sort: "name-asc",
-  }
-
-  // Hide active filters
-  document.getElementById("activeFilters").classList.add("d-none")
-
-  // Apply reset filters
-  applyFilters()
-}
-
-// Apply all current filters
-function applyFilters() {
-  // Show loading state
-  document.getElementById("loadingState").classList.remove("d-none")
-  document.getElementById("tableView").classList.add("d-none")
-  document.getElementById("cardView").classList.add("d-none")
-  document.getElementById("emptyState").classList.add("d-none")
-
-  // Reset to first page
-  currentPage = 1
-
-  // Filter products
-  filteredProducts = allProducts.filter((product) => {
-    // Search filter
-    if (
-      currentFilters.search &&
-      !product.product_name.toLowerCase().includes(currentFilters.search.toLowerCase()) &&
-      !product.sku.toLowerCase().includes(currentFilters.search.toLowerCase())
-    ) {
-      return false
-    }
-
-    // Category filter
-    if (currentFilters.category !== "all" && product.category !== currentFilters.category) {
-      return false
-    }
-
-    // Stock filter
-    if (currentFilters.stock !== "all") {
-      if (currentFilters.stock === "in-stock" && product.stock_status !== "in-stock") {
-        return false
-      }
-      if (currentFilters.stock === "low-stock" && product.stock_status !== "low-stock") {
-        return false
-      }
-      if (currentFilters.stock === "out-of-stock" && product.stock_status !== "out-of-stock") {
-        return false
-      }
-    }
-
-    // Expiry filter
-    if (currentFilters.expiry !== "all") {
-      if (currentFilters.expiry === "expiring-soon" && !product.is_expiring_soon) {
-        return false
-      }
-      if (currentFilters.expiry === "expired" && !product.is_expired) {
-        return false
-      }
-    }
-
-    return true
-  })
-
-  // Sort products
-  sortProducts()
-
-  // Update active filters display
-  updateActiveFilters()
-
-  // Render products
-  renderProducts()
-}
-
-// Sort products based on current sort option
-function sortProducts() {
-  switch (currentFilters.sort) {
-    case "name-asc":
-      filteredProducts.sort((a, b) => a.product_name.localeCompare(b.product_name))
-      break
-    case "name-desc":
-      filteredProducts.sort((a, b) => b.product_name.localeCompare(a.product_name))
-      break
-    case "stock-asc":
-      filteredProducts.sort((a, b) => a.total_stock - b.total_stock)
-      break
-    case "stock-desc":
-      filteredProducts.sort((a, b) => b.total_stock - a.total_stock)
-      break
-    case "expiry-asc":
-      filteredProducts.sort((a, b) => {
-        // Sort by earliest expiry date first
-        if (!a.earliest_expiry) return 1
-        if (!b.earliest_expiry) return -1
-        return new Date(a.earliest_expiry) - new Date(b.earliest_expiry)
-      })
-      break
-    case "expiry-desc":
-      filteredProducts.sort((a, b) => {
-        // Sort by latest expiry date first
-        if (!a.earliest_expiry) return 1
-        if (!b.earliest_expiry) return -1
-        return new Date(b.earliest_expiry) - new Date(a.earliest_expiry)
-      })
-      break
-  }
-}
-
-// Update active filters display
-function updateActiveFilters() {
-  const activeFiltersContainer = document.getElementById("activeFilters")
-  const activeFilterTags = document.querySelector(".active-filter-tags")
-
-  // Clear existing tags
-  activeFilterTags.innerHTML = ""
-
-  // Check if any filters are active
-  let hasActiveFilters = false
-
-  // Add search filter tag
-  if (currentFilters.search) {
-    hasActiveFilters = true
-    const searchTag = document.createElement("span")
-    searchTag.className = "badge bg-light text-dark me-2"
-    searchTag.innerHTML = `Search: ${currentFilters.search} <i class="bi bi-x-circle ms-1" data-filter="search"></i>`
-    activeFilterTags.appendChild(searchTag)
-
-    // Add click event to remove this filter
-    searchTag.querySelector("i").addEventListener("click", () => {
-      document.getElementById("inventorySearch").value = ""
-      currentFilters.search = ""
-      applyFilters()
-    })
-  }
-
-  // Add category filter tag
-  if (currentFilters.category !== "all") {
-    hasActiveFilters = true
-    const categoryTag = document.createElement("span")
-    categoryTag.className = "badge bg-light text-dark me-2"
-    categoryTag.innerHTML = `Category: ${currentFilters.category.charAt(0).toUpperCase() + currentFilters.category.slice(1)} <i class="bi bi-x-circle ms-1" data-filter="category"></i>`
-    activeFilterTags.appendChild(categoryTag)
-
-    // Add click event to remove this filter
-    categoryTag.querySelector("i").addEventListener("click", () => {
-      document.querySelectorAll(".category-filter").forEach((f) => {
-        f.classList.remove("active")
-        if (f.getAttribute("data-category") === "all") {
-          f.classList.add("active")
-        }
-      })
-      document.getElementById("categoryFilter").innerHTML = `<i class="bi bi-tag me-1"></i> Category: All`
-      currentFilters.category = "all"
-      applyFilters()
-    })
-  }
-
-  // Add stock filter tag
-  if (currentFilters.stock !== "all") {
-    hasActiveFilters = true
-    let stockText = ""
-    if (currentFilters.stock === "in-stock") stockText = "In Stock"
-    if (currentFilters.stock === "low-stock") stockText = "Low Stock"
-    if (currentFilters.stock === "out-of-stock") stockText = "Out of Stock"
-
-    const stockTag = document.createElement("span")
-    stockTag.className = "badge bg-light text-dark me-2"
-    stockTag.innerHTML = `Status: ${stockText} <i class="bi bi-x-circle ms-1" data-filter="stock"></i>`
-    activeFilterTags.appendChild(stockTag)
-
-    // Add click event to remove this filter
-    stockTag.querySelector("i").addEventListener("click", () => {
-      document.querySelectorAll(".stock-filter").forEach((f) => {
-        f.classList.remove("active")
-        if (f.getAttribute("data-stock") === "all") {
-          f.classList.add("active")
-        }
-      })
-      document.getElementById("stockFilter").innerHTML = `<i class="bi bi-layers me-1"></i> Status: All`
-      currentFilters.stock = "all"
-      applyFilters()
-    })
-  }
-
-  // Add expiry filter tag
-  if (currentFilters.expiry !== "all") {
-    hasActiveFilters = true
-    let expiryText = ""
-    if (currentFilters.expiry === "expiring-soon") expiryText = "Expiring Soon"
-    if (currentFilters.expiry === "expired") expiryText = "Expired"
-
-    const expiryTag = document.createElement("span")
-    expiryTag.className = "badge bg-light text-dark me-2"
-    expiryTag.innerHTML = `Expiry: ${expiryText} <i class="bi bi-x-circle ms-1" data-filter="expiry"></i>`
-    activeFilterTags.appendChild(expiryTag)
-
-    // Add click event to remove this filter
-    expiryTag.querySelector("i").addEventListener("click", () => {
-      document.querySelectorAll(".expiry-filter").forEach((f) => {
-        f.classList.remove("active")
-        if (f.getAttribute("data-expiry") === "all") {
-          f.classList.add("active")
-        }
-      })
-      document.getElementById("expiryFilter").innerHTML = `<i class="bi bi-calendar-x me-1"></i> Expiry: All`
-      currentFilters.expiry = "all"
-      applyFilters()
-    })
-  }
-
-  // Show or hide active filters container
-  if (hasActiveFilters) {
-    activeFiltersContainer.classList.remove("d-none")
-  } else {
-    activeFiltersContainer.classList.add("d-none")
-  }
-}
-
-// Initialize product form
-function initProductForm() {
-  // Add product button
-  document.getElementById("addProductBtn").addEventListener("click", () => {
-    // Reset form
-    document.getElementById("productForm").reset()
-    document.getElementById("productId").value = ""
-
-    // Update modal title
-    document.getElementById("productFormModalLabel").textContent = "Add New Product"
-
-    // Show modal
-    const productFormModal = new bootstrap.Modal(document.getElementById("productFormModal"))
-    productFormModal.show()
-  })
-
-  // Save product button
-  document.getElementById("saveProductBtn").addEventListener("click", () => {
-    saveProduct()
-  })
-}
-
-// Initialize event listeners
-function initEventListeners() {
-  // Export inventory button
-  document.getElementById("exportInventoryBtn").addEventListener("click", () => {
-    exportInventory()
-  })
-
-  // Modal order more button
-  document.getElementById("modalOrderMoreBtn").addEventListener("click", () => {
-    orderMoreProduct()
-  })
-
-  // Modal edit button
-  document.getElementById("modalEditBtn").addEventListener("click", () => {
-    const productId = document.getElementById("modalProductSku").textContent
-    editProduct(productId)
-  })
-
-  // Confirm delete button
-  document.getElementById("confirmDeleteBtn").addEventListener("click", () => {
-    deleteProduct()
-  })
-}
-
-// Load products from server
-function loadProducts() {
-  // Show loading state
-  document.getElementById("loadingState").classList.remove("d-none")
-  document.getElementById("tableView").classList.add("d-none")
-  document.getElementById("cardView").classList.add("d-none")
-  document.getElementById("emptyState").classList.add("d-none")
-
-  // Simulate API call with setTimeout
-  setTimeout(() => {
-    // Mock data for demonstration
-    allProducts = [
-      {
-        product_id: "1",
-        product_name: "Pineapple Jam",
-        sku: "SKU-001",
-        category: "preserves",
-        total_stock: 75,
-        batch_count: 3,
-        stock_status: "in-stock",
-        reorder_level: 30,
-        supplier: "Piñana Gourmet",
-        description: "Premium pineapple jam made from fresh pineapples.",
-        image_url: "https://via.placeholder.com/200",
-        is_expiring_soon: false,
-        is_expired: false,
-        earliest_expiry: "2023-09-05",
-        batches: [
-          {
-            batch_id: "BATCH-001",
-            quantity: 15,
-            manufacturing_date: "2022-11-15",
-            expiry_date: "2023-05-15",
-            status: "expired",
-          },
-          {
-            batch_id: "BATCH-002",
-            quantity: 25,
-            manufacturing_date: "2023-01-10",
-            expiry_date: "2023-07-10",
-            status: "expiring-soon",
-          },
-          {
-            batch_id: "BATCH-003",
-            quantity: 35,
-            manufacturing_date: "2023-03-05",
-            expiry_date: "2023-09-05",
-            status: "good",
-          },
-        ],
-      },
-      {
-        product_id: "2",
-        product_name: "Pineapple Juice",
-        sku: "SKU-002",
-        category: "beverages",
-        total_stock: 25,
-        batch_count: 2,
-        stock_status: "low-stock",
-        reorder_level: 50,
-        supplier: "Piñana Gourmet",
-        description: "Refreshing pineapple juice made from 100% fresh pineapples.",
-        image_url: "https://via.placeholder.com/200",
-        is_expiring_soon: true,
-        is_expired: false,
-        earliest_expiry: "2023-05-30",
-        batches: [
-          {
-            batch_id: "BATCH-005",
-            quantity: 15,
-            manufacturing_date: "2022-12-01",
-            expiry_date: "2023-05-30",
-            status: "expiring-soon",
-          },
-          {
-            batch_id: "BATCH-006",
-            quantity: 10,
-            manufacturing_date: "2023-01-15",
-            expiry_date: "2023-06-15",
-            status: "good",
-          },
-        ],
-      },
-      {
-        product_id: "3",
-        product_name: "Dried Pineapple",
-        sku: "SKU-003",
-        category: "snacks",
-        total_stock: 60,
-        batch_count: 4,
-        stock_status: "in-stock",
-        reorder_level: 40,
-        supplier: "Piñana Gourmet",
-        description: "Delicious dried pineapple slices, perfect for snacking.",
-        image_url: "https://via.placeholder.com/200",
-        is_expiring_soon: true,
-        is_expired: false,
-        earliest_expiry: "2023-06-10",
-        batches: [
-          {
-            batch_id: "BATCH-008",
-            quantity: 20,
-            manufacturing_date: "2022-12-10",
-            expiry_date: "2023-06-10",
-            status: "expiring-soon",
-          },
-          {
-            batch_id: "BATCH-009",
-            quantity: 15,
-            manufacturing_date: "2023-01-20",
-            expiry_date: "2023-07-20",
-            status: "good",
-          },
-          {
-            batch_id: "BATCH-010",
-            quantity: 15,
-            manufacturing_date: "2023-02-05",
-            expiry_date: "2023-08-05",
-            status: "good",
-          },
-          {
-            batch_id: "BATCH-011",
-            quantity: 10,
-            manufacturing_date: "2023-02-20",
-            expiry_date: "2023-08-20",
-            status: "good",
-          },
-        ],
-      },
-      {
-        product_id: "4",
-        product_name: "Pineapple Cake",
-        sku: "SKU-004",
-        category: "bakery",
-        total_stock: 10,
-        batch_count: 1,
-        stock_status: "out-of-stock",
-        reorder_level: 40,
-        supplier: "Piñana Gourmet",
-        description: "Delicious pineapple cake with real pineapple chunks.",
-        image_url: "https://via.placeholder.com/200",
-        is_expiring_soon: false,
-        is_expired: false,
-        earliest_expiry: "2023-05-10",
-        batches: [
-          {
-            batch_id: "BATCH-012",
-            quantity: 10,
-            manufacturing_date: "2023-04-10",
-            expiry_date: "2023-05-10",
-            status: "expiring-soon",
-          },
-        ],
-      },
-      {
-        product_id: "5",
-        product_name: "Pineapple Syrup",
-        sku: "SKU-007",
-        category: "condiments",
-        total_stock: 30,
-        batch_count: 2,
-        stock_status: "low-stock",
-        reorder_level: 60,
-        supplier: "Piñana Gourmet",
-        description: "Sweet pineapple syrup, perfect for desserts and cocktails.",
-        image_url: "https://via.placeholder.com/200",
-        is_expiring_soon: false,
-        is_expired: false,
-        earliest_expiry: "2023-10-15",
-        batches: [
-          {
-            batch_id: "BATCH-015",
-            quantity: 15,
-            manufacturing_date: "2023-04-15",
-            expiry_date: "2023-10-15",
-            status: "good",
-          },
-          {
-            batch_id: "BATCH-016",
-            quantity: 15,
-            manufacturing_date: "2023-04-20",
-            expiry_date: "2023-10-20",
-            status: "good",
-          },
-        ],
-      },
-      {
-        product_id: "6",
-        product_name: "Pineapple Vinegar",
-        sku: "SKU-009",
-        category: "condiments",
-        total_stock: 20,
-        batch_count: 1,
-        stock_status: "low-stock",
-        reorder_level: 45,
-        supplier: "Piñana Gourmet",
-        description: "Tangy pineapple vinegar, great for salad dressings and marinades.",
-        image_url: "https://via.placeholder.com/200",
-        is_expiring_soon: false,
-        is_expired: false,
-        earliest_expiry: "2023-11-10",
-        batches: [
-          {
-            batch_id: "BATCH-020",
-            quantity: 20,
-            manufacturing_date: "2023-05-10",
-            expiry_date: "2023-11-10",
-            status: "good",
-          },
-        ],
-      },
-    ]
-
-    // Apply initial filters
-    filteredProducts = [...allProducts]
-
-    // Sort products
-    sortProducts()
-
-    // Render products
-    renderProducts()
-  }, 1000)
-}
-
-// Render products based on current view and filters
-function renderProducts() {
-  // Hide loading state
-  document.getElementById("loadingState").classList.add("d-none")
-
-  // Check if there are products to display
-  if (filteredProducts.length === 0) {
-    document.getElementById("emptyState").classList.remove("d-none")
-    document.getElementById("tableView").classList.add("d-none")
-    document.getElementById("cardView").classList.add("d-none")
-
-    // Update counts
-    document.getElementById("currentCount").textContent = "0"
-    document.getElementById("totalCount").textContent = allProducts.length
-
-    // Clear pagination
-    document.getElementById("inventoryPagination").innerHTML = ""
-
+// Fetch completed orders from the server
+function fetchCompletedOrders() {
+  const inventoryContainer = document.getElementById("consignment-inventory-container")
+  if (!inventoryContainer) {
+    console.error("Inventory container not found")
     return
   }
 
-  // Calculate pagination
-  totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length)
-  const currentPageProducts = filteredProducts.slice(startIndex, endIndex)
+  // Show loading indicator
+  inventoryContainer.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="mt-3">Loading consignment inventory...</div>
+        </div>
+    `
 
-  // Update counts
-  document.getElementById("currentCount").textContent = currentPageProducts.length
-  document.getElementById("totalCount").textContent = allProducts.length
+  // Fetch completed orders from server
+  fetch("fetch_completed_orders.php")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        // Store orders
+        completedOrders = data.orders || []
+        console.log("Number of completed orders:", completedOrders.length)
 
-  // Render based on current view
-  if (currentView === "table") {
-    renderTableView(currentPageProducts)
-    document.getElementById("tableView").classList.remove("d-none")
-    document.getElementById("cardView").classList.add("d-none")
-  } else {
-    renderCardView(currentPageProducts)
-    document.getElementById("cardView").classList.remove("d-none")
-    document.getElementById("tableView").classList.add("d-none")
-  }
-
-  document.getElementById("emptyState").classList.add("d-none")
-
-  // Render pagination
-  renderPagination()
+        // Render orders
+        renderCompletedOrders(completedOrders)
+      } else {
+        throw new Error(data.message || "Failed to fetch completed orders")
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching completed orders:", error)
+      inventoryContainer.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Error loading consignment inventory: ${error.message}
+                    <button class="btn btn-outline-danger btn-sm ms-3" onclick="fetchCompletedOrders()">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Try Again
+                    </button>
+                </div>
+            `
+    })
 }
 
-// Render table view
-function renderTableView(products) {
-  const tableBody = document.getElementById("inventoryTableBody")
-  tableBody.innerHTML = ""
+// Fetch products from the server
+function fetchProducts() {
+  const productsContainer = document.getElementById("products-inventory-container")
+  if (!productsContainer) {
+    console.error("Products container not found")
+    return
+  }
+
+  // Show loading indicator
+  productsContainer.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="mt-3">Loading product inventory...</div>
+        </div>
+    `
+
+  // Fetch products from server
+  fetch("fetch_products.php")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        // Store products
+        inventoryProducts = data.products || []
+        console.log("Number of products:", inventoryProducts.length)
+
+        // Render products
+        renderProducts(inventoryProducts)
+      } else {
+        throw new Error(data.message || "Failed to fetch products")
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching products:", error)
+      productsContainer.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Error loading product inventory: ${error.message}
+                    <button class="btn btn-outline-danger btn-sm ms-3" onclick="fetchProducts()">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Try Again
+                    </button>
+                </div>
+            `
+    })
+}
+
+// Group products by product_id
+function groupProductsByProductId(products) {
+  const groupedProducts = {}
 
   products.forEach((product) => {
-    // Determine status badge class
-    let statusBadgeClass = ""
-    if (product.stock_status === "in-stock") {
-      statusBadgeClass = "status-in-stock"
-    } else if (product.stock_status === "low-stock") {
-      statusBadgeClass = "status-low-stock"
-    } else if (product.stock_status === "out-of-stock") {
-      statusBadgeClass = "status-out-stock"
+    const productId = product.product_id
+
+    if (!groupedProducts[productId]) {
+      groupedProducts[productId] = {
+        ...product,
+        orders: [],
+        total_quantity: 0,
+      }
     }
 
-    // Format status text
-    let statusText = ""
-    if (product.stock_status === "in-stock") {
-      statusText = "In Stock"
-    } else if (product.stock_status === "low-stock") {
-      statusText = "Low Stock"
-    } else if (product.stock_status === "out-of-stock") {
-      statusText = "Out of Stock"
+    // Add order info if not already added
+    const orderExists = groupedProducts[productId].orders.some((order) => order.order_id === product.order_id)
+    if (!orderExists) {
+      groupedProducts[productId].orders.push({
+        order_id: product.order_id,
+        po_number: product.po_number,
+        quantity: product.quantity,
+      })
     }
 
-    const row = document.createElement("tr")
-    row.innerHTML = `
-            <td>
-                <div class="d-flex align-items-center">
-                    <img src="${product.image_url}" alt="${product.product_name}" class="me-2" width="40" height="40">
-                    <span class="product-name">${product.product_name}</span>
-                </div>
-            </td>
-            <td class="product-id">${product.sku}</td>
-            <td>${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</td>
-            <td>
-                <div class="progress">
-                    <div class="progress-bar ${product.stock_status === "out-of-stock" ? "bg-danger" : product.stock_status === "low-stock" ? "bg-warning" : "bg-success"}" 
-                         role="progressbar" 
-                         style="width: ${Math.min(100, Math.round((product.total_stock / product.reorder_level) * 100))}%">
-                    </div>
-                </div>
-                <span class="small">${product.total_stock} units</span>
-            </td>
-            <td>${product.batch_count} ${product.batch_count === 1 ? "batch" : "batches"}</td>
-            <td><span class="status-badge ${statusBadgeClass}">${statusText}</span></td>
-            <td>
-                <div class="action-buttons">
-                    <button class="action-btn action-btn-edit" data-bs-toggle="tooltip" title="Edit" data-id="${product.sku}">
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                    <button class="action-btn action-btn-view" data-bs-toggle="tooltip" title="View Details" data-id="${product.sku}">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                    <button class="action-btn action-btn-delete" data-bs-toggle="tooltip" title="Delete" data-id="${product.sku}" data-name="${product.product_name}">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            </td>
-        `
-
-    tableBody.appendChild(row)
-
-    // Add event listeners to action buttons
-    row.querySelector(".action-btn-view").addEventListener("click", function () {
-      viewProduct(this.getAttribute("data-id"))
-    })
-
-    row.querySelector(".action-btn-edit").addEventListener("click", function () {
-      editProduct(this.getAttribute("data-id"))
-    })
-
-    row.querySelector(".action-btn-delete").addEventListener("click", function () {
-      confirmDelete(this.getAttribute("data-id"), this.getAttribute("data-name"))
-    })
+    // Sum up quantities
+    groupedProducts[productId].total_quantity += Number.parseInt(product.quantity)
   })
 
-  // Initialize tooltips
-  if (typeof bootstrap !== "undefined" && typeof bootstrap.Tooltip !== "undefined") {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    tooltipTriggerList.map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl))
-  }
+  return Object.values(groupedProducts)
 }
 
-// Render card view
-function renderCardView(products) {
-  const cardContainer = document.getElementById("inventoryCardContainer")
-  cardContainer.innerHTML = ""
+// Render products in a grid
+function renderProducts(products) {
+  const productsContainer = document.getElementById("products-inventory-container")
+  if (!productsContainer) {
+    console.error("Products container not found in renderProducts")
+    return
+  }
 
-  products.forEach((product) => {
-    // Determine status badge class
-    let statusBadgeClass = ""
-    let statusBgClass = ""
-    if (product.stock_status === "in-stock") {
-      statusBadgeClass = "status-in-stock"
-      statusBgClass = "bg-success"
-    } else if (product.stock_status === "low-stock") {
-      statusBadgeClass = "status-low-stock"
-      statusBgClass = "bg-warning"
-    } else if (product.stock_status === "out-of-stock") {
-      statusBadgeClass = "status-out-stock"
-      statusBgClass = "bg-danger"
+  // Clear the container
+  productsContainer.innerHTML = ""
+
+  // If no products, show a message
+  if (!products || products.length === 0) {
+    productsContainer.innerHTML = `
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                No products found in completed orders.
+            </div>
+        `
+    return
+  }
+
+  // Group products by product_id
+  const groupedProducts = groupProductsByProductId(products)
+
+  // Create a row for the product cards
+  const row = document.createElement("div")
+  row.className = "row g-3"
+
+  // Loop through grouped products and create cards
+  groupedProducts.forEach((product) => {
+    // Get product image path or use placeholder
+    const productImage = `uploads/product_${product.product_id}.jpg`
+
+    // Determine stock status and badge color
+    let stockStatusClass = "bg-success"
+    let stockStatusText = "In Stock"
+
+    if (product.available_stock <= 0) {
+      stockStatusClass = "bg-danger"
+      stockStatusText = "Out of Stock"
+    } else if (product.available_stock < 5) {
+      stockStatusClass = "bg-warning"
+      stockStatusText = "Low Stock"
     }
 
-    // Format status text
-    let statusText = ""
-    if (product.stock_status === "in-stock") {
-      statusText = "In Stock"
-    } else if (product.stock_status === "low-stock") {
-      statusText = "Low Stock"
-    } else if (product.stock_status === "out-of-stock") {
-      statusText = "Out of Stock"
-    }
+    // Format price
+    const formattedPrice = product.unit_price_formatted || `₱${Number.parseFloat(product.price).toFixed(2)}`
 
-    const card = document.createElement("div")
-    card.className = "col"
-
-    card.innerHTML = `
-            <div class="card h-100 product-card">
-                <div class="position-relative">
-                    <img src="${product.image_url}" class="card-img-top p-3" alt="${product.product_name}" style="height: 180px; object-fit: contain;">
-                    <span class="position-absolute top-0 end-0 badge ${statusBgClass} m-2">${statusText}</span>
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">${product.product_name}</h5>
-                    <p class="card-text text-muted small mb-2">SKU: ${product.sku}</p>
-                    <div class="mb-2">
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar ${product.stock_status === "out-of-stock" ? "bg-danger" : product.stock_status === "low-stock" ? "bg-warning" : "bg-success"}" 
-                                role="progressbar" 
-                                style="width: ${Math.min(100, Math.round((product.total_stock / product.reorder_level) * 100))}%">
+    // Create the card HTML
+    const cardHtml = `
+            <div class="col-md-6 col-lg-4 col-xl-3 mb-3">
+                <div class="card product-card h-100">
+                    <div class="product-image-container">
+                        <img src="${productImage}" class="card-img-top product-image" alt="${product.product_name}" onerror="this.src='assets/placeholder-product.jpg'">
+                        <span class="badge ${stockStatusClass} position-absolute top-0 end-0 m-2">${stockStatusText}</span>
+                        <span class="ordered-quantity-badge">${product.total_quantity}</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title product-name">${product.product_name}</h5>
+                        <div class="product-details">
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span class="text-muted">SKU:</span>
+                                <span class="fw-medium">${product.product_id}</span>
+                            </div>
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span class="text-muted">Price:</span>
+                                <span class="fw-bold">${formattedPrice}</span>
+                            </div>
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span class="text-muted">Category:</span>
+                                <span>${product.category || "N/A"}</span>
+                            </div>
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span class="text-muted">Ordered Quantity:</span>
+                                <span class="fw-bold text-primary">${product.total_quantity}</span>
+                            </div>
+                            <div class="mb-2 d-flex justify-content-between">
+                                <span class="text-muted">In Orders:</span>
+                                <span>${product.orders.length}</span>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mt-1">
-                            <small class="text-muted">Stock: ${product.total_stock} units</small>
-                            <small class="text-muted">Min: ${product.reorder_level}</small>
-                        </div>
                     </div>
-                    <div class="mt-auto pt-2 border-top d-flex justify-content-between">
-                        <span class="text-muted small">${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</span>
-                        <span class="text-muted small">${product.batch_count} ${product.batch_count === 1 ? "batch" : "batches"}</span>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-top-0">
-                    <div class="d-flex justify-content-between">
-                        <button class="btn btn-sm btn-outline-primary view-product-btn" data-id="${product.sku}">
-                            <i class="bi bi-eye me-1"></i> View
+                    <div class="card-footer">
+                        <button class="btn btn-primary btn-sm view-product-btn" data-id="${product.product_id}">
+                            <i class="bi bi-eye me-1"></i> View Details
                         </button>
-                        <div>
-                            <button class="btn btn-sm btn-outline-secondary edit-product-btn" data-id="${product.sku}">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger delete-product-btn" data-id="${product.sku}" data-name="${product.product_name}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
         `
 
-    cardContainer.appendChild(card)
-
-    // Add event listeners to action buttons
-    card.querySelector(".view-product-btn").addEventListener("click", function () {
-      viewProduct(this.getAttribute("data-id"))
-    })
-
-    card.querySelector(".edit-product-btn").addEventListener("click", function () {
-      editProduct(this.getAttribute("data-id"))
-    })
-
-    card.querySelector(".delete-product-btn").addEventListener("click", function () {
-      confirmDelete(this.getAttribute("data-id"), this.getAttribute("data-name"))
-    })
+    // Add the card to the row
+    row.innerHTML += cardHtml
   })
+
+  // Add the row to the container
+  productsContainer.appendChild(row)
+
+  // Set up event listeners for the view product buttons
+  setupViewProductButtons()
 }
 
-// Render pagination
-function renderPagination() {
-  const pagination = document.getElementById("inventoryPagination")
-  pagination.innerHTML = ""
-
-  if (totalPages <= 1) {
+// Render completed orders as horizontal cards
+function renderCompletedOrders(orders) {
+  const inventoryContainer = document.getElementById("consignment-inventory-container")
+  if (!inventoryContainer) {
+    console.error("Inventory container not found in renderCompletedOrders")
     return
   }
 
-  // Previous button
-  const prevLi = document.createElement("li")
-  prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`
-  prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>`
-  pagination.appendChild(prevLi)
+  // Clear the container
+  inventoryContainer.innerHTML = ""
 
-  if (currentPage > 1) {
-    prevLi.addEventListener("click", (e) => {
-      e.preventDefault()
-      currentPage--
-      renderProducts()
-    })
-  }
-
-  // Page numbers
-  const maxPages = 5 // Maximum number of page links to show
-  let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2))
-  const endPage = Math.min(totalPages, startPage + maxPages - 1)
-
-  if (endPage - startPage + 1 < maxPages) {
-    startPage = Math.max(1, endPage - maxPages + 1)
-  }
-
-  for (let i = startPage; i <= endPage; i++) {
-    const pageLi = document.createElement("li")
-    pageLi.className = `page-item ${i === currentPage ? "active" : ""}`
-    pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`
-
-    pageLi.addEventListener("click", (e) => {
-      e.preventDefault()
-      currentPage = i
-      renderProducts()
-    })
-
-    pagination.appendChild(pageLi)
-  }
-
-  // Next button
-  const nextLi = document.createElement("li")
-  nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`
-  nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>`
-  pagination.appendChild(nextLi)
-
-  if (currentPage < totalPages) {
-    nextLi.addEventListener("click", (e) => {
-      e.preventDefault()
-      currentPage++
-      renderProducts()
-    })
-  }
-}
-
-// View product details
-function viewProduct(productId) {
-  // Find product
-  const product = allProducts.find((p) => p.sku === productId)
-
-  if (!product) {
-    showAlert("danger", "Product not found")
+  // If no orders, show a message
+  if (!orders || orders.length === 0) {
+    inventoryContainer.innerHTML = `
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                No completed orders found in consignment inventory.
+            </div>
+        `
     return
   }
 
-  // Populate modal
-  document.getElementById("modalProductImage").src = product.image_url
-  document.getElementById("modalProductName").textContent = product.product_name
-  document.getElementById("modalProductDescription").textContent = product.description
-  document.getElementById("modalProductSku").textContent = product.sku
-  document.getElementById("modalProductCategory").textContent =
-    product.category.charAt(0).toUpperCase() + product.category.slice(1)
-  document.getElementById("modalProductStock").textContent = `${product.total_stock} units`
-  document.getElementById("modalProductReorderLevel").textContent = `${product.reorder_level} units`
-  document.getElementById("modalProductSupplier").textContent = product.supplier
+  // Create a row for the cards
+  const row = document.createElement("div")
+  row.className = "row g-3"
 
-  // Set status badge
-  const statusBadge = document.getElementById("modalProductStatus")
-  statusBadge.textContent =
-    product.stock_status === "in-stock"
-      ? "In Stock"
-      : product.stock_status === "low-stock"
-        ? "Low Stock"
-        : "Out of Stock"
+  // Loop through orders and create cards
+  orders.forEach((order) => {
+    // Get order number (PO number or order ID)
+    const orderNumber = order.po_number || order.order_id
 
-  statusBadge.className =
-    "badge " +
-    (product.stock_status === "in-stock"
-      ? "bg-success"
-      : product.stock_status === "low-stock"
-        ? "bg-warning"
-        : "bg-danger")
+    // Get consignment term
+    const consignmentTerm = order.consignment_term || 30 // Default to 30 days if not set
 
-  // Populate batches table
-  const batchesTable = document.getElementById("modalBatchesTable")
-  batchesTable.innerHTML = ""
+    // Calculate days remaining
+    const daysRemaining = order.days_remaining
 
-  product.batches.forEach((batch) => {
-    const row = document.createElement("tr")
+    // Calculate days since start
+    const daysSinceStart = order.days_since_start
 
-    // Determine status badge class
-    let statusClass = ""
-    if (batch.status === "good") {
-      statusClass = "bg-success"
-    } else if (batch.status === "expiring-soon") {
-      statusClass = "bg-warning"
-    } else if (batch.status === "expired") {
+    // Determine status color based on days remaining
+    let statusClass = "bg-success"
+    let statusText = "Active"
+
+    if (daysRemaining < 0) {
       statusClass = "bg-danger"
-    }
-
-    // Format status text
-    let statusText = ""
-    if (batch.status === "good") {
-      statusText = "Good"
-    } else if (batch.status === "expiring-soon") {
-      statusText = "Expiring Soon"
-    } else if (batch.status === "expired") {
       statusText = "Expired"
+    } else if (daysRemaining < 7) {
+      statusClass = "bg-warning"
+      statusText = "Ending Soon"
     }
 
-    row.innerHTML = `
-            <td>${batch.batch_id}</td>
-            <td>${batch.quantity} units</td>
-            <td>${batch.manufacturing_date}</td>
-            <td>${batch.expiry_date}</td>
-            <td><span class="badge ${statusClass}">${statusText}</span></td>
+    // Format dates
+    const startDate = new Date(order.created_at).toLocaleDateString()
+    const endDate = new Date(
+      new Date(order.created_at).getTime() + consignmentTerm * 24 * 60 * 60 * 1000,
+    ).toLocaleDateString()
+
+    // Create the card HTML
+    const cardHtml = `
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card consignment-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="bi bi-box me-2"></i> Order #${orderNumber}
+                        </h6>
+                        <span class="badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted"><i class="bi bi-calendar-check me-1"></i> Consignment Term:</span>
+                                <span class="fw-medium">${consignmentTerm} days</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted"><i class="bi bi-calendar-date me-1"></i> Start Date:</span>
+                                <span class="fw-medium">${startDate}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted"><i class="bi bi-calendar-date me-1"></i> End Date:</span>
+                                <span class="fw-medium">${endDate}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted"><i class="bi bi-clock-history me-1"></i> Days Since Start:</span>
+                                <span class="fw-medium">${daysSinceStart} days</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted"><i class="bi bi-clock me-1"></i> Days Remaining:</span>
+                                <span class="fw-bold ${daysRemaining < 0 ? "text-danger" : daysRemaining < 7 ? "text-warning" : "text-success"}">
+                                    ${daysRemaining < 0 ? "Expired" : daysRemaining + " days"}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="progress mb-3" style="height: 10px;">
+                            <div class="progress-bar ${statusClass}" role="progressbar" 
+                                style="width: ${Math.min(100, (daysSinceStart / consignmentTerm) * 100)}%;" 
+                                aria-valuenow="${daysSinceStart}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="${consignmentTerm}">
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Total Items: ${order.items ? order.items.length : 0}</span>
+                            <span class="fw-bold">₱${Number.parseFloat(order.total_amount).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary btn-sm view-details-btn" data-id="${order.order_id}">
+                            <i class="bi bi-eye me-1"></i> View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
         `
 
-    batchesTable.appendChild(row)
+    // Add the card to the row
+    row.innerHTML += cardHtml
   })
 
-  // Show modal
-  const productDetailsModal = new bootstrap.Modal(document.getElementById("productDetailsModal"))
-  productDetailsModal.show()
+  // Add the row to the container
+  inventoryContainer.appendChild(row)
+
+  // Set up event listeners for the view details buttons
+  setupViewDetailsButtons()
 }
 
-// Edit product
-function editProduct(productId) {
-  // Find product
-  const product = allProducts.find((p) => p.sku === productId)
+// Set up event listeners
+function setupEventListeners() {
+  // Add any general event listeners here
 
-  if (!product) {
-    showAlert("danger", "Product not found")
-    return
+  // Example: Refresh buttons
+  const refreshConsignmentBtn = document.getElementById("refresh-inventory-btn")
+  if (refreshConsignmentBtn) {
+    refreshConsignmentBtn.addEventListener("click", fetchCompletedOrders)
   }
 
-  // Populate form
-  document.getElementById("productId").value = product.product_id
-  document.getElementById("productName").value = product.product_name
-  document.getElementById("productSku").value = product.sku
-  document.getElementById("productCategory").value = product.category
-  document.getElementById("productSupplier").value = product.supplier
-  document.getElementById("productReorderLevel").value = product.reorder_level
-  document.getElementById("productDescription").value = product.description
-
-  // Update modal title
-  document.getElementById("productFormModalLabel").textContent = "Edit Product"
-
-  // Show modal
-  const productFormModal = new bootstrap.Modal(document.getElementById("productFormModal"))
-  productFormModal.show()
-}
-
-// Confirm delete product
-function confirmDelete(productId, productName) {
-  document.getElementById("deleteProductName").textContent = productName
-
-  // Store product ID in a data attribute for the confirm button
-  document.getElementById("confirmDeleteBtn").setAttribute("data-id", productId)
-
-  // Show modal
-  const confirmDeleteModal = new bootstrap.Modal(document.getElementById("confirmDeleteModal"))
-  confirmDeleteModal.show()
-}
-
-// Delete product
-function deleteProduct() {
-  const productId = document.getElementById("confirmDeleteBtn").getAttribute("data-id")
-
-  // Find product index
-  const productIndex = allProducts.findIndex((p) => p.sku === productId)
-
-  if (productIndex === -1) {
-    showAlert("danger", "Product not found")
-    return
+  const refreshProductsBtn = document.getElementById("refresh-products-btn")
+  if (refreshProductsBtn) {
+    refreshProductsBtn.addEventListener("click", fetchProducts)
   }
 
-  // Remove product
-  allProducts.splice(productIndex, 1)
-
-  // Close modal
-  const confirmDeleteModal = bootstrap.Modal.getInstance(document.getElementById("confirmDeleteModal"))
-  confirmDeleteModal.hide()
-
-  // Show success message
-  showAlert("success", "Product deleted successfully")
-
-  // Apply filters to update the view
-  applyFilters()
+  // Product search functionality
+  const productSearch = document.getElementById("product-search")
+  if (productSearch) {
+    productSearch.addEventListener("input", function () {
+      const searchTerm = this.value.toLowerCase().trim()
+      if (searchTerm === "") {
+        renderProducts(inventoryProducts)
+      } else {
+        const filteredProducts = inventoryProducts.filter(
+          (product) =>
+            product.product_name.toLowerCase().includes(searchTerm) ||
+            product.product_id.toLowerCase().includes(searchTerm) ||
+            (product.category && product.category.toLowerCase().includes(searchTerm)),
+        )
+        renderProducts(filteredProducts)
+      }
+    })
+  }
 }
 
-// Save product
-function saveProduct() {
-  // Get form data
-  const productId = document.getElementById("productId").value
-  const productName = document.getElementById("productName").value
-  const productSku = document.getElementById("productSku").value
-  const productCategory = document.getElementById("productCategory").value
-  const productSupplier = document.getElementById("productSupplier").value
-  const productReorderLevel = document.getElementById("productReorderLevel").value
-  const productDescription = document.getElementById("productDescription").value
+// Set up view details buttons for consignment orders
+function setupViewDetailsButtons() {
+  const viewDetailsButtons = document.querySelectorAll(".view-details-btn")
+  viewDetailsButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-id")
+      showConsignmentDetailsModal(orderId)
+    })
+  })
+}
 
-  // Validate form
-  if (!productName || !productSku || !productCategory || !productSupplier || !productReorderLevel) {
-    showAlert("danger", "Please fill in all required fields")
-    return
-  }
+// Set up view product buttons
+function setupViewProductButtons() {
+  const viewProductButtons = document.querySelectorAll(".view-product-btn")
+  viewProductButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const productId = this.getAttribute("data-id")
+      showProductDetailsModal(productId)
+    })
+  })
+}
 
-  // Check if editing or adding
-  if (productId) {
-    // Find product
-    const productIndex = allProducts.findIndex((p) => p.product_id === productId)
-
-    if (productIndex === -1) {
-      showAlert("danger", "Product not found")
+// Show product details modal
+function showProductDetailsModal(productId) {
+    // Find all instances of this product in inventoryProducts
+    const productInstances = inventoryProducts.filter((p) => p.product_id === productId)
+  
+    if (!productInstances || productInstances.length === 0) {
+      showResponseMessage("danger", "Product not found")
       return
     }
-
-    // Update product
-    allProducts[productIndex].product_name = productName
-    allProducts[productIndex].sku = productSku
-    allProducts[productIndex].category = productCategory
-    allProducts[productIndex].supplier = productSupplier
-    allProducts[productIndex].reorder_level = Number.parseInt(productReorderLevel)
-    allProducts[productIndex].description = productDescription
-
-    showAlert("success", "Product updated successfully")
-  } else {
-    // Create new product
-    const newProduct = {
-      product_id: (allProducts.length + 1).toString(),
-      product_name: productName,
-      sku: productSku,
-      category: productCategory,
-      total_stock: 0,
-      batch_count: 0,
-      stock_status: "out-of-stock",
-      reorder_level: Number.parseInt(productReorderLevel),
-      supplier: productSupplier,
-      description: productDescription,
-      image_url: "https://via.placeholder.com/200",
-      is_expiring_soon: false,
-      is_expired: false,
-      earliest_expiry: null,
-      batches: [],
+  
+    // Use the first instance for basic product info
+    const product = productInstances[0]
+  
+    // Create modal if it doesn't exist
+    let productModal = document.getElementById("productDetailsModal")
+    if (!productModal) {
+      productModal = document.createElement("div")
+      productModal.className = "modal fade"
+      productModal.id = "productDetailsModal"
+      productModal.tabIndex = "-1"
+      productModal.setAttribute("aria-labelledby", "productDetailsModalLabel")
+      productModal.setAttribute("aria-hidden", "true")
+  
+      productModal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="productDetailsModalLabel">
+                <i class="bi bi-box-seam me-2"></i> Product Details
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="productDetailsModalBody">
+              <!-- Content will be dynamically inserted here -->
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      `
+  
+      document.body.appendChild(productModal)
     }
-
-    // Add batch if provided
-    const batchId = document.getElementById("batchId").value
-    const batchQuantity = document.getElementById("batchQuantity").value
-    const batchManufacturingDate = document.getElementById("batchManufacturingDate").value
-    const batchExpiryDate = document.getElementById("batchExpiryDate").value
-
-    if (batchId && batchQuantity && batchManufacturingDate && batchExpiryDate) {
-      const batch = {
-        batch_id: batchId,
-        quantity: Number.parseInt(batchQuantity),
-        manufacturing_date: batchManufacturingDate,
-        expiry_date: batchExpiryDate,
-        status: "good",
-      }
-
-      newProduct.batches.push(batch)
-      newProduct.batch_count = 1
-      newProduct.total_stock = Number.parseInt(batchQuantity)
-      newProduct.earliest_expiry = batchExpiryDate
-
-      // Determine stock status
-      if (newProduct.total_stock === 0) {
-        newProduct.stock_status = "out-of-stock"
-      } else if (newProduct.total_stock < newProduct.reorder_level) {
-        newProduct.stock_status = "low-stock"
+  
+    // Get product image path or use placeholder
+    const productImage = `uploads/product_${product.product_id}.jpg`
+  
+    // Determine stock status and badge color
+    let stockStatusClass = "bg-success"
+    let stockStatusText = "In Stock"
+  
+    if (product.available_stock <= 0) {
+      stockStatusClass = "bg-danger"
+      stockStatusText = "Out of Stock"
+    } else if (product.available_stock < 5) {
+      stockStatusClass = "bg-warning"
+      stockStatusText = "Low Stock"
+    }
+  
+    // Calculate total quantity across all orders
+    const totalQuantity = productInstances.reduce((sum, p) => sum + Number.parseInt(p.quantity), 0)
+  
+    // Group by order
+    const orderMap = new Map()
+    productInstances.forEach((p) => {
+      if (!orderMap.has(p.order_id)) {
+        orderMap.set(p.order_id, {
+          order_id: p.order_id,
+          po_number: p.po_number || p.order_id,
+          quantity: Number.parseInt(p.quantity),
+          unit_price: p.unit_price,
+          total_price: p.total_price,
+        })
       } else {
-        newProduct.stock_status = "in-stock"
+        const order = orderMap.get(p.order_id)
+        order.quantity += Number.parseInt(p.quantity)
+        order.total_price = (Number.parseFloat(order.total_price) + Number.parseFloat(p.total_price)).toFixed(2)
       }
-
-      // Check if expiring soon
-      const today = new Date()
-      const expiryDate = new Date(batchExpiryDate)
-      const diffTime = expiryDate - today
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-      if (diffDays <= 30 && diffDays > 0) {
-        newProduct.is_expiring_soon = true
-        batch.status = "expiring-soon"
-      } else if (diffDays <= 0) {
-        newProduct.is_expired = true
-        batch.status = "expired"
+    })
+  
+    const orders = Array.from(orderMap.values())
+  
+    // Populate modal content with tabs
+    const modalBody = document.getElementById("productDetailsModalBody")
+    modalBody.innerHTML = `
+      <ul class="nav nav-tabs" id="productDetailsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="product-info-tab" data-bs-toggle="tab" data-bs-target="#product-info" 
+                  type="button" role="tab" aria-controls="product-info" aria-selected="true">
+            Product Info
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" 
+                  type="button" role="tab" aria-controls="orders" aria-selected="false">
+            Orders
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="batch-details-tab" data-bs-toggle="tab" data-bs-target="#batch-details" 
+                  type="button" role="tab" aria-controls="batch-details" aria-selected="false">
+            Batch Details
+          </button>
+        </li>
+      </ul>
+      
+      <div class="tab-content pt-3" id="productDetailsTabContent">
+        <!-- Product Info Tab -->
+        <div class="tab-pane fade show active" id="product-info" role="tabpanel" aria-labelledby="product-info-tab">
+          <div class="row">
+            <div class="col-md-4 text-center">
+              <img src="${productImage}" class="product-detail-image mb-3" alt="${product.product_name}" 
+                   onerror="this.src='assets/placeholder-product.jpg'" style="max-width: 100%; height: auto;">
+              <span class="badge ${stockStatusClass} d-block mx-auto">${stockStatusText}</span>
+            </div>
+            <div class="col-md-8">
+              <h4 class="mb-3">${product.product_name}</h4>
+              
+              <div class="card mb-3">
+                <div class="card-header bg-light">
+                  <h6 class="mb-0">Product Information</h6>
+                </div>
+                <div class="card-body">
+                  <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-muted">SKU:</span>
+                    <span class="fw-medium">${product.product_id}</span>
+                  </div>
+                  <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-muted">Price:</span>
+                    <span class="fw-bold">${product.unit_price_formatted || `₱${Number.parseFloat(product.price).toFixed(2)}`}</span>
+                  </div>
+                  <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-muted">Category:</span>
+                    <span>${product.category || "N/A"}</span>
+                  </div>
+                  <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-muted">Available Stock:</span>
+                    <span class="${product.available_stock <= 0 ? "text-danger" : product.available_stock < 5 ? "text-warning" : "text-success"} fw-bold">
+                      ${product.available_stock || "N/A"}
+                    </span>
+                  </div>
+                  <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-muted">Total Ordered:</span>
+                    <span class="fw-bold text-primary">${totalQuantity}</span>
+                  </div>
+                  <div class="mb-2 d-flex justify-content-between">
+                    <span class="text-muted">In Orders:</span>
+                    <span>${orders.length}</span>
+                  </div>
+                  <div class="mb-0 d-flex justify-content-between">
+                    <span class="text-muted">Status:</span>
+                    <span>${product.status || "N/A"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Orders Tab -->
+        <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+          <div class="card">
+            <div class="card-header bg-light">
+              <h6 class="mb-0">Order Details</h6>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Order #</th>
+                      <th>Quantity</th>
+                      <th>Unit Price</th>
+                      <th>Total</th>
+                      <th>Batch Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${orders
+                      .map(
+                        (order) => `
+                        <tr>
+                          <td>${order.po_number}</td>
+                          <td>${order.quantity}</td>
+                          <td>₱${Number.parseFloat(order.unit_price).toFixed(2)}</td>
+                          <td>₱${Number.parseFloat(order.total_price).toFixed(2)}</td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary" 
+                                onclick="showOrderProductBatchDetails('${order.order_id}', '${product.product_id}', '${product.product_name}')">
+                                <i class="bi bi-box-seam me-1"></i> View Batches
+                            </button>
+                          </td>
+                        </tr>
+                      `,
+                      )
+                      .join("")}
+                  </tbody>
+                  <tfoot class="table-light">
+                    <tr>
+                      <td colspan="1" class="text-end fw-bold">Total:</td>
+                      <td class="fw-bold">${totalQuantity}</td>
+                      <td></td>
+                      <td class="fw-bold">₱${orders.reduce((sum, order) => sum + Number.parseFloat(order.total_price), 0).toFixed(2)}</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Batch Details Tab -->
+        <div class="tab-pane fade" id="batch-details" role="tabpanel" aria-labelledby="batch-details-tab">
+          <div class="alert alert-info mb-3">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            This tab shows batch details for this product in completed orders. Click on "View Batches" in the Orders tab to see specific batch details for each order.
+          </div>
+          <div id="batch-details-content">
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Loading batch details...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  
+    // Show the modal
+    try {
+      // Ensure bootstrap is available
+      if (typeof bootstrap !== "undefined") {
+        const bsModal = new bootstrap.Modal(productModal)
+        bsModal.show()
+        
+        // Load batch details for all orders of this product
+        loadProductBatchDetails(product.product_id, product.product_name)
+      } else {
+        console.error("Bootstrap is not defined. Ensure it is properly loaded.")
+        showResponseMessage("danger", "Bootstrap is not loaded. Please check your setup.")
       }
+    } catch (error) {
+      console.error("Bootstrap modal error:", error)
+      showResponseMessage("danger", "Failed to open product details modal. Please check console for errors.")
     }
+  }
+  
+  // Function to load batch details for a product across all orders
+  function loadProductBatchDetails(productId, productName) {
+    const batchDetailsContent = document.getElementById("batch-details-content")
+    
+    // Get all orders for this product
+    const productInstances = inventoryProducts.filter((p) => p.product_id === productId)
+    const orderIds = [...new Set(productInstances.map(p => p.order_id))]
+    
+    if (orderIds.length === 0) {
+      batchDetailsContent.innerHTML = `
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          No orders found for this product.
+        </div>
+      `
+      return
+    }
+    
+    // Create a container for batch details from all orders
+    let allBatchDetails = []
+    let loadedOrders = 0
+    
+    // Load batch details for each order
+    orderIds.forEach(orderId => {
+      fetch(`get_order_batch_details.php?order_id=${orderId}&product_id=${productId}`)
+        .then(response => response.json())
+        .then(data => {
+          loadedOrders++
+          
+          if (data.success && data.batch_tracking_enabled && data.batch_details && data.batch_details.length > 0) {
+            // Add order info to each batch detail
+            const orderBatchDetails = data.batch_details.map(batch => ({
+              ...batch,
+              order_id: orderId,
+              order_number: data.order.order_number,
+              deduction_date: data.deduction_date
+            }))
+            
+            allBatchDetails = [...allBatchDetails, ...orderBatchDetails]
+          }
+          
+          // If all orders have been processed, render the batch details
+          if (loadedOrders === orderIds.length) {
+            renderAllBatchDetails(allBatchDetails, productName)
+          }
+        })
+        .catch(error => {
+          console.error(`Error fetching batch details for order ${orderId}:`, error)
+          loadedOrders++
+          
+          // If all orders have been processed, render the batch details
+          if (loadedOrders === orderIds.length) {
+            renderAllBatchDetails(allBatchDetails, productName)
+          }
+        })
+    })
+  }
+  
+  // Function to render all batch details for a product
+  function renderAllBatchDetails(batchDetails, productName) {
+    const batchDetailsContent = document.getElementById("batch-details-content")
+    
+    if (batchDetails.length === 0) {
+      batchDetailsContent.innerHTML = `
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          No batch details found for this product in completed orders.
+        </div>
+      `
+      return
+    }
+    
+    // Group batch details by order
+    const batchesByOrder = {}
+    batchDetails.forEach(batch => {
+      const orderId = batch.order_id
+      if (!batchesByOrder[orderId]) {
+        batchesByOrder[orderId] = {
+          order_id: orderId,
+          order_number: batch.order_number,
+          deduction_date: batch.deduction_date,
+          batches: []
+        }
+      }
+      batchesByOrder[orderId].batches.push(batch)
+    })
+    
+    // Render batch details grouped by order
+    let html = `
+      <h5 class="mb-3">${productName} - Batch Details from Completed Orders</h5>
+    `
+    
+    Object.values(batchesByOrder).forEach(orderBatches => {
+      const deductionDate = new Date(orderBatches.deduction_date).toLocaleString()
+      
+      html += `
+        <div class="card mb-3">
+          <div class="card-header bg-light">
+            <h6 class="mb-0">Order #${orderBatches.order_number}</h6>
+            <small class="text-muted">Deducted on: ${deductionDate}</small>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Batch Code</th>
+                    <th>Quantity</th>
+                    <th>Expiration Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+      `
+      
+      orderBatches.batches.forEach(batch => {
+        // Format dates
+        const expiryDate = batch.expiration_date ? new Date(batch.expiration_date) : null
+        let expiryFormatted = "N/A"
+        let statusClass = "bg-secondary"
+        let statusText = "No Expiry"
+        
+        if (expiryDate && batch.expiration_date !== "0000-00-00") {
+          expiryFormatted = expiryDate.toLocaleDateString()
+          const today = new Date()
+          
+          if (expiryDate < today) {
+            statusClass = "bg-danger"
+            statusText = "Expired"
+          } else {
+            statusClass = "bg-success"
+            statusText = "Valid"
+          }
+        }
+        
+        html += `
+          <tr>
+            <td>${batch.batch_code}</td>
+            <td>${batch.deducted}</td>
+            <td>${expiryFormatted}</td>
+            <td><span class="badge ${statusClass}">${statusText}</span></td>
+          </tr>
+        `
+      })
+      
+      html += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `
+    })
+    
+    batchDetailsContent.innerHTML = html
+  }
+// Show consignment details modal
+function showConsignmentDetailsModal(orderId) {
+  // Find the order in completedOrders
+  const order = completedOrders.find((o) => o.order_id == orderId)
 
-    // Add to products array
-    allProducts.push(newProduct)
-
-    showAlert("success", "Product added successfully")
+  if (!order) {
+    showResponseMessage("danger", "Order not found")
+    return
   }
 
-  // Close modal
-  const productFormModal = bootstrap.Modal.getInstance(document.getElementById("productFormModal"))
-  productFormModal.hide()
+  // Get order number (PO number or order ID)
+  const orderNumber = order.po_number || order.order_id
 
-  // Apply filters to update the view
-  applyFilters()
-}
+  // Get consignment term
+  const consignmentTerm = order.consignment_term || 30
 
-// Order more product
-function orderMoreProduct() {
-  // Get product ID from modal
-  const productSku = document.getElementById("modalProductSku").textContent
+  // Calculate days remaining
+  const daysRemaining = order.days_remaining
 
-  // Close product details modal
-  const productDetailsModal = bootstrap.Modal.getInstance(document.getElementById("productDetailsModal"))
-  productDetailsModal.hide()
+  // Calculate days since start
+  const daysSinceStart = order.days_since_start
 
-  // Show alert
-  showAlert("info", "Redirecting to orders page to place an order for " + productSku)
+  // Format dates
+  const startDate = new Date(order.created_at).toLocaleDateString()
+  const endDate = new Date(
+    new Date(order.created_at).getTime() + consignmentTerm * 24 * 60 * 60 * 1000,
+  ).toLocaleDateString()
 
-  // In a real application, you would redirect to the orders page with the product pre-selected
-  // window.location.href = "rt_orders.php?product=" + productSku;
-}
+  // Create modal if it doesn't exist
+  let consignmentModal = document.getElementById("consignmentDetailsModal")
+  if (!consignmentModal) {
+    consignmentModal = document.createElement("div")
+    consignmentModal.className = "modal fade"
+    consignmentModal.id = "consignmentDetailsModal"
+    consignmentModal.tabIndex = "-1"
+    consignmentModal.setAttribute("aria-labelledby", "consignmentDetailsModalLabel")
+    consignmentModal.setAttribute("aria-hidden", "true")
 
-// Export inventory
-function exportInventory() {
-  // Show alert
-  showAlert("info", "Exporting inventory data...")
+    consignmentModal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="consignmentDetailsModalLabel">
+                            <i class="bi bi-box me-2"></i> Consignment Details
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="consignmentDetailsModalBody">
+                        <!-- Content will be dynamically inserted here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        `
 
-  // In a real application, you would make an AJAX request to export the data
-  setTimeout(() => {
-    showAlert("success", "Inventory data exported successfully")
-  }, 1500)
-}
+    document.body.appendChild(consignmentModal)
+  }
 
-// Show alert message
-function showAlert(type, message) {
-  // Create alert element
-  const alertDiv = document.createElement("div")
-  alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`
-  alertDiv.setAttribute("role", "alert")
-  alertDiv.style.zIndex = "9999"
-  alertDiv.style.maxWidth = "350px"
-  alertDiv.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)"
+  // Populate modal content
+  const modalBody = document.getElementById("consignmentDetailsModalBody")
 
-  // Alert content
-  alertDiv.innerHTML = `
-        <div class="d-flex align-items-center">
-            <i class="bi ${getAlertIcon(type)} me-2"></i>
-            <div>${message}</div>
+  // Determine status color based on days remaining
+  let statusClass = "bg-success"
+  let statusText = "Active"
+
+  if (daysRemaining < 0) {
+    statusClass = "bg-danger"
+    statusText = "Expired"
+  } else if (daysRemaining < 7) {
+    statusClass = "bg-warning"
+    statusText = "Ending Soon"
+  }
+
+  modalBody.innerHTML = `
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Consignment Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Order #:</span>
+                            <span class="fw-bold">${orderNumber}</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Status:</span>
+                            <span class="badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Consignment Term:</span>
+                            <span>${consignmentTerm} days</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Start Date:</span>
+                            <span>${startDate}</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">End Date:</span>
+                            <span>${endDate}</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Days Since Start:</span>
+                            <span>${daysSinceStart} days</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Days Remaining:</span>
+                            <span class="${daysRemaining < 0 ? "text-danger" : daysRemaining < 7 ? "text-warning" : "text-success"} fw-bold">
+                                ${daysRemaining < 0 ? "Expired" : daysRemaining + " days"}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Order Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Retailer:</span>
+                            <span>${order.retailer_name}</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Email:</span>
+                            <span>${order.retailer_email}</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Contact:</span>
+                            <span>${order.retailer_contact || "N/A"}</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Order Date:</span>
+                            <span>${new Date(order.order_date).toLocaleDateString()}</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Delivery Mode:</span>
+                            <span>${order.delivery_mode === "pickup" ? "Pickup" : "Delivery"}</span>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <span class="text-muted">Total Amount:</span>
+                            <span class="fw-bold">₱${Number.parseFloat(order.total_amount).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Consignment Progress</h6>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3" style="height: 20px;">
+                    <div class="progress-bar ${statusClass}" role="progressbar" 
+                        style="width: ${Math.min(100, (daysSinceStart / consignmentTerm) * 100)}%;" 
+                        aria-valuenow="${daysSinceStart}" 
+                        aria-valuemin="0" 
+                        aria-valuemax="${consignmentTerm}">
+                        ${Math.round((daysSinceStart / consignmentTerm) * 100)}%
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="small">${startDate}</span>
+                    <span class="small">${endDate}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Consigned Items</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${
+                              order.items && order.items.length > 0
+                                ? order.items
+                                    .map(
+                                      (item, index) => `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${item.product_name || "Unknown Product"}</td>
+                                        <td>${item.quantity}</td>
+                                        <td>₱${Number.parseFloat(item.unit_price).toFixed(2)}</td>
+                                        <td>₱${Number.parseFloat(item.total_price || item.quantity * item.unit_price).toFixed(2)}</td>
+                                    </tr>
+                                `,
+                                    )
+                                    .join("")
+                                : '<tr><td colspan="5" class="text-center py-3">No items found for this order</td></tr>'
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">Subtotal:</td>
+                                <td>₱${Number.parseFloat(order.subtotal).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end">Discount:</td>
+                                <td>₱${Number.parseFloat(order.discount || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">Total:</td>
+                                <td class="fw-bold">₱${Number.parseFloat(order.total_amount).toFixed(2)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `
+
+  // Show the modal
+  try {
+    // Ensure bootstrap is available
+    if (typeof bootstrap !== "undefined") {
+      const bsModal = new bootstrap.Modal(consignmentModal)
+      bsModal.show()
+    } else {
+      console.error("Bootstrap is not defined. Ensure it is properly loaded.")
+      showResponseMessage("danger", "Bootstrap is not loaded. Please check your setup.")
+    }
+  } catch (error) {
+    console.error("Bootstrap modal error:", error)
+    showResponseMessage("danger", "Failed to open details modal. Please check console for errors.")
+  }
+}
+
+// Show response message
+function showResponseMessage(type, message) {
+  const responseMessage = document.getElementById("response-message")
+  if (!responseMessage) return
+
+  // Set message content and type
+  responseMessage.className = `alert alert-${type} alert-dismissible fade show`
+  responseMessage.innerHTML = `
+        ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `
 
-  // Add to document
-  document.body.appendChild(alertDiv)
+  // Show the message
+  responseMessage.style.display = "block"
 
-  // Auto-dismiss after 3 seconds
+  // Auto-dismiss after 5 seconds
   setTimeout(() => {
+    if (responseMessage.parentNode) {
+      try {
+        const bsAlert = bootstrap.Alert.getInstance(responseMessage)
+        if (bsAlert) {
+          bsAlert.close()
+        } else {
+          responseMessage.style.display = "none"
+        }
+      } catch (error) {
+        console.error("Bootstrap Alert error:", error)
+        // Fallback to removing the element if Bootstrap Alert fails
+        responseMessage.style.display = "none"
+      }
+    }
+  }, 5000)
+}
+
+// Function to show batch details for a product in an order
+function showOrderProductBatchDetails(orderId, productId, productName) {
+    // Create modal if it doesn't exist
+    let batchDetailsModal = document.getElementById("orderProductBatchDetailsModal")
+    if (!batchDetailsModal) {
+      batchDetailsModal = document.createElement("div")
+      batchDetailsModal.className = "modal fade"
+      batchDetailsModal.id = "orderProductBatchDetailsModal"
+      batchDetailsModal.tabIndex = "-1"
+      batchDetailsModal.setAttribute("aria-labelledby", "orderProductBatchDetailsModalLabel")
+      batchDetailsModal.setAttribute("aria-hidden", "true")
+  
+      batchDetailsModal.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="orderProductBatchDetailsModalLabel">
+                <i class="bi bi-box-seam me-2"></i> Product Batch Details
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="orderProductBatchDetailsModalBody">
+              <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading batch details...</p>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      `
+  
+      document.body.appendChild(batchDetailsModal)
+    }
+  
+    // Show the modal with loading state
     try {
       if (typeof bootstrap !== "undefined") {
-        const bsAlert = new bootstrap.Alert(alertDiv)
-        bsAlert.close()
+        const bsModal = new bootstrap.Modal(batchDetailsModal)
+        bsModal.show()
       } else {
-        alertDiv.remove()
+        console.error("Bootstrap is not defined. Ensure it is properly loaded.")
+        showResponseMessage("danger", "Bootstrap is not loaded. Please check your setup.")
+        return
       }
     } catch (error) {
-      console.error("Error closing alert:", error)
-      alertDiv.remove()
+      console.error("Bootstrap modal error:", error)
+      showResponseMessage("danger", "Failed to open batch details modal. Please check console for errors.")
+      return
     }
-  }, 3000)
-}
-
-// Get alert icon based on type
-function getAlertIcon(type) {
-  switch (type) {
-    case "success":
-      return "bi-check-circle-fill text-success"
-    case "danger":
-      return "bi-exclamation-circle-fill text-danger"
-    case "warning":
-      return "bi-exclamation-triangle-fill text-warning"
-    case "info":
-      return "bi-info-circle-fill text-info"
-    default:
-      return "bi-bell-fill"
+  
+    // Fetch batch details for this product in this order
+    fetch(`get_order_batch_details.php?order_id=${orderId}&product_id=${productId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        const modalBody = document.getElementById("orderProductBatchDetailsModalBody")
+  
+        if (data.success) {
+          if (data.batch_tracking_enabled && data.batch_details && data.batch_details.length > 0) {
+            const deductionDate = new Date(data.deduction_date).toLocaleString()
+  
+            let html = `
+              <h5 class="mb-3">${productName}</h5>
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                Order #${data.order.order_number} - Quantity: ${data.quantity_deducted}
+                <br>Deducted on: ${deductionDate}
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Batch Code</th>
+                      <th>Quantity</th>
+                      <th>Expiration Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+            `
+  
+            data.batch_details.forEach((batch) => {
+              // Format dates
+              const expiryDate = batch.expiration_date ? new Date(batch.expiration_date) : null
+              let expiryFormatted = "N/A"
+              let statusClass = "bg-secondary"
+              let statusText = "No Expiry"
+  
+              if (expiryDate && batch.expiration_date !== "0000-00-00") {
+                expiryFormatted = expiryDate.toLocaleDateString()
+                const today = new Date()
+  
+                if (expiryDate < today) {
+                  statusClass = "bg-danger"
+                  statusText = "Expired"
+                } else {
+                  statusClass = "bg-success"
+                  statusText = "Valid"
+                }
+              }
+  
+              html += `
+                <tr>
+                  <td>${batch.batch_code}</td>
+                  <td>${batch.deducted}</td>
+                  <td>${expiryFormatted}</td>
+                  <td><span class="badge ${statusClass}">${statusText}</span></td>
+                </tr>
+              `
+            })
+  
+            html += `
+                  </tbody>
+                </table>
+              </div>
+            `
+  
+            modalBody.innerHTML = html
+          } else {
+            modalBody.innerHTML = `
+              <h5 class="mb-3">${productName}</h5>
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                ${
+                  data.batch_tracking_enabled
+                    ? "No batch details available for this product in this order."
+                    : "Batch tracking is not enabled for this product."
+                }
+              </div>
+            `
+          }
+        } else {
+          modalBody.innerHTML = `
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              ${data.message || "Failed to load batch details"}
+            </div>
+          `
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching batch details:", error)
+        document.getElementById("orderProductBatchDetailsModalBody").innerHTML = `
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Error loading batch details: ${error.message || "Unknown error"}
+          </div>
+        `
+      })
   }
-}

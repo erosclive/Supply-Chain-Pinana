@@ -655,3 +655,201 @@
 2025-04-22 07:28:32 - Testing email connection before sending verification email
 2025-04-22 07:28:42 - Verification email sent successfully to: fyavetargaryen@gmail.com
 2025-04-22 07:28:42 - Registration successful
+2025-04-23 05:16:22 - POST data: Array
+(
+    [firstName] => pepito
+    [lastName] => manaloto
+    [birthday] => 2006-06-01
+    [age] => 18
+    [nationality] => Filipino
+    [businessName] => peps
+    [businessType] => Restaurant
+    [province] => Laguna
+    [city] => Calauan
+    [barangay] => Dayap
+    [houseNumber] => purok 5
+    [addressNotes] => 
+    [phone] => +639283900824
+    [email] => jamesguevarra070827@gmail.com
+    [facebook] => 
+    [instagram] => 
+    [tiktok] => 
+    [reg_username] => peps
+    [reg_password] => manaloto123
+    [termsAgreement] => on
+)
+
+2025-04-23 05:16:22 - Extracted data: firstName: pepito, lastName: manaloto, username: peps, email: jamesguevarra070827@gmail.com
+2025-04-23 05:16:22 - Database connection: Connected
+2025-04-23 05:16:22 - Before user insert
+2025-04-23 05:16:22 - User inserted with ID: 22
+2025-04-23 05:16:23 - Before profile insert
+2025-04-23 05:16:23 - Profile inserted successfully
+2025-04-23 05:16:23 - Email connection test: Failed
+2025-04-23 05:16:23 - Testing email connection before sending verification email
+2025-04-23 05:16:24 - Failed to send verification email to: jamesguevarra070827@gmail.com (no error details available)
+2025-04-23 05:16:24 - Registration successful
+2025-04-23 12:13:04 - POST data: Array
+(
+    [firstName] => Fohr
+    [lastName] => Targaryen
+    [birthday] => 2025-04-23
+    [age] => 0
+    [nationality] => Filipino
+    [businessName] => sdg
+    [businessType] => Retail Store
+    [province] => Laguna
+    [city] => Calauan
+    [barangay] => San Isidro
+    [houseNumber] => 3
+    [addressNotes] => 
+    [phone] => +639749388477
+    [email] => fohrtargaryen@gmail.com
+    [facebook] => 
+    [instagram] => 
+    [tiktok] => 
+    [reg_username] => Wanpiece
+    [reg_password] => targaryenfam12
+    [termsAgreement] => on
+)
+
+2025-04-23 12:13:04 - Extracted data: firstName: Fohr, lastName: Targaryen, username: Wanpiece, email: fohrtargaryen@gmail.com
+2025-04-23 12:13:04 - Database connection: Connected
+2025-04-23 12:13:04 - Before user insert
+2025-04-23 12:13:04 - User inserted with ID: 23
+2025-04-23 12:13:04 - Before profile insert
+2025-04-23 12:13:04 - Profile inserted successfully
+2025-04-23 12:13:07 - Email connection test: Successful
+2025-04-23 12:13:07 - Testing email connection before sending verification email
+2025-04-23 12:13:14 - Verification email sent successfully to: fohrtargaryen@gmail.com
+2025-04-23 12:13:14 - Registration successful
+2025-04-23 12:25:36 - POST data: Array
+(
+    [firstName] => Fohr
+    [lastName] => Targaryen
+    [birthday] => 2025-04-23
+    [age] => 0
+    [businessName] => 
+    [businessType] => Independent Retailer
+    [province] => 043400000
+    [city] => 043406000
+    [barangay] => 043406017
+    [houseNumber] => 3
+    [addressNotes] => 
+    [phone] => +639495027266
+    [email] => fohrtargaryen@gmail.com
+    [facebook] => 
+    [instagram] => 
+    [tiktok] => 
+    [reg_username] => Wanpiece
+    [reg_password] => targaryenfam12
+    [reg_password_confirm] => targaryenfam12
+    [termsAgreement] => on
+)
+
+2025-04-23 12:25:36 - Extracted data: firstName: Fohr, lastName: Targaryen, username: Wanpiece, email: fohrtargaryen@gmail.com
+2025-04-23 12:25:36 - ERROR: All required fields must be filled.
+2025-04-23 12:25:44 - POST data: Array
+(
+    [firstName] => Fohr
+    [lastName] => Targaryen
+    [birthday] => 2025-04-23
+    [age] => 0
+    [businessName] => 
+    [businessType] => Independent Retailer
+    [province] => 043400000
+    [city] => 043406000
+    [barangay] => 043406017
+    [houseNumber] => 3
+    [addressNotes] => 
+    [phone] => +639495027266
+    [email] => fohrtargaryen@gmail.com
+    [facebook] => 
+    [instagram] => 
+    [tiktok] => 
+    [reg_username] => Wanpiece
+    [reg_password] => targaryenfam12
+    [reg_password_confirm] => targaryenfam12
+    [termsAgreement] => on
+)
+
+2025-04-23 12:25:44 - Extracted data: firstName: Fohr, lastName: Targaryen, username: Wanpiece, email: fohrtargaryen@gmail.com
+2025-04-23 12:25:44 - ERROR: All required fields must be filled.
+2025-04-23 12:26:12 - POST data: Array
+(
+    [firstName] => Fohr
+    [lastName] => Targaryen
+    [birthday] => 2025-04-23
+    [age] => 0
+    [businessName] => 
+    [businessType] => Independent Retailer
+    [province] => 043400000
+    [city] => 043406000
+    [barangay] => 043406017
+    [houseNumber] => 3
+    [addressNotes] => 
+    [phone] => +639495027266
+    [email] => fohrtargaryen@gmail.com
+    [facebook] => Fohr Targaryen
+    [instagram] => 
+    [tiktok] => 
+    [reg_username] => Wanpiece
+    [reg_password] => targaryenfam12
+    [reg_password_confirm] => targaryenfam12
+    [termsAgreement] => on
+)
+
+2025-04-23 12:26:12 - Extracted data: firstName: Fohr, lastName: Targaryen, username: Wanpiece, email: fohrtargaryen@gmail.com
+2025-04-23 12:26:12 - ERROR: All required fields must be filled.
+2025-04-23 12:28:00 - POST data: Array
+(
+    [firstName] => Fohr
+    [lastName] => Targaryen
+    [birthday] => 2005-12-07
+    [age] => 19
+    [businessName] => 
+    [businessType] => Retail Store
+    [province] => 043400000
+    [city] => 043406000
+    [barangay] => 043406017
+    [houseNumber] => 3
+    [addressNotes] => 
+    [phone] => +639495027266
+    [email] => fohrtargaryen@gmail.com
+    [facebook] => 
+    [instagram] => 
+    [tiktok] => 
+    [reg_username] => Wanpiece
+    [reg_password] => targaryenfam12
+    [reg_password_confirm] => targaryenfam12
+    [termsAgreement] => on
+)
+
+2025-04-23 12:28:00 - Extracted data: firstName: Fohr, lastName: Targaryen, username: Wanpiece, email: fohrtargaryen@gmail.com
+2025-04-23 12:28:00 - ERROR: All required fields must be filled.
+2025-04-23 12:28:17 - POST data: Array
+(
+    [firstName] => Fohr
+    [lastName] => Targaryen
+    [birthday] => 2005-12-07
+    [age] => 19
+    [businessName] => 
+    [businessType] => Retail Store
+    [province] => 043400000
+    [city] => 043406000
+    [barangay] => 043406017
+    [houseNumber] => 3
+    [addressNotes] => 
+    [phone] => +639495027266
+    [email] => fohrtargaryen@gmail.com
+    [facebook] => 
+    [instagram] => 
+    [tiktok] => 
+    [reg_username] => Wanpiece
+    [reg_password] => Targaryenfam12
+    [reg_password_confirm] => Targaryenfam12
+    [termsAgreement] => on
+)
+
+2025-04-23 12:28:17 - Extracted data: firstName: Fohr, lastName: Targaryen, username: Wanpiece, email: fohrtargaryen@gmail.com
+2025-04-23 12:28:17 - ERROR: All required fields must be filled.

@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Run PHP Server 🚀",
+        "type": "php",
+        "request": "launch",
+        "program": "${file}",
+        "cwd": "${workspaceFolder}",
+        "port": 3000,
+        "runtimeExecutable": "php",
+        "runtimeArgs": ["-S", "localhost:5500", "-t", "SupplyChainCapstone"],
+        "env": {},
+        "console": "integratedTerminal"
+      }
+    ]
+  }
+  

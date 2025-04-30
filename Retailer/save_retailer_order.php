@@ -56,6 +56,7 @@ try {
                         subtotal = ?,
                         discount = ?,
                         total_amount = ?,
+                        consignment_term = ?,
                         updated_at = NOW()
                         WHERE order_id = ?";
         
@@ -79,7 +80,11 @@ try {
         $subtotal = isset($data['subtotal']) ? $data['subtotal'] : 0;
         $discount = isset($data['discount']) ? $data['discount'] : 0;
         $totalAmount = isset($data['total_amount']) ? $data['total_amount'] : 0;
+        $consignmentTerm = isset($data['consignment_term']) ? $data['consignment_term'] : 30;
         $orderId = $data['order_id'];
+        
+        // Debug log
+        error_log("Updating order with ID: $orderId, Delivery Mode: $deliveryMode, Consignment Term: $consignmentTerm");
         
         // Validate date formats
         if ($expectedDelivery && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $expectedDelivery)) {
@@ -100,10 +105,10 @@ try {
             }
         }
         
-        $stmt->bind_param("ssssssssssdddi", 
+        $stmt->bind_param("ssssssssssdddii", 
             $retailerName, $retailerEmail, $retailerContact, 
             $orderDate, $expectedDelivery, $deliveryMode, $pickupLocation, $pickupDate,
-            $notes, $status, $subtotal, $discount, $totalAmount, $orderId);
+            $notes, $status, $subtotal, $discount, $totalAmount, $consignmentTerm, $orderId);
         
         if (!$stmt->execute()) {
             throw new Exception("Failed to update order: " . $stmt->error);
@@ -145,8 +150,8 @@ try {
                         po_number, retailer_name, retailer_email, retailer_contact, 
                         order_date, expected_delivery, delivery_mode,
                         pickup_location, pickup_date, notes, status, subtotal, discount, total_amount,
-                        created_at, updated_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+                        consignment_term, created_at, updated_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
         
         $stmt = $conn->prepare($insertQuery);
         
@@ -168,6 +173,7 @@ try {
         $subtotal = isset($data['subtotal']) ? $data['subtotal'] : 0;
         $discount = isset($data['discount']) ? $data['discount'] : 0;
         $totalAmount = isset($data['total_amount']) ? $data['total_amount'] : 0;
+        $consignmentTerm = isset($data['consignment_term']) ? $data['consignment_term'] : 30;
         
         // Validate date formats
         if ($expectedDelivery && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $expectedDelivery)) {
@@ -188,10 +194,10 @@ try {
             }
         }
         
-        $stmt->bind_param("sssssssssssddd", 
+        $stmt->bind_param("sssssssssssdddi", 
             $poNumber, $retailerName, $retailerEmail, $retailerContact, 
             $orderDate, $expectedDelivery, $deliveryMode, $pickupLocation, $pickupDate,
-            $notes, $status, $subtotal, $discount, $totalAmount);
+            $notes, $status, $subtotal, $discount, $totalAmount, $consignmentTerm);
         
         if (!$stmt->execute()) {
             throw new Exception("Failed to create order: " . $stmt->error);

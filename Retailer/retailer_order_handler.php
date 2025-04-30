@@ -37,6 +37,12 @@ switch ($action) {
     case 'delete_order':
         deleteOrder($conn, $user_id);
         break;
+    case 'cancel_order':
+        cancelOrder($conn, $user_id);
+        break;
+    case 'reorder_cancelled_order':
+        reorderCancelledOrder($conn, $user_id);
+        break;
     default:
         $response['message'] = 'Invalid action';
         echo json_encode($response);
@@ -220,6 +226,17 @@ function getOrders($conn, $user_id = null) {
                 if (!isset($row['delivery_mode']) || empty($row['delivery_mode'])) {
                     $row['delivery_mode'] = 'delivery';
                 }
+
+                
+                
+                // Adjust status display for pickup orders
+                if ($row['status'] === 'delivered' && $row['delivery_mode'] === 'pickup') {
+                    $row['display_status'] = 'picked up';
+                } else {
+                    $row['display_status'] = $row['status'];
+                }
+
+                
                 
                 $orders[] = $row;
             }
@@ -482,4 +499,119 @@ function getProducts($conn) {
     
     echo json_encode($response);
 }
+// Add or update the cancelOrder function to properly handle order cancellation
+function cancelOrder($conn, $user_id = null) {
+    $response = ['success' => false, 'message' => ''];
+
+    try {
+        if (!$user_id) throw new Exception("User not logged in");
+
+        $data = json_decode(file_get_contents("php://input"), true);
+        if (!isset($data['order_id'])) throw new Exception("Missing order ID");
+
+        $order_id = (int)$data['order_id'];
+
+        // Get user's email
+        $emailStmt = $conn->prepare("SELECT email FROM users WHERE id = ?");
+        $emailStmt->bind_param("i", $user_id);
+        $emailStmt->execute();
+        $emailResult = $emailStmt->get_result();
+
+        if (!$emailRow = $emailResult->fetch_assoc()) throw new Exception("User not found");
+        $userEmail = $emailRow['email'];
+
+        // Check ownership
+        $checkStmt = $conn->prepare("SELECT order_id FROM retailer_orders WHERE order_id = ? AND retailer_email = ?");
+        $checkStmt->bind_param("is", $order_id, $userEmail);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+
+        if ($checkResult->num_rows === 0) throw new Exception("Unauthorized or order not found");
+
+        // Start transaction
+        $conn->begin_transaction();
+
+        // Update order status
+        $update = $conn->prepare("UPDATE retailer_orders SET status = 'cancelled', updated_at = NOW() WHERE order_id = ?");
+        $update->bind_param("i", $order_id);
+        $update->execute();
+
+        // Log in history
+        $history = $conn->prepare("INSERT INTO retailer_order_status_history (order_id, status, notes, created_at) VALUES (?, 'cancelled', 'Order cancelled by retailer', NOW())");
+        $history->bind_param("i", $order_id);
+        $history->execute();
+
+        $conn->commit();
+
+        $response['success'] = true;
+        $response['message'] = 'Order cancelled successfully';
+    } catch (Exception $e) {
+        if ($conn && $conn->ping()) $conn->rollback();
+        $response['message'] = "Error: " . $e->getMessage();
+        error_log("Cancel Order Error: " . $e->getMessage());
+    }
+
+    echo json_encode($response);
+}
+
+// Function to reorder a cancelled order
+function reorderCancelledOrder($conn, $user_id = null) {
+    $response = ['success' => false, 'message' => ''];
+
+    try {
+        if (!$user_id) throw new Exception("User not logged in");
+
+        $data = json_decode(file_get_contents("php://input"), true);
+        if (!isset($data['order_id'])) throw new Exception("Missing order ID");
+
+        $order_id = (int)$data['order_id'];
+
+        // Get user's email
+        $emailStmt = $conn->prepare("SELECT email FROM users WHERE id = ?");
+        $emailStmt->bind_param("i", $user_id);
+        $emailStmt->execute();
+        $emailResult = $emailStmt->get_result();
+
+        if (!$emailRow = $emailResult->fetch_assoc()) throw new Exception("User not found");
+        $userEmail = $emailRow['email'];
+
+        // Check if the order belongs to this user and is cancelled
+        $checkQuery = "SELECT order_id, status FROM retailer_orders WHERE order_id = ? AND retailer_email = ? AND status = 'cancelled'";
+        $checkStmt = $conn->prepare($checkQuery);
+        $checkStmt->bind_param("is", $order_id, $userEmail);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        
+        if ($checkResult->num_rows === 0) {
+            throw new Exception("You don't have permission to reorder this order or it's not cancelled");
+        }
+
+        // Start transaction
+        $conn->begin_transaction();
+
+        // Update order status to "order"
+        $update = $conn->prepare("UPDATE retailer_orders SET status = 'order', updated_at = NOW() WHERE order_id = ?");
+        $update->bind_param("i", $order_id);
+        $update->execute();
+
+        // Log in history
+        $history = $conn->prepare("INSERT INTO retailer_order_status_history (order_id, status, notes, created_at) VALUES (?, 'order', 'Order placed again from cancelled order', NOW())");
+        $history->bind_param("i", $order_id);
+        $history->execute();
+
+        $conn->commit();
+
+        $response['success'] = true;
+        $response['message'] = 'Order has been placed again successfully';
+    } catch (Exception $e) {
+        if ($conn && $conn->ping()) $conn->rollback();
+        $response['message'] = "Error: " . $e->getMessage();
+        error_log("Reorder Cancelled Error: " . $e->getMessage());
+    }
+
+    echo json_encode($response);
+
+    
+}
+
 ?>

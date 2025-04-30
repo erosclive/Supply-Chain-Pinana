@@ -92,3 +92,33 @@
 2025-04-22 07:29:21 - Attempting to send welcome email to: fyavetargaryen@gmail.com
 2025-04-22 07:29:21 - Logo found and encoded for welcome email
 2025-04-22 07:29:31 - Welcome email sent successfully to: fyavetargaryen@gmail.com
+2025-04-23 05:16:24 - Attempting to send verification email to: jamesguevarra070827@gmail.com
+2025-04-23 05:16:24 - Logo found and encoded
+2025-04-23 05:16:24 - Error sending verification email: SMTP Error: Could not connect to SMTP host. Failed to connect to serverSMTP server error: Failed to connect to server Additional SMTP info: php_network_getaddresses: getaddrinfo for smtp.gmail.com failed: No such host is known. 
+2025-04-23 05:16:24 - Attempting to send verification email to: jamesguevarra070827@gmail.com
+2025-04-23 05:16:24 - Logo found and encoded
+2025-04-23 05:16:24 - Error sending verification email: SMTP Error: Could not connect to SMTP host. Failed to connect to serverSMTP server error: Failed to connect to server Additional SMTP info: php_network_getaddresses: getaddrinfo for smtp.gmail.com failed: No such host is known. 
+2025-04-23 05:17:33 - Attempting to send verification email to: jamesguevarra070827@gmail.com
+2025-04-23 05:17:33 - Logo found and encoded
+2025-04-23 05:17:33 - Error sending verification email: SMTP Error: Could not connect to SMTP host. Failed to connect to serverSMTP server error: Failed to connect to server Additional SMTP info: php_network_getaddresses: getaddrinfo for smtp.gmail.com failed: No such host is known. 
+2025-04-23 05:18:13 - Attempting to send verification email to: jamesguevarra070827@gmail.com
+2025-04-23 05:18:13 - Logo found and encoded
+2025-04-23 05:18:20 - Verification email sent successfully to: jamesguevarra070827@gmail.com
+2025-04-23 05:23:07 - Attempting to send welcome email to: jamesguevarra070827@gmail.com
+2025-04-23 05:23:07 - Logo found and encoded for welcome email
+2025-04-23 05:23:14 - Welcome email sent successfully to: jamesguevarra070827@gmail.com
+2025-04-23 12:13:08 - Attempting to send verification email to: fohrtargaryen@gmail.com
+2025-04-23 12:13:08 - Logo found and encoded
+2025-04-23 12:13:14 - Verification email sent successfully to: fohrtargaryen@gmail.com
+2025-04-23 12:13:15 - Attempting to send verification email to: fohrtargaryen@gmail.com
+2025-04-23 12:13:15 - Logo found and encoded
+2025-04-23 12:13:20 - Verification email sent successfully to: fohrtargaryen@gmail.com
+2025-04-23 12:30:39 - Attempting to send verification email to: fohrtargaryen@gmail.com
+2025-04-23 12:30:39 - Logo found and encoded
+2025-04-23 12:30:45 - Verification email sent successfully to: fohrtargaryen@gmail.com
+2025-04-23 12:30:46 - Attempting to send verification email to: fohrtargaryen@gmail.com
+2025-04-23 12:30:46 - Logo found and encoded
+2025-04-23 12:30:52 - Verification email sent successfully to: fohrtargaryen@gmail.com
+2025-04-23 12:31:50 - Attempting to send welcome email to: fohrtargaryen@gmail.com
+2025-04-23 12:31:50 - Logo found and encoded for welcome email
+2025-04-23 12:31:56 - Welcome email sent successfully to: fohrtargaryen@gmail.com

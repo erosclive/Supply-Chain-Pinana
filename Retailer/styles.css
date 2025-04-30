@@ -1787,37 +1787,919 @@
     color: white;
     border-color: #eed324;
   }
-  
-  /* Add these styles to enhance the modals */
-  
-  /* Enhanced Modal Styles */
-  .modal-xl {
-    max-width: 1140px;
+  /* Modern Modal Styles - Retailer Order Management */
+
+/* Base Modal Styles */
+.modal-content {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #f5cc39 0%, #f8d775 100%);
+  border-bottom: none;
+  padding: 1.5rem;
+}
+
+.modal-header .modal-title {
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+}
+
+.modal-header .modal-title i {
+  margin-right: 0.75rem;
+  font-size: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.modal-header .btn-close {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: all 0.2s ease;
+}
+
+.modal-header .btn-close:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 0;
+}
+
+.modal-footer {
+  background-color: #f9f9f9;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1.25rem 1.5rem;
+}
+
+/* Section Headers */
+.modal-section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.modal-section-icon {
+  width: 36px;
+  height: 36px;
+  background-color: rgba(89, 223, 153, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+  color: #19ac54;
+}
+
+.modal-section-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+  color: #333;
+}
+
+/* Form Controls */
+.modal .form-label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.modal .form-control,
+.modal .form-select {
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.modal .form-control:focus,
+.modal .form-select:focus {
+  border-color: #f5cc39;
+  box-shadow: 0 0 0 3px rgba(245, 204, 57, 0.25);
+  background-color: #fff;
+}
+
+.modal .form-control.is-invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.modal .form-text {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+/* Input Groups */
+.modal .input-group-text {
+  background-color: #f5f5f5;
+  border-color: #e0e0e0;
+  color: #555;
+  border-radius: 10px 0 0 10px;
+}
+
+.modal .input-group .form-control {
+  border-radius: 0 10px 10px 0;
+}
+
+/* Cards in Modals */
+.modal .card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.modal .card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modal .card-header {
+  background-color: #f9f9f9;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1rem 1.25rem;
+}
+
+.modal .card-body {
+  padding: 1.25rem;
+}
+
+.modal .card-footer {
+  background-color: #f9f9f9;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1rem 1.25rem;
+}
+
+/* Buttons */
+.modal .btn {
+  border-radius: 10px;
+  padding: 0.6rem 1.25rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.modal .btn i {
+  font-size: 1rem;
+}
+
+.modal .btn-primary {
+  background-color: #59df99;
+  border-color: #59df99;
+  color: #fff;
+}
+
+.modal .btn-primary:hover {
+  background-color: #19ac54;
+  border-color: #19ac54;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 172, 84, 0.2);
+}
+
+.modal .btn-secondary {
+  background-color: #f0f0f0;
+  border-color: #e0e0e0;
+  color: #555;
+}
+
+.modal .btn-secondary:hover {
+  background-color: #e0e0e0;
+  border-color: #d0d0d0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal .btn-warning {
+  background-color: #f5cc39;
+  border-color: #f5cc39;
+  color: #333;
+}
+
+.modal .btn-warning:hover {
+  background-color: #e3b728;
+  border-color: #e3b728;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(227, 183, 40, 0.2);
+}
+
+.modal .btn-danger {
+  background-color: #ff6b6b;
+  border-color: #ff6b6b;
+  color: #fff;
+}
+
+.modal .btn-danger:hover {
+  background-color: #ff5252;
+  border-color: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 82, 82, 0.2);
+}
+
+.modal .btn-outline-primary {
+  border-color: #59df99;
+  color: #19ac54;
+}
+
+.modal .btn-outline-primary:hover {
+  background-color: #59df99;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(25, 172, 84, 0.2);
+}
+
+.modal .btn-outline-secondary {
+  border-color: #e0e0e0;
+  color: #555;
+}
+
+.modal .btn-outline-secondary:hover {
+  background-color: #f0f0f0;
+  color: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tables in Modals */
+.modal .table {
+  margin-bottom: 0;
+}
+
+.modal .table th {
+  background-color: #f9f9f9;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #555;
+  border-top: none;
+  padding: 0.85rem 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal .table td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-color: #f0f0f0;
+}
+
+.modal .table-hover tbody tr:hover {
+  background-color: rgba(245, 204, 57, 0.05);
+}
+
+/* Status Badges */
+.modal .status-badge {
+  padding: 0.4em 0.8em;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 30px;
+  display: inline-block;
+  min-width: 90px;
+  text-align: center;
+}
+
+.modal .status-order {
+  background-color: rgba(245, 204, 57, 0.15);
+  color: #e3b728;
+}
+
+.modal .status-processing {
+  background-color: rgba(13, 202, 240, 0.15);
+  color: #0dcaf0;
+}
+
+.modal .status-shipped {
+  background-color: rgba(13, 110, 253, 0.15);
+  color: #0d6efd;
+}
+
+.modal .status-delivered {
+  background-color: rgba(25, 135, 84, 0.15);
+  color: #198754;
+}
+
+.modal .status-cancelled {
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
+}
+
+/* Timeline Styles */
+.status-timeline {
+  position: relative;
+  padding-left: 30px;
+  margin-top: 1rem;
+}
+
+.status-timeline-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+  margin-left: 15px;
+}
+
+.status-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.status-timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 8px;
+  bottom: 0;
+  width: 2px;
+  background-color: #e9ecef;
+}
+
+.status-timeline-item:last-child::before {
+  display: none;
+}
+
+.status-timeline-dot {
+  position: absolute;
+  left: -26px;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 2px solid #59df99;
+  z-index: 1;
+}
+
+.status-timeline-content {
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 1rem;
+  border-left: 3px solid #59df99;
+  margin-bottom: 0.5rem;
+}
+
+.status-timeline-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #333;
+}
+
+.status-timeline-date {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.status-timeline-notes {
+  font-size: 0.875rem;
+  color: #555;
+}
+
+/* Order Confirmation Modal */
+.order-summary-section {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.order-summary-header {
+  background-color: #f9f9f9;
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+}
+
+.order-summary-header i {
+  margin-right: 0.75rem;
+  color: #59df99;
+}
+
+.order-summary-item {
+  display: flex;
+  margin-bottom: 0.75rem;
+}
+
+.order-summary-label {
+  font-weight: 500;
+  color: #6c757d;
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.order-summary-value {
+  color: #333;
+}
+
+.order-summary-total {
+  font-weight: 700;
+  color: #19ac54;
+  font-size: 1.1rem;
+}
+
+.order-items-summary {
+  padding: 0 1.25rem;
+}
+
+/* Delete Confirmation Modal */
+.delete-confirmation {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.delete-icon {
+  font-size: 3rem;
+  color: #ff6b6b;
+  margin-bottom: 1rem;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
   }
-  
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.delete-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+
+.delete-message {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+/* View Order Modal */
+
+.view-order-header {
+  background-color: #f9f9f9;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.view-order-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.view-order-number {
+  font-family: monospace;
+  font-size: 1.1rem;
+  color: #6c757d;
+}
+
+.view-order-status {
+  margin-top: 0.5rem;
+}
+
+.view-order-section {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.view-order-section:last-child {
+  border-bottom: none;
+}
+
+.view-order-section-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.view-order-section-title i {
+  margin-right: 0.75rem;
+  color: #59df99;
+}
+
+.view-order-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.view-order-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.view-order-info-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.view-order-info-value {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Update Status Modal */
+.status-update-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.status-option {
+  flex: 1;
+  min-width: 120px;
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.status-option:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.status-option.active {
+  background-color: rgba(89, 223, 153, 0.1);
+  border-color: #59df99;
+}
+
+.status-option-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.status-option-label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Animation for Modal */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+.modal.show .modal-dialog {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767.98px) {
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-content {
+    border-radius: 12px;
+  }
+
   .modal-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    padding: 1rem 1.5rem;
+    padding: 1.25rem;
   }
-  
-  .modal-header .modal-title {
-    display: flex;
-    align-items: center;
-    font-weight: 600;
-  }
-  
-  .modal-header .modal-title i {
-    margin-right: 0.5rem;
-  }
-  
-  .modal-body {
-    padding: 1.5rem;
-  }
-  
+
   .modal-footer {
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    padding: 1rem 1.5rem;
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
   }
+
+  .modal-footer .btn {
+    width: 100%;
+  }
+
+  .view-order-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-summary-item {
+    flex-direction: column;
+    margin-bottom: 1rem;
+  }
+
+  .order-summary-label {
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* Create Order Modal Specific Styles */
+#createOrderModal .modal-header {
+  background: linear-gradient(135deg, #59df99 0%, #a1f3c5 100%);
+}
+
+#createOrderModal .modal-header .modal-title i {
+  color: #19ac54;
+}
+
+/* Edit Order Modal Specific Styles */
+#editOrderModal .modal-header {
+  background: linear-gradient(135deg, #f5cc39 0%, #ffeea3 100%);
+}
+
+#editOrderModal .modal-header .modal-title i {
+  color: #e3b728;
+}
+
+/* View Order Modal Specific Styles */
+#viewOrderModal .modal-header {
+  background: linear-gradient(135deg, #0df095 0%, #cff4fc 100%);
+}
+
+#viewOrderModal .modal-header .modal-title i {
+  color: #0ab752;
+}
+
+/* Update Status Modal Specific Styles */
+#updateStatusModal .modal-header {
+  background: linear-gradient(135deg, #0dfd79 0%, #cfe2ff 100%);
+}
+
+#updateStatusModal .modal-header .modal-title i {
+  color: #0aca40;
+}
+
+/* Delete Order Modal Specific Styles */
+#deleteOrderModal .modal-header {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ffc9c9 100%);
+}
+
+#deleteOrderModal .modal-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Order Confirmation Modal Specific Styles */
+#orderConfirmationModal .modal-header {
+  background: linear-gradient(135deg, #78c6a2 0%, #d1e7dd 100%);
+}
+
+#orderConfirmationModal .modal-header .modal-title i {
+  color: #59dfa0;
+}
+
+/* Custom Scrollbar for Modals */
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Order Confirmation Styles */
+.order-summary-section {
+  padding: 1.25rem;
+}
+
+.order-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -0.5rem;
+}
+
+.order-summary-col {
+  flex: 1;
+  min-width: 250px;
+  padding: 0 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Order Confirmation Modal Styles */
+
+.order-confirmation-container {
+  padding: 0;
+}
+
+.order-confirmation-header {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.order-confirmation-icon {
+  width: 80px;
+  height: 80px;
+  background-color: rgba(25, 135, 84, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.order-confirmation-icon i {
+  font-size: 2.5rem;
+  color: #198754;
+}
+
+.order-confirmation-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.order-confirmation-subtitle {
+  color: #6c757d;
+  margin-bottom: 0;
+}
+
+.order-summary {
+  padding: 1.5rem;
+}
+
+.order-summary-section {
+  margin-bottom: 2rem;
+}
+
+.order-summary-section:last-child {
+  margin-bottom: 0;
+}
+
+.order-summary-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.order-summary-header-icon {
+  width: 32px;
+  height: 32px;
+  background-color: rgba(245, 204, 57, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+}
+
+.order-summary-header-icon i {
+  font-size: 1rem;
+  color: #f5cc39;
+}
+
+.order-summary-header-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+}
+
+.order-summary-item {
+  display: flex;
+  margin-bottom: 0.75rem;
+}
+
+.order-summary-label {
+  font-weight: 500;
+  color: #6c757d;
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.order-summary-value {
+  color: #333;
+}
+
+.order-summary-total {
+  font-weight: 700;
+  color: #198754;
+}
+
+.order-items-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 1.5rem;
+}
+
+.order-items-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.order-items-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-items-table tr:last-child td {
+  border-bottom: none;
+}
+
+.order-confirmation-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Animation for items */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+  .order-summary-item {
+    flex-direction: column;
+  }
+
+  .order-summary-label {
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
+
+  .order-confirmation-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .order-confirmation-actions .btn {
+    width: 100%;
+  }
+}
+
   
   /* Enhanced Delivery Timeline */
   .delivery-timeline {
@@ -2760,5 +3642,378 @@
   color: #bb2d3b;
 }
 
+/* Order Tabs Styling */
+.order-tabs {
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 1.5rem;
+}
 
+.order-tabs .nav-link {
+  color: #6c757d;
+  font-weight: 500;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+.order-tabs .nav-link:hover {
+  color: #495057;
+  border-bottom-color: #f5cc39;
+}
+
+.order-tabs .nav-link.active {
+  color: #212529;
+  background-color: transparent;
+  border-bottom-color: #59df99;
+  font-weight: 600;
+}
+
+.order-tabs .nav-link .badge {
+  margin-left: 5px;
+}
+
+/* Enhanced Order Card Styles */
+.modern-card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.modern-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.modern-card .card-header {
+  background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+}
+
+.order-card-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.order-number {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #333;
+  line-height: 1.2;
+}
+
+.order-date {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.order-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.order-total-item {
+  grid-column: span 2;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.order-info-item {
+  display: flex;
+  align-items: center;
+}
+
+.order-info-icon {
+  width: 28px;
+  height: 28px;
+  background-color: rgba(89, 223, 153, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  color: #19ac54;
+  font-size: 0.9rem;
+}
+
+.order-info-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-right: 0.5rem;
+}
+
+.order-info-value {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.order-total {
+  font-weight: 700;
+  color: #f5cc39;
+  font-size: 1.1rem;
+}
+
+.modern-card .card-footer {
+  background-color: #f9f9f9;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0.75rem 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.action-btn-view, .action-btn-delete {
+  flex: 1;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+}
+
+.status-badge {
+  padding: 0.35em 0.65em;
+  font-size: 0.75em;
+  font-weight: 500;
+  border-radius: 30px;
+  display: inline-block;
+  min-width: 90px;
+  text-align: center;
+}
+
+.status-order {
+  background-color: rgba(245, 204, 57, 0.15);
+  color: #e3b728;
+}
+
+.status-processing {
+  background-color: rgba(13, 202, 240, 0.1);
+  color: #0dcaf0;
+}
+
+.status-shipped {
+  background-color: rgba(13, 110, 253, 0.1);
+  color: #0d6efd;
+}
+
+.status-delivered {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: #198754;
+}
+
+.status-cancelled {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.delivery-badge {
+  padding: 0.35em 0.65em;
+  font-size: 0.75em;
+  font-weight: 500;
+  border-radius: 30px;
+  display: inline-block;
+  text-align: center;
+}
+
+.delivery-pickup {
+  background-color: rgba(13, 202, 240, 0.1);
+  color: #0dcaf0;
+}
+
+.delivery-delivery {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: #198754;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+  .order-info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
   
+  .order-total-item {
+    grid-column: span 1;
+  }
+}
+  
+/* Add these styles for the Complete and Return buttons */
+.action-btn-complete, .action-btn-return {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  width: 48%;
+}
+
+.action-btn-complete {
+  background-color: #198754;
+  border-color: #198754;
+  color: white;
+}
+
+.action-btn-complete:hover {
+  background-color: #146c43;
+  border-color: #146c43;
+}
+
+.action-btn-return {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
+}
+
+.action-btn-return:hover {
+  background-color: #ffca2c;
+  border-color: #ffca2c;
+}
+
+/* Status badge for completed and returned orders */
+.status-completed {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: #198754;
+}
+
+.status-returned {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.order-card .card-footer {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  height: auto; /* ensures it grows with content */
+  display: flex;
+  gap: 0.5rem; /* optional: space between buttons */
+}
+
+.order-card .card-footer .btn {
+  flex: 1; /* makes buttons equally fill the footer width */
+  border-radius: 0; /* optional: remove border radius if flush look is desired */
+}
+
+.bg-confirmed {
+  background-color: #f0ad4e; /* amber */
+  color: white;
+}
+
+.bg-ready-to-pickup {
+  background-color: #5bc0de; /* cyan */
+  color: white;
+}
+
+/* Consignment Inventory Styles */
+.consignment-card {
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.consignment-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.consignment-card .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+  padding: 0.75rem 1rem;
+}
+
+.consignment-card .card-body {
+  padding: 1rem;
+}
+
+.consignment-card .card-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+  padding: 0.75rem 1rem;
+}
+
+.consignment-card .progress {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #e9ecef;
+}
+
+.consignment-card .progress-bar {
+  border-radius: 4px;
+}
+
+/* Status badges */
+.badge.bg-success {
+  background-color: #59df99 !important;
+  color: #333;
+}
+
+.badge.bg-warning {
+  background-color: #f5cc39 !important;
+  color: #333;
+}
+
+.badge.bg-danger {
+  background-color: #ff6b6b !important;
+  color: white;
+}
+
+/* Consignment details modal */
+#consignmentDetailsModal .modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+#consignmentDetailsModal .modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+#consignmentDetailsModal .card {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
+}
+
+#consignmentDetailsModal .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+  padding: 0.75rem 1rem;
+}
+
+#consignmentDetailsModal .progress {
+  height: 20px;
+  border-radius: 10px;
+  background-color: #e9ecef;
+}
+
+#consignmentDetailsModal .progress-bar {
+  border-radius: 10px;
+  text-align: center;
+  line-height: 20px;
+  font-weight: bold;
+}
+
+#consignmentDetailsModal .table th,
+#consignmentDetailsModal .table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+#consignmentDetailsModal .table thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+#consignmentDetailsModal .table-hover tbody tr:hover {
+  background-color: rgba(245, 204, 57, 0.05);
+}

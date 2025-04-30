@@ -138,6 +138,8 @@
         <div class="main-content-inner">
           <!-- Retailer Orders Content -->
           <div class="orders-section">
+            
+           
             <div class="row mb-4">
               <div class="col-md-12">
                 <div class="d-flex justify-content-between align-items-center flex-wrap">
@@ -168,62 +170,6 @@
               </div>
             </div>
             
-            <!-- Retailer Order Stats Cards -->
-            <div class="row mb-4">
-              <div class="col-md-3 col-sm-6 mb-3">
-                <div class="card kpi-card h-100 small-kpi-card">
-                  <div class="card-body">
-                    <h6 class="card-title text-muted small-card-title">Total Orders</h6>
-                    <div class="d-flex align-items-center">
-                      <div class="fw-bold me-3 small-card-value" id="totalRetailerOrdersCount">0</div>
-                      <div class="text-success small">
-                        <i class="bi bi-graph-up"></i> <span id="totalRetailerOrdersGrowth">0%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-sm-6 mb-3">
-                <div class="card kpi-card h-100 small-kpi-card">
-                  <div class="card-body">
-                    <h6 class="card-title text-muted small-card-title">Pending Orders</h6>
-                    <div class="d-flex align-items-center">
-                      <div class="fw-bold me-3 small-card-value" id="pendingRetailerOrdersCount">0</div>
-                      <div class="text-warning">
-                        <i class="bi bi-clock"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-sm-6 mb-3">
-                <div class="card kpi-card h-100 small-kpi-card">
-                  <div class="card-body">
-                    <h6 class="card-title text-muted small-card-title">Confirmed Orders</h6>
-                    <div class="d-flex align-items-center">
-                      <div class="fw-bold me-3 small-card-value" id="confirmedRetailerOrdersCount">0</div>
-                      <div class="text-success">
-                        <i class="bi bi-check-circle"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 col-sm-6 mb-3">
-                <div class="card kpi-card h-100 small-kpi-card">
-                  <div class="card-body">
-                    <h6 class="card-title text-muted small-card-title">Total Revenue</h6>
-                    <div class="d-flex align-items-center">
-                      <div class="fw-bold me-3 small-card-value" id="totalRetailerRevenue">₱0</div>
-                      <div class="text-success small">
-                        <i class="bi bi-currency-exchange"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
             <div class="row mt-2">
               <div class="col-12">
                 <div class="card">
@@ -233,9 +179,6 @@
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-outline-secondary refresh-retailer-btn">
                           <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="exportRetailerOrdersBtn">
-                          <i class="bi bi-download me-1"></i> Export
                         </button>
                       </div>
                     </div>
@@ -302,6 +245,204 @@
     </div>
   </div>
 
+  <!-- Print Invoice Modal - Add this before the closing </body> tag -->
+<div class="modal fade" id="printInvoiceModal" tabindex="-1" aria-labelledby="printInvoiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="printInvoiceModalLabel">Invoice</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Invoice content will be loaded here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="printInvoice()">
+          <i class="bi bi-printer me-1"></i> Print Invoice
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mark as Shipped Modal with Delivery Hours -->
+<div class="modal fade" id="shippedModal" tabindex="-1" aria-labelledby="shippedModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shippedModalLabel">Mark Order as Shipped</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Notify customer, tracking info update</p>
+        
+        <div class="mb-3">
+          <label class="form-label">Delivery Hours</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="deliveryHours" id="morningDelivery" value="Morning (7-12 am)" checked>
+            <label class="form-check-label" for="morningDelivery">
+              Morning (7-12 am)
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="deliveryHours" id="afternoonDelivery" value="Afternoon (12-6 pm)">
+            <label class="form-check-label" for="afternoonDelivery">
+              Afternoon (12-6 pm)
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="deliveryHours" id="eveningDelivery" value="Evening (6-8 pm)">
+            <label class="form-check-label" for="eveningDelivery">
+              Evening (6-8 pm)
+            </label>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Notify Customer</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="notifyEmailShipped" checked>
+            <label class="form-check-label" for="notifyEmailShipped">
+              Notify by Email
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="notifySMSShipped">
+            <label class="form-check-label" for="notifySMSShipped">
+              Notify by SMS
+            </label>
+          </div>
+        </div>
+        
+        <input type="hidden" id="shippedOrderId" value="">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmShippedBtn">Mark as Shipped</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Simplified Mark as Ready for Pickup Modal -->
+<div class="modal fade" id="readyForPickupModal" tabindex="-1" aria-labelledby="readyForPickupModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="readyForPickupModalLabel">Mark Order as Ready</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-4">The order will be marked as ready for pickup. The customer will be notified to pick up their order.</p>
+        
+        <div class="mb-3">
+          <label class="form-label">Notify Customer</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="notifyEmailPickup" checked>
+            <label class="form-check-label" for="notifyEmailPickup">
+              Notify by Email
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="notifySMSPickup">
+            <label class="form-check-label" for="notifySMSPickup">
+              Notify by SMS
+            </label>
+          </div>
+        </div>
+        
+        <input type="hidden" id="pickupOrderId" value="">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmPickupBtn">Mark as Ready for Pickup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Delivered Modal -->
+<div class="modal fade" id="deliveredModal" tabindex="-1" aria-labelledby="deliveredModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deliveredModalLabel">Mark Order as Delivered</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="deliveredForm" enctype="multipart/form-data">
+          <input type="hidden" id="deliveredOrderId" name="order_id">
+          
+          <div class="mb-3">
+            <label for="deliveryProofPhoto" class="form-label">Upload Delivery Proof Photo</label>
+            <input type="file" class="form-control" id="deliveryProofPhoto" name="delivery_proof_photo" accept="image/*" required>
+            <div class="form-text">Please upload a photo as proof of delivery (e.g., signed receipt, delivered package)</div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="deliveryNotes" class="form-label">Delivery Notes</label>
+            <textarea class="form-control" id="deliveryNotes" name="notes" rows="3" placeholder="Any additional notes about the delivery"></textarea>
+          </div>
+          
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="notifyEmailDelivered" name="notify_email" checked>
+            <label class="form-check-label" for="notifyEmailDelivered">Notify customer by email</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmDeliveredBtn">Confirm Delivery</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Picked Up Modal -->
+<div class="modal fade" id="pickedUpModal" tabindex="-1" aria-labelledby="pickedUpModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pickedUpModalLabel">Mark Order as Picked Up</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="pickedUpForm">
+          <input type="hidden" id="pickedUpOrderId" name="order_id">
+          
+          <div class="mb-3">
+            <label for="pickupPersonName" class="form-label">Picked Up By</label>
+            <input type="text" class="form-control" id="pickupPersonName" name="pickup_person_name" placeholder="Name of person who picked up the order" required>
+          </div>
+          
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="pickupIdVerified" name="pickup_id_verified">
+            <label class="form-check-label" for="pickupIdVerified">ID Verified</label>
+          </div>
+          
+          <div class="mb-3">
+            <label for="pickupNotes" class="form-label">Pickup Notes</label>
+            <textarea class="form-control" id="pickupNotes" name="pickup_notes" rows="3" placeholder="Any additional notes about the pickup"></textarea>
+          </div>
+          
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="notifyEmailPickedUp" name="notify_email" checked>
+            <label class="form-check-label" for="notifyEmailPickedUp">Notify customer by email</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmPickedUpBtn">Confirm Pickup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
   <!-- Delete Confirmation Modal -->
   <div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-labelledby="deleteOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -338,6 +479,7 @@
         <div class="modal-body">
           <p>Are you sure you want to confirm this order?</p>
           <input type="hidden" id="confirmOrderId" value="">
+          <input type="hidden" id="confirmOrderMode" value="">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

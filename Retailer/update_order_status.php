@@ -1,262 +1,192 @@
 <?php
-// update_order_status.php
-// This file handles updating order status and reporting issues
-
 // Include database connection
 require_once 'db_connection.php';
 
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Set header to return JSON
+// Set headers
 header('Content-Type: application/json');
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'User not logged in',
-        'data' => null
-    ]);
-    exit;
-}
-
-// Get user ID from session
-$userId = $_SESSION['user_id'];
-
-// Get retailer information
-try {
-    // First, check if the user exists and get basic info
-    $userQuery = "SELECT u.id, u.username, u.email, u.full_name, u.role 
-                  FROM users u 
-                  WHERE u.id = ?";
-    
-    $stmt = $conn->prepare($userQuery);
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $userResult = $stmt->get_result();
-    
-    if ($userResult->num_rows === 0) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'User not found',
-            'data' => null
-        ]);
-        exit;
-    }
-    
-    $user = $userResult->fetch_assoc();
-    
-    // Check if user is a retailer
-    if ($user['role'] !== 'retailer') {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Access denied. Only retailers can access this page.',
-            'data' => null
-        ]);
-        exit;
-    }
-    
-    // Now get retailer-specific information
-    $retailerQuery = "SELECT r.* 
-                      FROM retailer_profiles r 
-                      WHERE r.user_id = ?";
-    
-    $stmt = $conn->prepare($retailerQuery);
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $retailerResult = $stmt->get_result();
-    
-    if ($retailerResult->num_rows === 0) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Retailer profile not found',
-            'data' => null
-        ]);
-        exit;
-    }
-    
-    $retailer = $retailerResult->fetch_assoc();
-    $retailerId = $retailer['id']; // Get the retailer ID from the profile
-    
-} catch (Exception $e) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Error: ' . $e->getMessage(),
-        'data' => null
-    ]);
-    exit;
-}
-
-// Check if request is POST
+// Check if request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid request method',
-        'data' => null
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
     exit;
 }
 
-// Get action from request
-$action = isset($_POST['action']) ? $_POST['action'] : '';
+// Get order ID and new status
+$order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
+$status = isset($_POST['status']) ? $_POST['status'] : '';
+$notes = isset($_POST['notes']) ? $_POST['notes'] : '';
 
-// Handle different actions
-switch ($action) {
-    case 'receive_order':
-        receiveOrder($conn, $retailerId);
-        break;
-    case 'report_issue':
-        reportIssue($conn, $retailerId);
-        break;
-    default:
-        echo json_encode([
-            'success' => false,
-            'message' => 'Invalid action',
-            'data' => null
-        ]);
+// Validate input
+if (!$order_id || empty($status)) {
+    echo json_encode(['success' => false, 'message' => 'Order ID and status are required']);
+    exit;
 }
 
-// Function to mark an order as received
-function receiveOrder($conn, $retailerId) {
-    // Get parameters from request
-    $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
-    $receive_date = isset($_POST['receive_date']) ? $_POST['receive_date'] : date('Y-m-d');
-    $notes = isset($_POST['notes']) ? $_POST['notes'] : '';
-    
-    // Validate order belongs to retailer
-    $sql_check = "SELECT order_id, delivery_mode FROM retailer_orders WHERE order_id = ? AND retailer_id = ?";
-    $stmt_check = $conn->prepare($sql_check);
-    $stmt_check->bind_param("ii", $order_id, $retailerId);
-    $stmt_check->execute();
-    $result_check = $stmt_check->get_result();
-    
-    if ($result_check->num_rows === 0) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Order not found or does not belong to this retailer',
-            'data' => null
-        ]);
-        return;
-    }
-    
-    $order = $result_check->fetch_assoc();
-    $delivery_mode = $order['delivery_mode'];
-    
+try {
     // Start transaction
     $conn->begin_transaction();
     
-    try {
-        // Update order status based on delivery mode
-        $new_status = ($delivery_mode === 'delivery') ? 'delivered' : 'picked up';
-        
-        $sql_update = "UPDATE retailer_orders SET status = ? WHERE order_id = ?";
-        $stmt_update = $conn->prepare($sql_update);
-        $stmt_update->bind_param("si", $new_status, $order_id);
-        $stmt_update->execute();
-        
-        // Add status history entry
-        $sql_history = "INSERT INTO retailer_order_status_history (order_id, status, notes) VALUES (?, ?, ?)";
-        $stmt_history = $conn->prepare($sql_history);
-        $stmt_history->bind_param("iss", $order_id, $new_status, $notes);
-        $stmt_history->execute();
-        
-        // Process received items if provided
-        if (isset($_POST['items']) && is_array($_POST['items'])) {
-            foreach ($_POST['items'] as $item) {
-                // Here you would typically update inventory or other related tables
-                // This is a placeholder for that functionality
+    // Get current order status
+    $query = "SELECT status, delivery_mode FROM retailer_orders WHERE order_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param('i', $order_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        throw new Exception('Order not found');
+    }
+    
+    $order = $result->fetch_assoc();
+    $currentStatus = $order['status'];
+    $deliveryMode = $order['delivery_mode'];
+    
+    // Update the update_order_status.php file to handle the specific status transitions
+    // Validate status transition
+    $validTransition = true;
+    $message = "";
+
+    // Update the status transition validation to handle both delivery and pickup modes properly
+
+switch ($currentStatus) {
+    case 'order':
+        // Order can only be confirmed or cancelled
+        if ($status !== 'confirmed' && $status !== 'cancelled') {
+            $validTransition = false;
+            $message = "Order can only be confirmed or cancelled";
+        }
+        break;
+    case 'confirmed':
+        // Handle different transitions based on delivery mode
+        if ($deliveryMode === 'delivery') {
+            if ($status !== 'shipped' && $status !== 'cancelled') {
+                $validTransition = false;
+                $message = "Confirmed delivery order can only be shipped or cancelled";
+            }
+        } else if ($deliveryMode === 'pickup') {
+            if ($status !== 'ready' && $status !== 'ready_for_pickup' && 
+                $status !== 'ready-to-pickup' && $status !== 'ready for pickup' && 
+                $status !== 'cancelled') {
+                $validTransition = false;
+                $message = "Confirmed pickup order can only be marked as ready for pickup or cancelled";
+            }
+        } else {
+            if ($status !== 'shipped' && 
+                $status !== 'ready_for_pickup' && 
+                $status !== 'ready-to-pickup' && 
+                $status !== 'ready for pickup' && 
+                $status !== 'ready' && 
+                $status !== 'cancelled') {
+                $validTransition = false;
+                $message = "Confirmed order can only be shipped, marked ready for pickup, or cancelled";
             }
         }
-        
-        // Commit transaction
-        $conn->commit();
-        
-        echo json_encode([
-            'success' => true,
-            'message' => 'Order marked as ' . $new_status . ' successfully',
-            'data' => null
-        ]);
-    } catch (Exception $e) {
-        // Rollback transaction on error
-        $conn->rollback();
-        
-        echo json_encode([
-            'success' => false,
-            'message' => 'Error updating order status: ' . $e->getMessage(),
-            'data' => null
-        ]);
+        break;
+    case 'shipped':
+        // Shipped can only be delivered or cancelled
+        if ($status !== 'delivered' && $status !== 'cancelled') {
+            $validTransition = false;
+            $message = "Shipped order can only be delivered or cancelled";
+        }
+        break;
+    case 'ready_for_pickup':
+    case 'ready-to-pickup':
+    case 'ready for pickup':
+    case 'ready':
+        // Ready for pickup can only be picked up or cancelled
+        if ($status !== 'picked_up' && $status !== 'picked up' && $status !== 'cancelled') {
+            $validTransition = false;
+            $message = "Ready for pickup order can only be picked up or cancelled";
+        }
+        break;
+    case 'delivered':
+    case 'picked_up':
+    case 'picked up':
+        // Delivered and picked up are final states, can't be changed
+        $validTransition = false;
+        $message = "Order status cannot be changed after delivery or pickup";
+        break;
+    case 'cancelled':
+        // Cancelled is final state, can't be changed
+        $validTransition = false;
+        $message = "Cancelled order status cannot be changed";
+        break;
+}
+
+// Also update the delivery mode check to handle both formats
+if ($validTransition && $deliveryMode) {
+    if ($deliveryMode === 'delivery' && ($status === 'ready_for_pickup' || $status === 'ready-to-pickup' || $status === 'ready for pickup' || $status === 'ready' || $status === 'picked_up' || $status === 'picked up')) {
+        $validTransition = false;
+        $message = "Delivery orders cannot have pickup statuses";
+    } else if ($deliveryMode === 'pickup' && ($status === 'shipped' || $status === 'delivered')) {
+        // Convert delivery statuses to pickup equivalents
+        if ($status === 'shipped') {
+            $status = 'ready';
+        } else if ($status === 'delivered') {
+            $status = 'picked up';
+        }
     }
 }
 
-// Function to report an issue with an order
-function reportIssue($conn, $retailerId) {
-    // Get parameters from request
-    $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
-    $issue_type = isset($_POST['issue_type']) ? $_POST['issue_type'] : '';
-    $issue_severity = isset($_POST['issue_severity']) ? $_POST['issue_severity'] : 'medium';
-    $issue_description = isset($_POST['issue_description']) ? $_POST['issue_description'] : '';
-    $requested_action = isset($_POST['requested_action']) ? $_POST['requested_action'] : '';
-    
-    // Validate order belongs to retailer
-    $sql_check = "SELECT order_id FROM retailer_orders WHERE order_id = ? AND retailer_id = ?";
-    $stmt_check = $conn->prepare($sql_check);
-    $stmt_check->bind_param("ii", $order_id, $retailerId);
-    $stmt_check->execute();
-    $result_check = $stmt_check->get_result();
-    
-    if ($result_check->num_rows === 0) {
+    if (!$validTransition) {
         echo json_encode([
             'success' => false,
-            'message' => 'Order not found or does not belong to this retailer',
-            'data' => null
+            'message' => $message
         ]);
-        return;
+        exit;
     }
     
-    // Start transaction
-    $conn->begin_transaction();
-    
-    try {
-        // Update order status to 'issue'
-        $sql_update = "UPDATE retailer_orders SET status = 'issue' WHERE order_id = ?";
-        $stmt_update = $conn->prepare($sql_update);
-        $stmt_update->bind_param("i", $order_id);
-        $stmt_update->execute();
+    // Only update if status is different
+    if ($currentStatus !== $status) {
+        // Update order status
+        $updateQuery = "UPDATE retailer_orders SET status = ?, updated_at = NOW() WHERE order_id = ?";
+        $stmt = $conn->prepare($updateQuery);
+        $stmt->bind_param('si', $status, $order_id);
+        
+        if (!$stmt->execute()) {
+            throw new Exception('Failed to update order status: ' . $conn->error);
+        }
         
         // Add status history entry
-        $notes = "Issue reported: " . $issue_description;
-        $sql_history = "INSERT INTO retailer_order_status_history (order_id, status, notes) VALUES (?, 'issue', ?)";
-        $stmt_history = $conn->prepare($sql_history);
-        $stmt_history->bind_param("is", $order_id, $notes);
-        $stmt_history->execute();
+        $historyQuery = "INSERT INTO retailer_order_status_history (order_id, status, notes, created_at) VALUES (?, ?, ?, NOW())";
+        $stmt = $conn->prepare($historyQuery);
+        $stmt->bind_param('iss', $order_id, $status, $notes);
         
-        // Insert into issues table
-        $sql_issue = "INSERT INTO retailer_order_issues (order_id, issue_type, severity, description, requested_action) 
-                      VALUES (?, ?, ?, ?, ?)";
-        $stmt_issue = $conn->prepare($sql_issue);
-        $stmt_issue->bind_param("issss", $order_id, $issue_type, $issue_severity, $issue_description, $requested_action);
-        $stmt_issue->execute();
+        if (!$stmt->execute()) {
+            throw new Exception('Failed to add status history: ' . $conn->error);
+        }
         
-        // Commit transaction
-        $conn->commit();
-        
-        echo json_encode([
-            'success' => true,
-            'message' => 'Issue reported successfully',
-            'data' => null
-        ]);
-    } catch (Exception $e) {
-        // Rollback transaction on error
-        $conn->rollback();
-        
-        echo json_encode([
-            'success' => false,
-            'message' => 'Error reporting issue: ' . $e->getMessage(),
-            'data' => null
-        ]);
+        // If status is "shipped" or "ready", set expected delivery/pickup date if not already set
+        if (($status === 'shipped' || $status === 'ready_for_pickup' || $status === 'ready')) {
+            $dateField = ($deliveryMode === 'delivery') ? 'expected_delivery' : 'pickup_date';
+            $expectedDate = date('Y-m-d', strtotime('+3 days')); // Default to 3 days from now
+            
+            $updateDateQuery = "UPDATE retailer_orders SET $dateField = ? WHERE order_id = ? AND ($dateField IS NULL OR $dateField = '0000-00-00')";
+            $stmt = $conn->prepare($updateDateQuery);
+            $stmt->bind_param('si', $expectedDate, $order_id);
+            $stmt->execute();
+        }
     }
+    
+    // Commit transaction
+    $conn->commit();
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'Order status updated successfully',
+        'new_status' => $status
+    ]);
+    
+} catch (Exception $e) {
+    // Rollback transaction on error
+    $conn->rollback();
+    
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
+
+// Close connection
+$conn->close();
 ?>

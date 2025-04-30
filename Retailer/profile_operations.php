@@ -1,3 +1,4 @@
+
 <?php
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
@@ -79,7 +80,7 @@ function updateRetailerProfile($conn, $user_id, $data) {
              WHERE user_id = ?";
              
    $stmt = $conn->prepare($query);
-   $stmt->bind_param("sssississssi", 
+   $stmt->bind_param("sssisssisssi", 
                    $data['first_name'], 
                    $data['last_name'], 
                    $data['birthday'], 
@@ -406,11 +407,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                $required_fields = ['first_name', 'last_name', 'birthday', 'nationality', 'business_name', 'business_address', 'phone'];
                foreach ($required_fields as $field) {
                    if (!isset($_POST[$field]) || empty($_POST[$field])) {
-                       $response = ['success' => false, 'message' => 'All required fields must be filled'];
-                       echo json_encode($response);
-                       exit;
-                   }
-               }
+                    $response = ['success' => false, 'message' => 'All required fields must be filled'];
+                    echo json_encode($response);
+                    exit;
+                }
+            }
                
                // Prepare data for update
                $data = [

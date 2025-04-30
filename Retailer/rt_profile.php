@@ -2,6 +2,9 @@
 // Start session
 session_start();
 
+$passwordError = $_SESSION['password_error'] ?? false;
+unset($_SESSION['password_error']);
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -635,11 +638,11 @@ unset($_SESSION['error_message']);
           <i class="bi bi-shield-lock"></i>Account
         </button>
       </li>
-      <li class="nav-item" role="presentation">
+      <!--<li class="nav-item" role="presentation">
         <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity-tab-pane" type="button" role="tab" aria-controls="activity-tab-pane" aria-selected="false">
           <i class="bi bi-clock-history"></i>Activity
         </button>
-      </li>
+      </li> -->
     </ul>
     
     <!-- Tab Content -->
@@ -648,6 +651,9 @@ unset($_SESSION['error_message']);
       <div class="tab-pane fade show active" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
         <div class="row">
           <div class="col-lg-8">
+
+
+
             <!-- Personal Information -->
             <div class="card profile-card">
               <div class="card-header d-flex justify-content-between align-items-center">
@@ -679,6 +685,9 @@ unset($_SESSION['error_message']);
                 </div>
               </div>
             </div>
+
+
+
             
             <!-- Business Information -->
             <div class="card profile-card mt-4">
@@ -709,6 +718,10 @@ unset($_SESSION['error_message']);
                 </div>
               </div>
             </div>
+
+
+
+
             
             <!-- Social Media -->
             <div class="card profile-card mt-4">
@@ -750,6 +763,9 @@ unset($_SESSION['error_message']);
             </div>
           </div>
           
+
+
+
           <div class="col-lg-4">
             <!-- Account Summary -->
             <div class="card profile-card">
@@ -798,6 +814,10 @@ unset($_SESSION['error_message']);
                 </div>
               </div>
             </div>
+
+
+
+
             
             <!-- Recent Orders -->
             <div class="card profile-card mt-4">
@@ -831,6 +851,10 @@ unset($_SESSION['error_message']);
         </div>
       </div>
       
+
+
+
+
       <!-- Account Tab -->
       <div class="tab-pane fade" id="account-tab-pane" role="tabpanel" aria-labelledby="account-tab" tabindex="0">
         <div class="row">
@@ -873,111 +897,57 @@ unset($_SESSION['error_message']);
               </div>
             </div>
             
+
+
+
             <!-- Email Preferences -->
             <div class="card profile-card mt-4">
-              <div class="card-header">
-                <h5><i class="bi bi-envelope"></i>Email Preferences</h5>
-              </div>
-              <div class="card-body">
-                <form data-form-type="preferences">
-                  <div class="mb-3">
-                    <div class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" role="switch" id="orderNotifications" checked>
-                      <label class="form-check-label" for="orderNotifications">Order Notifications</label>
-                    </div>
-                    <div class="form-text">Receive email notifications about your orders.</div>
-                  </div>
-                  <div class="mb-3">
-                    <div class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" role="switch" id="productUpdates" checked>
-                      <label class="form-check-label" for="productUpdates">Product Updates</label>
-                    </div>
-                    <div class="form-text">Receive email notifications about product updates.</div>
-                  </div>
-                  <div class="mb-3">
-                    <div class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" role="switch" id="promotionalEmails">
-                      <label class="form-check-label" for="promotionalEmails">Promotional Emails</label>
-                    </div>
-                    <div class="form-text">Receive promotional emails and special offers.</div>
-                  </div>
-                  <div class="text-end">
-                    <button type="submit" class="btn btn-primary">Save Preferences</button>
-                  </div>
-                </form>
-              </div>
+            
+          
             </div>
           </div>
           
+
+
+
           <div class="col-lg-4">
-            <!-- Account Security -->
-            <div class="card profile-card">
-              <div class="card-header">
-                <h5><i class="bi bi-shield-lock"></i>Account Security</h5>
-              </div>
-              <div class="card-body">
-                <div class="mb-3">
-                  <p class="text-muted mb-1">Two-Factor Authentication</p>
-                  <p class="fw-medium">
-                    <span class="badge bg-danger">Not Enabled</span>
-                  </p>
-                  <button class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-shield-plus me-1"></i> Enable 2FA
-                  </button>
-                </div>
-                <hr>
-                <div class="mb-3">
-                  <p class="text-muted mb-1">Last Password Change</p>
-                  <p class="fw-medium">Never</p>
-                </div>
-                <hr>
-                <div>
-                  <p class="text-muted mb-1">Account Actions</p>
-                  <button class="btn btn-sm btn-outline-danger">
-                    <i class="bi bi-trash me-1"></i> Delete Account
-                  </button>
-                </div>
-              </div>
-            </div>
+            
+          <!-- Account Security -->
+<div class="card profile-card">
+  <div class="card-header">
+    <h5><i class="bi bi-shield-lock"></i> Account Security</h5>
+  </div>
+  <div class="card-body">
+    <p class="text-muted">Account Actions</p>
+    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+  <i class="bi bi-trash me-1"></i> Delete Account
+</button>
+  </div>
+</div>
+
+            
+
+
+
             
             <!-- Connected Devices -->
             <div class="card profile-card mt-4">
-              <div class="card-header">
-                <h5><i class="bi bi-laptop"></i>Connected Devices</h5>
-              </div>
-              <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                  <div class="me-3">
-                    <i class="bi bi-laptop fs-3"></i>
-                  </div>
-                  <div>
-                    <h6 class="mb-1">Windows PC - Chrome</h6>
-                    <p class="text-muted mb-0 small">Manila, Philippines</p>
-                    <p class="text-success mb-0 small">Current Device</p>
-                  </div>
-                </div>
-                <div class="d-flex align-items-center">
-                  <div class="me-3">
-                    <i class="bi bi-phone fs-3"></i>
-                  </div>
-                  <div>
-                    <h6 class="mb-1">iPhone - Safari</h6>
-                    <p class="text-muted mb-0 small">Manila, Philippines</p>
-                    <p class="text-muted mb-0 small">Last active: 2 days ago</p>
-                  </div>
-                </div>
-              </div>
+             
+              
             </div>
           </div>
         </div>
       </div>
       
+
+
+      
       <!-- Activity Tab -->
-      <div class="tab-pane fade" id="activity-tab-pane" role="tabpanel" aria-labelledby="activity-tab" tabindex="0">
+      <!--<div class="tab-pane fade" id="activity-tab-pane" role="tabpanel" aria-labelledby="activity-tab" tabindex="0">
         <div class="row">
-          <div class="col-lg-8">
+          <div class="col-lg-8"> -->
             <!-- Activity Timeline -->
-            <div class="card profile-card">
+           <!-- <div class="card profile-card">
               <div class="card-header">
                 <h5><i class="bi bi-clock-history"></i>Activity Timeline</h5>
               </div>
@@ -1001,10 +971,10 @@ unset($_SESSION['error_message']);
                         </div>
                       </div>
                     <?php endforeach; ?>
-                  <?php endif; ?>
+                  <?php endif; ?> -->
                   
                   <!-- Fallback activity items if no records found -->
-                  <?php if (empty($user_activity)): ?>
+                 <!-- <?php if (empty($user_activity)): ?>
                     <div class="activity-item">
                       <div class="activity-icon">
                         <i class="bi bi-cart-check"></i>
@@ -1041,9 +1011,9 @@ unset($_SESSION['error_message']);
             </div>
           </div>
           
-          <div class="col-lg-4">
+          <div class="col-lg-4"> -->
             <!-- Login History -->
-            <div class="card profile-card">
+            <!-- <div class="card profile-card">
               <div class="card-header">
                 <h5><i class="bi bi-box-arrow-in-right"></i>Login History</h5>
               </div>
@@ -1067,10 +1037,10 @@ unset($_SESSION['error_message']);
                         <small class="text-muted"><?php echo $login['location']; ?> - <?php echo date('M j, Y g:i A', strtotime($login['login_time'])); ?></small>
                       </div>
                     <?php endforeach; ?>
-                  <?php endif; ?>
+                  <?php endif; ?> -->
                   
                   <!-- Fallback login history if no records found -->
-                  <?php if (empty($login_history)): ?>
+                <!--  <?php if (empty($login_history)): ?>
                     <div class="list-group-item">
                       <div class="d-flex w-100 justify-content-between">
                         <h6 class="mb-1">Current Session</h6>
@@ -1090,10 +1060,10 @@ unset($_SESSION['error_message']);
                   <?php endif; ?>
                 </div>
               </div>
-            </div>
+            </div> -->
             
             <!-- System Notifications -->
-            <div class="card profile-card mt-4">
+           <!-- <div class="card profile-card mt-4">
               <div class="card-header">
                 <h5><i class="bi bi-bell"></i>System Notifications</h5>
               </div>
@@ -1127,7 +1097,7 @@ unset($_SESSION['error_message']);
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Profile Image Modal -->
   <div class="modal fade" id="profileImageModal" tabindex="-1" aria-labelledby="profileImageModalLabel" aria-hidden="true">
@@ -1216,6 +1186,10 @@ unset($_SESSION['error_message']);
       </div>
     </div>
   </div>
+
+
+
+  
 
   <!-- Business Information Modal -->
   <div class="modal fade" id="businessInfoModal" tabindex="-1" aria-labelledby="businessInfoModalLabel" aria-hidden="true">
@@ -1318,6 +1292,44 @@ unset($_SESSION['error_message']);
     </div>
   </div>
 
+
+<!-- Modal for deleting account -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <!-- Form updated with ID 'deleteAccountForm' -->
+      <form id="deleteAccountForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to <strong>permanently delete</strong> your account? This action cannot be undone.</p>
+          <div class="mb-3 position-relative">
+            <label for="password" class="form-label">Enter your password to confirm:</label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="password" name="password" required>
+              <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+              </button>
+            </div>
+            <div class="invalid-feedback">
+              Incorrect password. Please try again.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+
   <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Flatpickr JS -->
@@ -1328,6 +1340,78 @@ unset($_SESSION['error_message']);
   <script src="script.js"></script>
   <!-- Profile specific JavaScript -->
   <script src="profile.js"></script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById('deleteAccountForm');
+  const passwordInput = document.getElementById('password');
+  const deleteModalEl = document.getElementById('deleteAccountModal');
+  const deleteModal = new bootstrap.Modal(deleteModalEl);
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault(); // prevent full form submission
+
+    const formData = new FormData(form);
+
+    fetch('delete_account.php', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+      if (data.trim() === 'success') {
+        window.location.href = '/SupplyChainCapstoney/';
+      } else {
+        passwordInput.classList.add('is-invalid');
+        passwordInput.value = '';
+      }
+    });
+  });
+
+  deleteModalEl.addEventListener('hidden.bs.modal', function () {
+    passwordInput.classList.remove('is-invalid');
+    passwordInput.value = '';
+  });
+
+  passwordInput.addEventListener('input', function () {
+    this.classList.remove('is-invalid');
+  });
+});
+</script>
+
+
+
+
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const passwordError = <?php echo json_encode($passwordError); ?>;
+  if (passwordError) {
+    const passwordInput = document.getElementById('password');
+    const modal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+    modal.show();
+
+    passwordInput.value = '';
+    passwordInput.classList.add('is-invalid');
+  }
+});
+</script>
+
+
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const icon = document.getElementById('togglePasswordIcon');
+
+    toggleBtn.addEventListener('click', function () {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      icon.classList.toggle('bi-eye');
+      icon.classList.toggle('bi-eye-slash');
+    });
+  });
+</script>
+
 </body>
 </html>
 

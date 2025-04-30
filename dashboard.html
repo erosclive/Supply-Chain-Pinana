@@ -110,10 +110,26 @@
              
               <!-- User Profile Dropdown -->
               <div class="dropdown user-profile-dropdown" >
-                <div class="profile-circle dropdown-toggle" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="profile-circle dropdown-toggle position-relative" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                   <i class="bi bi-person-fill"></i>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" id="notification-badge" style="display: none;">
+                    0
+                    <span class="visually-hidden">unread notifications</span>
+                  </span>
                 </div>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown" style="width: 200px;">
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown" style="width: 350px;">
+                  <li class="dropdown-item-text">
+                    <div class="sidebar-divider">
+                      <span>NOTIFICATIONS</span>
+                      <div class="float-end">
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" id="mark-all-read">Mark all as read</button>
+                      </div>
+                    </div>
+                    <div id="notifications-container" class="notifications-container" style="max-height: 300px; overflow-y: auto;">
+                      <div class="text-center py-3 text-muted" id="no-notifications-message">No new notifications</div>
+                    </div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
                   <li class="dropdown-item-text">
                     <div class="sidebar-divider">
                       <span>ACCOUNT</span>
@@ -406,6 +422,27 @@
     </div>
   </div>
 
+  <!-- Order Details Modal -->
+  <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="order-details-content">
+            <!-- Order details will be loaded here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="updateOrderStatus">Update Status</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Chart.js -->
@@ -416,6 +453,6 @@
   <script src="scripts.js"></script>
   <script src="dashboard.js"></script>
   <script src="logout.js"></script>
+  <script src="notifications.js"></script>
 </body>
 </html>
-

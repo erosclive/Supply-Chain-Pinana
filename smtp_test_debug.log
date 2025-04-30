@@ -310,3 +310,66 @@
 2025-04-22 07:28:32: SERVER -> CLIENT: 221 2.0.0 closing connection d2e1a72fcca58-73dbf8e0bbesm7693216b3a.37 - gsmtp
 
 2025-04-22 07:28:32: Connection: closed
+2025-04-23 05:16:23: Connection: opening to smtp.gmail.com:587, timeout=300, options=array (
+  'ssl' => 
+  array (
+    'verify_peer' => false,
+    'verify_peer_name' => false,
+    'allow_self_signed' => true,
+  ),
+)
+2025-04-23 05:16:23: Connection failed. Error #2: stream_socket_client(): php_network_getaddresses: getaddrinfo for smtp.gmail.com failed: No such host is known.  [C:\xamppp\htdocs\SupplyChainCapstone\PHPMailer\src\SMTP.php line 396]
+2025-04-23 05:16:23: Connection failed. Error #2: stream_socket_client(): Unable to connect to smtp.gmail.com:587 (php_network_getaddresses: getaddrinfo for smtp.gmail.com failed: No such host is known. ) [C:\xamppp\htdocs\SupplyChainCapstone\PHPMailer\src\SMTP.php line 396]
+2025-04-23 05:16:23: SMTP ERROR: Failed to connect to server: php_network_getaddresses: getaddrinfo for smtp.gmail.com failed: No such host is known.  (0)
+2025-04-23 12:13:04: Connection: opening to smtp.gmail.com:587, timeout=300, options=array (
+  'ssl' => 
+  array (
+    'verify_peer' => false,
+    'verify_peer_name' => false,
+    'allow_self_signed' => true,
+  ),
+)
+2025-04-23 12:13:04: Connection: opened
+2025-04-23 12:13:05: SERVER -> CLIENT: 220 smtp.gmail.com ESMTP d9443c01a7336-22c50eb4aadsm99987295ad.146 - gsmtp
+
+2025-04-23 12:13:05: CLIENT -> SERVER: EHLO localhost
+
+2025-04-23 12:13:05: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [49.144.233.117]
+250-SIZE 35882577
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+2025-04-23 12:13:05: CLIENT -> SERVER: STARTTLS
+
+2025-04-23 12:13:06: SERVER -> CLIENT: 220 2.0.0 Ready to start TLS
+
+2025-04-23 12:13:06: CLIENT -> SERVER: EHLO localhost
+
+2025-04-23 12:13:06: SERVER -> CLIENT: 250-smtp.gmail.com at your service, [49.144.233.117]
+250-SIZE 35882577
+250-8BITMIME
+250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+
+2025-04-23 12:13:06: CLIENT -> SERVER: AUTH LOGIN
+
+2025-04-23 12:13:06: SERVER -> CLIENT: 334 VXNlcm5hbWU6
+
+2025-04-23 12:13:06: CLIENT -> SERVER: [credentials hidden]
+2025-04-23 12:13:06: SERVER -> CLIENT: 334 UGFzc3dvcmQ6
+
+2025-04-23 12:13:06: CLIENT -> SERVER: [credentials hidden]
+2025-04-23 12:13:07: SERVER -> CLIENT: 235 2.7.0 Accepted
+
+2025-04-23 12:13:07: CLIENT -> SERVER: QUIT
+
+2025-04-23 12:13:07: SERVER -> CLIENT: 221 2.0.0 closing connection d9443c01a7336-22c50eb4aadsm99987295ad.146 - gsmtp
+
+2025-04-23 12:13:07: Connection: closed

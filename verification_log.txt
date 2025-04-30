@@ -122,3 +122,14 @@
 2025-04-22 07:29:21 - Verification attempt with token: f3479c9e35ac5d3c2d0d42b85f48f816e24d92231c64c6ebb3a65261f81f3dde
 2025-04-22 07:29:31 - Welcome email sent to: fyavetargaryen@gmail.com
 2025-04-22 07:29:31 - Success: Email verified for user ID: 21
+2025-04-23 05:16:24 - Failed to resend verification email to: jamesguevarra070827@gmail.com
+2025-04-23 05:17:33 - Failed to resend verification email to: jamesguevarra070827@gmail.com
+2025-04-23 05:18:20 - Resent verification email to: jamesguevarra070827@gmail.com
+2025-04-23 05:23:07 - Verification attempt with token: 9fa1e662d0d8000ed160b56ca2edffae07b9fce97e5b83e9f8cd8c9c312d7564
+2025-04-23 05:23:14 - Welcome email sent to: jamesguevarra070827@gmail.com
+2025-04-23 05:23:14 - Success: Email verified for user ID: 22
+2025-04-23 12:13:20 - Resent verification email to: fohrtargaryen@gmail.com
+2025-04-23 12:30:52 - Resent verification email to: fohrtargaryen@gmail.com
+2025-04-23 12:31:50 - Verification attempt with token: 7094862806dcb7e31946e18f8414745c126a981205194f1ed34e65cc3cb72b1c
+2025-04-23 12:31:56 - Welcome email sent to: fohrtargaryen@gmail.com
+2025-04-23 12:31:56 - Success: Email verified for user ID: 24

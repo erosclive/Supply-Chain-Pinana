@@ -21,6 +21,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $manufacturing_date = $_POST['manufacturingDate'] ?? null;
         $unit_cost = floatval($_POST['unitCost'] ?? 0);
         
+        // Get expiration duration and custom duration days
+        $expiration_duration = $_POST['expirationDuration'] ?? '';
+        $custom_duration_days = null;
+        if ($expiration_duration === 'custom' && isset($_POST['customDurationDays'])) {
+            $custom_duration_days = intval($_POST['customDurationDays']);
+            // Validate custom duration days
+            if ($custom_duration_days < 1) {
+                throw new Exception("Custom duration days must be at least 1.");
+            }
+        }
+        
         // Log received data for debugging
         error_log("Received batch data: " . json_encode($_POST));
         
@@ -86,13 +97,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Calculate quantity difference
             $quantity_diff = $quantity - $old_quantity;
             
-            // Update batch information - CRITICAL FIX: Ensure manufacturing_date is properly set
+            // Update batch information - CRITICAL FIX: Include expiration_duration and custom_duration_days
             $sql = "UPDATE product_batches SET 
                         batch_code = ?, 
                         quantity = ?, 
                         expiration_date = ?, 
                         manufacturing_date = ?, 
-                        unit_cost = ?, 
+                        unit_cost = ?,
+                        expiration_duration = ?,
+                        custom_duration_days = ?,
                         updated_at = NOW()
                     WHERE batch_id = ?";
             
@@ -103,17 +116,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // Log the values being bound to the statement
-            error_log("Binding values for update: batch_code=$batch_code, quantity=$quantity, expiration_date=$expiration_date, manufacturing_date=$manufacturing_date, unit_cost=$unit_cost, batch_id=$batch_id");
+            error_log("Binding values for update: batch_code=$batch_code, quantity=$quantity, expiration_date=$expiration_date, manufacturing_date=$manufacturing_date, unit_cost=$unit_cost, expiration_duration=$expiration_duration, custom_duration_days=$custom_duration_days, batch_id=$batch_id");
             
             // Bind parameters
             mysqli_stmt_bind_param(
                 $stmt, 
-                "sisddi", 
+                "sisddsii", 
                 $batch_code, 
                 $quantity, 
                 $expiration_date, 
                 $manufacturing_date, 
                 $unit_cost,
+                $expiration_duration,
+                $custom_duration_days,
                 $batch_id
             );
             
@@ -153,17 +168,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             // This is an insert operation
             
-            // Insert batch information - CRITICAL FIX: Ensure manufacturing_date is properly set
+            // Insert batch information - CRITICAL FIX: Include expiration_duration and custom_duration_days
             $sql = "INSERT INTO product_batches (
                         product_id, 
                         batch_code, 
                         quantity, 
                         expiration_date, 
                         manufacturing_date, 
-                        unit_cost, 
+                        unit_cost,
+                        expiration_duration,
+                        custom_duration_days,
                         created_at, 
                         updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
             
             $stmt = mysqli_prepare($conn, $sql);
             
@@ -172,18 +189,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // Log the values being bound to the statement
-            error_log("Binding values for insert: product_id=$product_id, batch_code=$batch_code, quantity=$quantity, expiration_date=$expiration_date, manufacturing_date=$manufacturing_date, unit_cost=$unit_cost");
+            error_log("Binding values for insert: product_id=$product_id, batch_code=$batch_code, quantity=$quantity, expiration_date=$expiration_date, manufacturing_date=$manufacturing_date, unit_cost=$unit_cost, expiration_duration=$expiration_duration, custom_duration_days=$custom_duration_days");
             
             // Bind parameters
             mysqli_stmt_bind_param(
                 $stmt, 
-                "ssisdd", 
+                "ssisddsi", 
                 $product_id, 
                 $batch_code, 
                 $quantity, 
                 $expiration_date, 
                 $manufacturing_date, 
-                $unit_cost
+                $unit_cost,
+                $expiration_duration,
+                $custom_duration_days
             );
             
             // Execute statement
@@ -311,4 +330,3 @@ function validateDate($date, $format = 'Y-m-d') {
     return $d && $d->format($format) === $date;
 }
 ?>
-

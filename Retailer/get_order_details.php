@@ -1,29 +1,9 @@
 <?php
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Include database connection
 require_once 'db_connection.php';
 
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Set header to return JSON
 header('Content-Type: application/json');
-
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'User not logged in'
-    ]);
-    exit;
-}
-
-$user_id = $_SESSION['user_id'];
 
 // Check if order_id is provided
 if (!isset($_GET['order_id'])) {
@@ -37,96 +17,96 @@ if (!isset($_GET['order_id'])) {
 $order_id = intval($_GET['order_id']);
 
 try {
-    // Verify the order belongs to this user
-    $checkQuery = "SELECT ro.* FROM retailer_orders ro 
-                  JOIN users u ON ro.retailer_email = u.email 
-                  WHERE ro.order_id = ? AND u.id = ?";
-    $checkStmt = mysqli_prepare($conn, $checkQuery);
+    // Get order items with product details
+    $itemsQuery = "SELECT 
+                    roi.item_id,
+                    roi.order_id,
+                    roi.product_id,
+                    roi.quantity,
+                    roi.unit_price,
+                    roi.total_price,
+                    roi.product_name,
+                    p.product_photo,
+                    p.category
+                FROM 
+                    retailer_order_items roi
+                LEFT JOIN 
+                    products p ON roi.product_id = p.product_id
+                WHERE 
+                    roi.order_id = ?";
     
-    if (!$checkStmt) {
-        throw new Exception("Query preparation failed: " . mysqli_error($conn));
-    }
-    
-    mysqli_stmt_bind_param($checkStmt, "ii", $order_id, $user_id);
-    
-    if (!mysqli_stmt_execute($checkStmt)) {
-        throw new Exception("Query execution failed: " . mysqli_stmt_error($checkStmt));
-    }
-    
-    $result = mysqli_stmt_get_result($checkStmt);
-    
-    if (mysqli_num_rows($result) === 0) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Order not found or you do not have permission to view it'
-        ]);
-        exit;
-    }
-    
-    // Get order details
-    $order = mysqli_fetch_assoc($result);
-    
-    // Get order items
-    $itemsQuery = "SELECT roi.*, p.product_name 
-                  FROM retailer_order_items roi
-                  LEFT JOIN products p ON roi.product_id = p.product_id
-                  WHERE roi.order_id = ?";
-    $itemsStmt = mysqli_prepare($conn, $itemsQuery);
-    
-    if (!$itemsStmt) {
-        throw new Exception("Items query preparation failed: " . mysqli_error($conn));
-    }
-    
-    mysqli_stmt_bind_param($itemsStmt, "i", $order_id);
-    
-    if (!mysqli_stmt_execute($itemsStmt)) {
-        throw new Exception("Items query execution failed: " . mysqli_stmt_error($itemsStmt));
-    }
-    
-    $itemsResult = mysqli_stmt_get_result($itemsStmt);
+    $itemsStmt = $conn->prepare($itemsQuery);
+    $itemsStmt->bind_param("i", $order_id);
+    $itemsStmt->execute();
+    $itemsResult = $itemsStmt->get_result();
     
     $items = [];
-    while ($item = mysqli_fetch_assoc($itemsResult)) {
-        $items[] = $item;
+    while ($row = $itemsResult->fetch_assoc()) {
+        $items[] = $row;
     }
     
-    $order['items'] = $items;
+    // Get order status history
+    $historyQuery = "SELECT 
+                        history_id,
+                        order_id,
+                        status,
+                        notes,
+                        created_at
+                    FROM 
+                        retailer_order_status_history
+                    WHERE 
+                        order_id = ?
+                    ORDER BY 
+                        created_at DESC";
     
-    // Get status history
-    $historyQuery = "SELECT * FROM retailer_order_status_history 
-                    WHERE order_id = ? 
-                    ORDER BY created_at ASC";
-    $historyStmt = mysqli_prepare($conn, $historyQuery);
+    $historyStmt = $conn->prepare($historyQuery);
+    $historyStmt->bind_param("i", $order_id);
+    $historyStmt->execute();
+    $historyResult = $historyStmt->get_result();
     
-    if (!$historyStmt) {
-        throw new Exception("History query preparation failed: " . mysqli_error($conn));
+    $status_history = [];
+    while ($row = $historyResult->fetch_assoc()) {
+        $status_history[] = $row;
     }
     
-    mysqli_stmt_bind_param($historyStmt, "i", $order_id);
+    // Get delivery issues if any
+    $issuesQuery = "SELECT 
+                        issue_id,
+                        order_id,
+                        issue_type,
+                        issue_severity,
+                        issue_description,
+                        requested_action,
+                        issue_status,
+                        resolution_notes,
+                        reported_at,
+                        resolved_at
+                    FROM 
+                        retailer_order_delivery_issues
+                    WHERE 
+                        order_id = ?";
     
-    if (!mysqli_stmt_execute($historyStmt)) {
-        throw new Exception("History query execution failed: " . mysqli_stmt_error($historyStmt));
+    $issuesStmt = $conn->prepare($issuesQuery);
+    $issuesStmt->bind_param("i", $order_id);
+    $issuesStmt->execute();
+    $issuesResult = $issuesStmt->get_result();
+    
+    $delivery_issues = [];
+    while ($row = $issuesResult->fetch_assoc()) {
+        $delivery_issues[] = $row;
     }
     
-    $historyResult = mysqli_stmt_get_result($historyStmt);
-    
-    $statusHistory = [];
-    while ($history = mysqli_fetch_assoc($historyResult)) {
-        $statusHistory[] = $history;
-    }
-    
-    $order['status_history'] = $statusHistory;
-    
-    // Return order details
     echo json_encode([
         'success' => true,
-        'order' => $order
+        'items' => $items,
+        'status_history' => $status_history,
+        'delivery_issues' => $delivery_issues
     ]);
     
 } catch (Exception $e) {
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
+        'message' => 'Error: ' . $e->getMessage()
     ]);
 }
 ?>

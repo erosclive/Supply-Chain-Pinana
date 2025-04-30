@@ -1,3 +1,22 @@
+<?php
+
+session_start();
+include 'db_connection.php'; 
+
+$retailer_id = $_SESSION['user_id'];
+
+$sql = "SELECT first_name, last_name FROM retailer_profiles WHERE user_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $retailer_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$fullName = "Retailer Name"; 
+
+if ($row = $result->fetch_assoc()) {
+    $fullName = $row['first_name'] . ' ' . $row['last_name'];
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -306,6 +325,130 @@
       width: 100%;
       margin-top: 0.5rem;
     }
+
+     /* Order Card Styles */
+  .order-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .order-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .order-card .card-header {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .order-card .card-body {
+    padding: 1rem;
+  }
+  
+  .order-card .card-footer {
+    background-color: #f9f9f9;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .order-number {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
+  }
+  
+  .order-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+  
+  .order-info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .order-info-label {
+    color: #6c757d;
+    font-weight: 500;
+  }
+  
+  .order-info-value {
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .order-total {
+    font-weight: 700;
+    color: var(--pineapple-yellow-dark);
+    font-size: 1.1rem;
+  }
+  
+  .order-card .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .order-card .action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+  
+  .delivery-badge {
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 500;
+    border-radius: 30px;
+    display: inline-block;
+    text-align: center;
+  }
+  
+  .delivery-pickup {
+    background-color: rgba(13, 202, 240, 0.1);
+    color: #0dcaf0;
+  }
+  
+  .delivery-delivery {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+  }
+  
+  /* Empty state styling */
+  .empty-orders {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+  
+  .empty-orders i {
+    font-size: 3rem;
+    color: #e9ecef;
+    margin-bottom: 1rem;
+  }
+  
+  .empty-orders h4 {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+  }
+  
+  .empty-orders p {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+  }
   </style>
 </head>
 <body>
@@ -352,11 +495,11 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="rt_delivery.php" data-page="delivery">
+              <a class="nav-link" href="rt_payments.php" data-page="payment">
                 <div class="nav-icon">
-                  <i class="bi bi-truck"></i>
+                  <i class="bi bi-credit-card"></i>
                 </div>
-                <span>Delivery</span>
+                <span>Payments</span>
               </a>
             </li>
           </ul>
@@ -390,8 +533,8 @@
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown">
                   <li class="dropdown-item-text">
                     <div class="d-flex flex-column">
-                      <span class="fw-bold">Retailer</span>
-                      <small class="text-muted">Pinana Gourmet</small>
+                    <span class="fw-bold"><?php echo htmlspecialchars($fullName); ?></span>
+                      <small class="text-muted">Retailer</small>
                     </div>
                   </li>
                   <li><hr class="dropdown-divider"></li>
@@ -406,103 +549,16 @@
         </div>
         
         <div class="main-content-inner">
+
           <!-- Orders Content -->
           <div class="orders-section">
-            <!-- Order Stats -->
-            <div class="row mb-4">
-              <div class="col-md-3">
-                <div class="stats-card">
-                  <div class="stats-card-body">
-                    <div class="stats-card-icon bg-primary-light">
-                      <i class="bi bi-cart"></i>
-                    </div>
-                    <div class="stats-card-info">
-                      <h6 class="stats-card-title">Total Orders</h6>
-                      <h3 class="stats-card-value" id="total-orders">0</h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="stats-card">
-                  <div class="stats-card-body">
-                    <div class="stats-card-icon bg-warning-light">
-                      <i class="bi bi-hourglass-split"></i>
-                    </div>
-                    <div class="stats-card-info">
-                      <h6 class="stats-card-title">Pending</h6>
-                      <h3 class="stats-card-value" id="pending-orders">0</h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="stats-card">
-                  <div class="stats-card-body">
-                    <div class="stats-card-icon bg-success-light">
-                      <i class="bi bi-check-circle"></i>
-                    </div>
-                    <div class="stats-card-info">
-                      <h6 class="stats-card-title">Received</h6>
-                      <h3 class="stats-card-value" id="received-orders">0</h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <div class="stats-card">
-                  <div class="stats-card-body">
-                    <div class="stats-card-icon bg-info-light">
-                      <i class="bi bi-currency-dollar"></i>
-                    </div>
-                    <div class="stats-card-info">
-                      <h6 class="stats-card-title">Total Spent</h6>
-                      <h3 class="stats-card-value" id="total-spent">₱0.00</h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        
             
             <!-- Orders Filters and Actions -->
             <div class="row mb-4">
               <div class="col-md-12">
                 <div class="d-flex justify-content-between align-items-center flex-wrap">
-                  <div class="d-flex flex-wrap gap-2 mb-2 mb-md-0">
-                    <div class="dropdown me-2">
-                      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-funnel me-1"></i> All Status
-                      </button>
-                      <ul class="dropdown-menu" aria-labelledby="statusDropdown">
-                        <li><a class="dropdown-item status-filter" href="#" data-status="all">All Status</a></li>
-                        <li><a class="dropdown-item status-filter" href="#" data-status="order">Order Placed</a></li>
-                        <li><a class="dropdown-item status-filter" href="#" data-status="processing">Processing</a></li>
-                        <li><a class="dropdown-item status-filter" href="#" data-status="shipped">Shipped</a></li>
-                        <li><a class="dropdown-item status-filter" href="#" data-status="delivered">Delivered</a></li>
-                        <li><a class="dropdown-item status-filter" href="#" data-status="cancelled">Cancelled</a></li>
-                      </ul>
-                    </div>
-                    <div class="dropdown me-2">
-                      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dateRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-calendar-range me-1"></i> Date Range
-                      </button>
-                      <ul class="dropdown-menu" aria-labelledby="dateRangeDropdown">
-                        <li><a class="dropdown-item date-range-filter" href="#" data-range="all">All Time</a></li>
-                        <li><a class="dropdown-item date-range-filter" href="#" data-range="today">Today</a></li>
-                        <li><a class="dropdown-item date-range-filter" href="#" data-range="week">This Week</a></li>
-                        <li><a class="dropdown-item date-range-filter" href="#" data-range="month">This Month</a></li>
-                        <li><a class="dropdown-item date-range-filter" href="#" data-range="custom">Custom Range</a></li>
-                      </ul>
-                    </div>
-                    <div class="search-container">
-                      <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0">
-                          <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0" id="order-search" placeholder="Search orders...">
-                      </div>
-                    </div>
-                  </div>
+                  
                   <button class="btn" id="create-order-btn">
                     <i class="bi bi-plus-lg me-1"></i> Create New Order
                   </button>
@@ -510,85 +566,58 @@
               </div>
             </div>
             
-            <!-- Custom Date Range Selector (initially hidden) -->
-            <div class="row mb-4" id="custom-date-range" style="display: none;">
-              <div class="col-md-12">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="row">
-                      <div class="col-md-5">
-                        <div class="mb-0">
-                          <label for="start-date" class="form-label">Start Date</label>
-                          <input type="date" class="form-control" id="start-date">
-                        </div>
-                      </div>
-                      <div class="col-md-5">
-                        <div class="mb-0">
-                          <label for="end-date" class="form-label">End Date</label>
-                          <input type="date" class="form-control" id="end-date">
-                        </div>
-                      </div>
-                      <div class="col-md-2 d-flex align-items-end">
-                        <button class="btn btn-pineapple w-100" id="apply-date-range">Apply</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <!-- Order Tabs -->
+<div class="row mb-4">
+  <div class="col-12">
+    <ul class="nav nav-tabs order-tabs">
+      <li class="nav-item">
+        <a class="nav-link active order-tab" href="#" data-status="all">All Orders</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link order-tab" href="#" data-status="delivered">Received</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link order-tab" href="#" data-status="cancelled">Cancelled</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link order-tab" href="#" data-status="returned">Returned</a>
+      </li>
+    </ul>
+  </div>
+</div>
             
-            <!-- Orders Table -->
-            <div class="row">
-              <div class="col-12">
-                <div class="card">
-                  <div class="card-body">
-                    <h5 class="card-title">Order List</h5>
-                    
-                    <div class="table-responsive">
-                      <table class="table table-hover">
-                        <thead>
-                          <tr>
-                            <th>Order #</th>
-                            <th>Date</th>
-                            <th>Items</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody id="orders-table-body">
-                          <!-- Orders will be loaded here -->
-                          <tr>
-                            <td colspan="7" class="text-center py-3">
-                              <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                              </div>
-                              <span class="ms-2">Loading orders...</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <div class="row mt-3">
-                      <div class="col-12">
-                        <nav aria-label="Order pagination">
-                          <ul class="pagination justify-content-center" id="pagination-container">
-                            <!-- Pagination will be generated here -->
-                          </ul>
-                        </nav>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <!-- Replace the Orders Table section with this card-based layout -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Order List</h5>
+        
+        <!-- Orders Card Grid -->
+        <div id="orders-card-container" class="row g-3">
+        <!-- Orders will be loaded here as cards -->
+        <div class="col-12 text-center py-3">
+          <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <span class="ms-2">Loading orders...</span>
+        </div>
+      </div>
+        
+        <!-- Pagination -->
+        <div class="row mt-3">
+          <div class="col-12">
+            <nav aria-label="Order pagination">
+              <ul class="pagination justify-content-center" id="pagination-container">
+                <!-- Pagination will be generated here -->
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <!-- Create Order Modal -->
   <div class="modal fade" id="createOrderModal" tabindex="-1" aria-labelledby="createOrderModalLabel" aria-hidden="true">
@@ -655,6 +684,15 @@
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="consignment-term" class="form-label fw-semibold">Consignment Term <span class="text-danger">*</span></label>
+                  <select class="form-select" id="consignment-term" name="consignment_term" required>
+                    <option value="15">15 days</option>
+                    <option value="30" selected>30 days</option>
+                    <option value="45">45 days</option>
+                  </select>
                 </div>
 
                 <div class="mb-3" id="expected-delivery-container">
@@ -757,9 +795,9 @@
               <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                 <i class="bi bi-x-lg me-1"></i> Cancel
               </button>
-              <button type="submit" class="btn btn-success" id="save-order-btn">
-                <i class="bi bi-save me-1"></i> Save Order
-              </button>
+              <button type="button" class="btn btn-success" id="review-order-btn">
+  <i class="bi bi-eye me-1"></i> Review Order
+</button>
             </div>
           </form>
         </div>
@@ -767,188 +805,134 @@
     </div>
   </div>
 
-  <!-- Edit Order Modal -->
-  <div class="modal fade" id="editOrderModal" tabindex="-1" aria-labelledby="editOrderModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-      <div class="modal-content">
-        <div class="modal-header bg-light">
-          <h5 class="modal-title" id="editOrderModalLabel">
-            <i class="bi bi-pencil-square me-2 text-warning"></i>Edit Order
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+ 
+
+  <!-- Order Confirmation Modal -->
+<div class="modal fade" id="orderConfirmationModal" tabindex="-1" aria-labelledby="orderConfirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="orderConfirmationModalLabel">
+          <i class="bi bi-check-circle-fill me-2 text-success"></i>Confirm Your Order
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info d-flex align-items-center mb-4">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          <div>
+            Please review your order details before confirming.
+          </div>
         </div>
-        <div class="modal-body p-0">
-          <form id="edit-order-form">
-            <input type="hidden" id="edit-order-id" name="order_id">
-            <div class="row g-0">
-              <!-- Customer Information -->
-              <div class="col-md-6 border-end p-4">
-                <div class="d-flex align-items-center mb-4">
-                  <div class="rounded-circle bg-light p-2 me-3">
-                    <i class="bi bi-person text-warning fs-4"></i>
-                  </div>
-                  <h5 class="mb-0">Customer Information</h5>
-                </div>
-                <div class="mb-3">
-                  <label for="edit-retailer-name" class="form-label fw-semibold">Retailer Name <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control form-control-lg" id="edit-retailer-name" name="retailer_name" required>
-                </div>
-                <div class="mb-3">
-                  <label for="edit-retailer-email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
-                  <input type="email" class="form-control" id="edit-retailer-email" name="retailer_email" required>
-                </div>
-                <div class="mb-3">
-                  <label for="edit-retailer-contact" class="form-label fw-semibold">Contact Number</label>
-                  <input type="text" class="form-control" id="edit-retailer-contact" name="retailer_contact">
-                </div>
-                <div class="mb-3">
-                  <label for="edit-retailer-address" class="form-label fw-semibold">Address <small class="text-muted">(non-editable)</small></label>
-                  <textarea class="form-control bg-light" id="edit-retailer-address" name="retailer_address" rows="3" readonly></textarea>
-                </div>
+        
+        <!-- Customer Information -->
+        <div class="order-summary-section">
+          <div class="order-summary-header">
+            <i class="bi bi-person-circle"></i> Customer Information
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="order-summary-item">
+                <div class="order-summary-label">Name:</div>
+                <div class="order-summary-value" id="confirm-retailer-name"></div>
               </div>
-              
-              <!-- Order Details -->
-              <div class="col-md-6 p-4">
-                <div class="d-flex align-items-center mb-4">
-                  <div class="rounded-circle bg-light p-2 me-3">
-                    <i class="bi bi-calendar-date text-warning fs-4"></i>
-                  </div>
-                  <h5 class="mb-0">Order Details</h5>
-                </div>
-                
-                <!-- Delivery Mode Selection -->
-                <div class="card mb-3 border-0 bg-light">
-                  <div class="card-body">
-                    <h6 class="card-title mb-3">
-                      <i class="bi bi-truck me-2"></i>Delivery Mode
-                    </h6>
-                    <div class="d-flex">
-                      <div class="form-check me-4">
-                        <input class="form-check-input" type="radio" id="edit-delivery-mode-delivery" name="edit_delivery_mode" value="delivery" checked>
-                        <label class="form-check-label fw-semibold" for="edit-delivery-mode-delivery">Delivery</label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="radio" id="edit-delivery-mode-pickup" name="edit_delivery_mode" value="pickup">
-                        <label class="form-check-label fw-semibold" for="edit-delivery-mode-pickup">Pickup</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mb-3" id="edit-expected-delivery-container">
-                  <label for="edit-expected-delivery" class="form-label fw-semibold">Expected Delivery Date <span class="text-danger">*</span></label>
-                  <input type="date" class="form-control" id="edit-expected-delivery" name="expected_delivery" required>
-                </div>
-
-                <div class="mb-3" id="edit-pickup-location-container" style="display: none;">
-                  <label for="edit-pickup-location" class="form-label fw-semibold">Pickup Location <span class="text-danger">*</span></label>
-                  <select class="form-select" id="edit-pickup-location" name="pickup_location">
-                    <option value="Pinana Gourmet Calauan" selected>Pinana Gourmet Calauan</option>
-                  </select>
-                </div>
-
-                <div class="mb-3" id="edit-pickup-date-container" style="display: none;">
-                  <label for="edit-pickup-date" class="form-label fw-semibold">Pickup Date <span class="text-danger">*</span></label>
-                  <input type="date" class="form-control" id="edit-pickup-date" name="pickup_date">
-                </div>
-                
-                <div class="mb-3">
-                  <label for="edit-order-date" class="form-label fw-semibold">Order Date <span class="text-danger">*</span></label>
-                  <input type="date" class="form-control" id="edit-order-date" name="order_date" required>
-                </div>
-                
-                <div class="mb-3">
-                  <label for="edit-order-notes" class="form-label fw-semibold">Notes</label>
-                  <textarea class="form-control" id="edit-order-notes" name="notes" rows="3" placeholder="Add any special instructions or notes here..."></textarea>
-                </div>
+              <div class="order-summary-item">
+                <div class="order-summary-label">Email:</div>
+                <div class="order-summary-value" id="confirm-retailer-email"></div>
               </div>
             </div>
-            
-            <!-- Order Items Section -->
-            <div class="bg-light p-4 border-top border-bottom">
-              <div class="d-flex align-items-center mb-4">
-                <div class="rounded-circle bg-white p-2 me-3">
-                  <i class="bi bi-cart text-warning fs-4"></i>
-                </div>
-                <h5 class="mb-0">Order Items</h5>
+            <div class="col-md-6">
+              <div class="order-summary-item">
+                <div class="order-summary-label">Contact:</div>
+                <div class="order-summary-value" id="confirm-retailer-contact"></div>
               </div>
-              
-              <!-- Order Items Table -->
-              <div class="card">
-                <div class="card-body p-0">
-                  <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="edit-order-items-table">
-                      <thead class="table-light">
-                        <tr>
-                          <th style="width: 40%;">PRODUCT</th>
-                          <th style="width: 15%;">QUANTITY</th>
-                          <th style="width: 15%;">PRICE (₱)</th>
-                          <th style="width: 20%;">TOTAL (₱)</th>
-                          <th style="width: 10%;"></th>
-                        </tr>
-                      </thead>
-                      <tbody id="edit-order-items-body">
-                        <!-- Order items will be added here -->
-                        <tr id="edit-no-items-row">
-                          <td colspan="5" class="text-center py-4">
-                            <i class="bi bi-cart-x fs-1 text-muted"></i>
-                            <p class="mt-2 mb-0">No items added yet</p>
-                          </td>
-                        </tr>
-                      </tbody>
-                      <tfoot class="table-light">
-                        <tr>
-                          <td colspan="3" class="text-end fw-bold">Subtotal:</td>
-                          <td class="fw-bold">₱<span id="edit-subtotal">0.00</span></td>
-                          <td></td>
-                        </tr>
-                        <tr>
-                          <td colspan="3" class="text-end">Discount:</td>
-                          <td>
-                            <div class="input-group input-group-sm">
-                              <span class="input-group-text">₱</span>
-                              <input type="number" class="form-control" id="edit-discount" name="discount" value="0" min="0" step="0.01">
-                            </div>
-                          </td>
-                          <td></td>
-                        </tr>
-                        <tr>
-                          <td colspan="3" class="text-end fw-bold">Total:</td>
-                          <td class="fw-bold fs-5 text-warning">₱<span id="edit-total-amount">0.00</span></td>
-                          <td></td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Add Item Button -->
-              <div class="mt-3">
-                <button type="button" class="btn btn-outline-warning" id="edit-add-item-btn">
-                  <i class="bi bi-plus-circle me-2"></i>Add Item
-                </button>
+              <div class="order-summary-item">
+                <div class="order-summary-label">Delivery Mode:</div>
+                <div class="order-summary-value" id="confirm-delivery-mode"></div>
               </div>
             </div>
-            
-            <div class="modal-footer bg-light">
-              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                <i class="bi bi-x-lg me-1"></i> Cancel
-              </button>
-              <button type="submit" class="btn btn-warning text-white" id="update-order-btn">
-                <i class="bi bi-save me-1"></i> Update Order
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
+        
+        <!-- Order Details -->
+        <div class="order-summary-section">
+          <div class="order-summary-header">
+            <i class="bi bi-calendar-check"></i> Order Details
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="order-summary-item">
+                <div class="order-summary-label">Order Date:</div>
+                <div class="order-summary-value" id="confirm-order-date"></div>
+              </div>
+              <div class="order-summary-item">
+                <div class="order-summary-label">Consignment Term:</div>
+                <div class="order-summary-value" id="confirm-consignment-term"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="order-summary-item">
+                <div class="order-summary-label">Notes:</div>
+                <div class="order-summary-value" id="confirm-notes"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Order Items -->
+        <div class="order-summary-section">
+          <div class="order-summary-header">
+            <i class="bi bi-cart-check"></i> Order Items
+          </div>
+          <div class="order-items-summary">
+            <table class="table table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Product</th>
+                  <th class="text-center">Quantity</th>
+                  <th class="text-end">Unit Price</th>
+                  <th class="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody id="confirm-order-items">
+                <!-- Order items will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+          <div class="row mt-3">
+            <div class="col-md-6 offset-md-6">
+              <div class="order-summary-item">
+                <div class="order-summary-label">Subtotal:</div>
+                <div class="order-summary-value">₱<span id="confirm-subtotal"></span></div>
+              </div>
+              <div class="order-summary-item">
+                <div class="order-summary-label">Discount:</div>
+                <div class="order-summary-value">₱<span id="confirm-discount"></span></div>
+              </div>
+              <div class="order-summary-item">
+                <div class="order-summary-label fw-bold">Total:</div>
+                <div class="order-summary-value order-summary-total">₱<span id="confirm-total"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-outline-secondary" id="back-to-edit-btn">
+          <i class="bi bi-arrow-left me-1"></i> Back to Edit
+        </button>
+        <button type="button" class="btn btn-success" id="save-order-btn">
+          <i class="bi bi-check-lg me-1"></i> Confirm & Place Order
+        </button>
       </div>
     </div>
   </div>
+</div>
 
   <!-- View Order Modal -->
-  <div class="modal fade" id="viewOrderModal" tabindex="-1" aria-labelledby="viewOrderModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
+  <div class="modal fade" id="viewOrderModal" tabindex="-1" aria-labelledby="viewOrderModalLabel" aria-hidden="true" >
+    <div class="modal-dialog modal-dialog-centered modal-xl" >
+      <div class="modal-content" >
         <div class="modal-header bg-light">
           <h5 class="modal-title" id="viewOrderModalLabel">
             <i class="bi bi-info-circle me-2 text-primary"></i>Order Details
@@ -966,25 +950,30 @@
               </div>
               <div class="mb-4">
                 <div class="card bg-light border-0">
-                  <div class="card-body">
-                    <div class="row mb-2">
-                      <div class="col-5 text-muted">Order #:</div>
-                      <div class="col-7 fw-bold" id="view-order-number"></div>
-                    </div>
-                    <div class="row mb-2">
-                      <div class="col-5 text-muted">Date:</div>
-                      <div class="col-7" id="view-order-date"></div>
-                    </div>
-                    <div class="row mb-2">
-                      <div class="col-5 text-muted">Status:</div>
-                      <div class="col-7" id="view-order-status"></div>
-                    </div>
-                    <div class="row">
-                      <div class="col-5 text-muted">Delivery Mode:</div>
-                      <div class="col-7" id="view-delivery-mode"></div>
+                    <div class="card-body">
+                      <div class="row mb-2">
+                        <div class="col-5 text-muted">Order #:</div>
+                        <div class="col-7 fw-bold" id="view-order-number"></div>
+                      </div>
+                      <div class="row mb-2">
+                        <div class="col-5 text-muted">Date:</div>
+                        <div class="col-7" id="view-order-date"></div>
+                      </div>
+                      <div class="row mb-2">
+                        <div class="col-5 text-muted">Status:</div>
+                        <div class="col-7" id="view-order-status"></div>
+                      </div>
+                      <!-- Add this new row for consignment term -->
+                      <div class="row mb-2">
+                        <div class="col-5 text-muted">Consignment Term:</div>
+                        <div class="col-7" id="view-consignment-term"></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-5 text-muted">Delivery Mode:</div>
+                        <div class="col-7" id="view-delivery-mode"></div>
+                      </div>
                     </div>
                   </div>
-                </div>
               </div>
               
               <!-- Delivery Details -->
@@ -1115,21 +1104,7 @@
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
             <i class="bi bi-x-lg me-1"></i> Close
           </button>
-          <button type="button" class="btn btn-outline-primary edit-order-btn" data-id="">
-            <i class="bi bi-pencil me-1"></i> Edit
-          </button>
-          <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" id="updateStatusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="bi bi-arrow-repeat me-1"></i> Update Status
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="updateStatusDropdown">
-              <li><a class="dropdown-item update-status" href="#" data-status="order">Order Placed</a></li>
-              <li><a class="dropdown-item update-status" href="#" data-status="processing">Processing</a></li>
-              <li><a class="dropdown-item update-status" href="#" data-status="shipped">Shipped</a></li>
-              <li><a class="dropdown-item update-status" href="#" data-status="delivered">Delivered</a></li>
-              <li><a class="dropdown-item update-status" href="#" data-status="cancelled">Cancelled</a></li>
-            </ul>
-          </div>
+          
         </div>
       </div>
     </div>
@@ -1177,28 +1152,237 @@
       </div>
     </div>
   </div>
+  
+  <!-- Complete Order Modal -->
+<div class="modal fade" id="completeOrderModal" tabindex="-1" aria-labelledby="completeOrderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="completeOrderModalLabel">
+          <i class="bi bi-check-circle-fill me-2 text-success"></i>Complete Order
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <form id="complete-order-form">
+          <input type="hidden" id="complete-order-id">
+          
+          <div class="p-4">
+            <div class="alert alert-info d-flex align-items-center mb-4">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <div>
+                Please verify all items in this order before completing it.
+              </div>
+            </div>
+            
+            <div class="card mb-4">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">Order Information</h6>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <p><strong>Order #:</strong> <span id="complete-order-number"></span></p>
+                    <p><strong>Date:</strong> <span id="complete-order-date"></span></p>
+                    <p><strong>Status:</strong> <span id="complete-order-status"></span></p>
+                  </div>
+                  <div class="col-md-6">
+                    <p><strong>Customer:</strong> <span id="complete-retailer-name"></span></p>
+                    <p><strong>Total Amount:</strong> ₱<span id="complete-total-amount"></span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">Order Items Verification</h6>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 40%;">Product</th>
+                        <th style="width: 15%;">Quantity</th>
+                        <th style="width: 20%;">Unit Price</th>
+                        <th style="width: 20%;">Total</th>
+                        <th style="width: 10%;">Verify</th>
+                      </tr>
+                    </thead>
+                    <tbody id="complete-order-items">
+                      <!-- Order items will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="verify-all-items">
+                <label class="form-check-label fw-bold" for="verify-all-items">
+                  I confirm that all items have been verified and are complete
+                </label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="confirm-complete-btn" disabled>
+          <i class="bi bi-check-lg me-1"></i> Complete Order
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Return Order Modal -->
+<div class="modal fade" id="returnOrderModal" tabindex="-1" aria-labelledby="returnOrderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="returnOrderModalLabel">
+          <i class="bi bi-arrow-return-left me-2 text-warning"></i>Return Order
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="return-order-form">
+          <input type="hidden" id="return-order-id">
+          
+          <div class="alert alert-warning d-flex align-items-center mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>
+              Please provide details about why you're returning this order.
+            </div>
+          </div>
+          
+          <div class="card mb-4">
+            <div class="card-header bg-light">
+              <h6 class="mb-0">Order Information</h6>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Order #:</strong> <span id="return-order-number"></span></p>
+                  <p><strong>Date:</strong> <span id="return-order-date"></span></p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Customer:</strong> <span id="return-retailer-name"></span></p>
+                  <p><strong>Total Amount:</strong> ₱<span id="return-total-amount"></span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-4">
+            <div class="card-header bg-light">
+              <h6 class="mb-0">Return Items</h6>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 5%;">#</th>
+                      <th style="width: 40%;">Product</th>
+                      <th style="width: 15%;">Ordered</th>
+                      <th style="width: 15%;">Return Qty</th>
+                      <th style="width: 25%;">Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody id="return-order-items">
+                    <!-- Order items will be loaded here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="return-reason" class="form-label fw-semibold">Return Reason</label>
+            <select class="form-select" id="return-reason" required>
+              <option value="">Select a reason</option>
+              <option value="Damaged">Damaged Products</option>
+              <option value="Wrong Items">Wrong Items Received</option>
+              <option value="Quality Issues">Quality Issues</option>
+              <option value="Expired">Expired Products</option>
+              <option value="Other">Other (Please specify)</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="return-details" class="form-label fw-semibold">Additional Details</label>
+            <textarea class="form-control" id="return-details" rows="3" placeholder="Please provide more details about the return..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-warning" id="confirm-return-btn">
+          <i class="bi bi-arrow-return-left me-1"></i> Request Return
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Cancel Order Confirmation Modal -->
+<div class="modal fade" id="cancelConfirmationModal" tabindex="-1" aria-labelledby="cancelConfirmationLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-white">
+        <h5 class="modal-title" id="cancelConfirmationLabel"><i class="bi bi-x-circle me-2"></i>Confirm Cancel</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to cancel this order? This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> No, Keep Order
+        </button>
+        <!-- Replace this button in the Cancel Order Confirmation Modal -->
+<button type="button" class="btn btn-danger" id="confirm-cancel-btn">
+  <i class="bi bi-check-circle me-1"></i> Yes, Cancel Order
+</button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 
   <!-- Delete Order Confirmation Modal -->
   <div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-labelledby="deleteOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content">
-        <div class="modal-body text-center p-4">
-          <div class="mb-4">
-            <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
-          </div>
-          <h5 class="modal-title mb-3" id="deleteOrderModalLabel">Confirm Delete</h5>
-          <p class="mb-4">Are you sure you want to delete this order? This action cannot be undone.</p>
-          <input type="hidden" id="delete-order-id">
-          
-          <div class="d-flex justify-content-center gap-2 mt-4">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-              <i class="bi bi-x-lg me-1"></i> Cancel
-            </button>
-            <button type="button" class="btn btn-danger" id="confirm-delete-btn">
-              <i class="bi bi-trash me-1"></i> Delete
-            </button>
-          </div>
-        </div>
+       <!-- Update the text in the delete confirmation modal -->
+<div class="modal-body text-center p-4">
+  <div class="mb-4">
+    <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+  </div>
+  <h5 class="modal-title mb-3" id="deleteOrderModalLabel">Confirm Delete</h5>
+  <p class="mb-4">Are you sure you want to permanently delete this order? This action cannot be undone.</p>
+  <input type="hidden" id="delete-order-id">
+  
+  <div class="d-flex justify-content-center gap-2 mt-4">
+    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+      <i class="bi bi-x-lg me-1"></i> Cancel
+    </button>
+    <button type="button" class="btn btn-danger" id="confirm-delete-btn">
+      <i class="bi bi-trash me-1"></i> Delete Permanently
+    </button>
+  </div>
+</div>
       </div>
     </div>
   </div>
@@ -1216,3 +1400,28 @@
   
 </body>
 </html>
+
+<script>
+  // This is just a template update - the actual implementation is in retail_orders.js
+  function createOrderCard(order) {
+    // Format status - Check if it's a delivered order in pickup mode
+    let displayStatus = order.status;
+    if (order.status === "delivered" && order.delivery_mode === "pickup") {
+      displayStatus = "picked up";
+    }
+    
+    return `
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card order-card modern-card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+              <i class="bi bi-box me-2"></i> Order #${order.po_number || order.order_id}
+            </h6>
+            <span class="badge ${getStatusBgClass(displayStatus)}">${formatStatus(displayStatus)}</span>
+          </div>
+          <!-- Rest of the card HTML -->
+        </div>
+      </div>
+    `;
+  }
+</script>
