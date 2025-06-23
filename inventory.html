@@ -18,6 +18,8 @@
 <link rel="stylesheet" href="modal-animations.css">
 <!-- Batch Modal Enhanced CSS -->
 <link rel="stylesheet" href="batch-modal-enhanced.css">
+<link rel="icon" href="Retailer/mono-green.png">
+
 
 <style>
 
@@ -416,6 +418,41 @@
     bottom: 0;
     z-index: 2000; /* Ensure it's above everything else */
   }
+
+  /* Submenu styles */
+  .submenu {
+    padding-left: 2rem;
+    list-style: none;
+  }
+
+  .submenu .nav-item {
+    margin-bottom: 0.25rem;
+  }
+
+  .submenu .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .submenu .nav-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .nav-link.dropdown-toggle::after {
+    display: inline-block;
+    margin-left: auto;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 </style>
 </head>
 <body>
@@ -425,19 +462,20 @@
 <div class="container-fluid">
   <div class="row">
    <!-- Sidebar -->
+   <!-- Sidebar -->
    <div class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
     <div class="sidebar-inner">
-      <div class="logo-container d-flex align-items-center mb-4 mt-3">
-          <img src="images/final-light.png"  class="pineapple-logo">
-      </div>
+        <div class="logo-container d-flex align-items-center mb-4 mt-3">
+            <img src="images/final-light.png" class="pineapple-logo">
+        </div>
       
-      <div class="sidebar-divider">
+      <div class="sidebar-divider" style="margin-top: -1.5rem;">
         <span>MAIN MENU</span>
       </div>
       
       <ul class="nav flex-column sidebar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="dashboard.html" data-page="index">
+          <a class="nav-link" href="dashboard.html" data-page="dashboard">
             <div class="nav-icon">
               <i class="bi bi-grid"></i>
             </div>
@@ -445,53 +483,94 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active" href="inventory.html" data-page="inventory">
+          <a class="nav-link active dropdown-toggle" href="#inventorySubmenu" data-bs-toggle="collapse" aria-expanded="true">
             <div class="nav-icon">
               <i class="bi bi-box"></i>
             </div>
             <span>Inventory</span>
           </a>
+          <ul class="collapse show submenu" id="inventorySubmenu">
+            <li class="nav-item">
+              <a class="nav-link active" href="inventory.html" data-page="inventory">
+                <div class="nav-icon">
+                  <i class="bi bi-box-seam"></i>
+                </div>
+                <span>Products</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="supplies.html" data-page="supplies">
+                <div class="nav-icon">
+                  <i class="bi bi-tools"></i>
+                </div>
+                <span>Supplies</span>
+              </a>
+            </li>
+          </ul>
         </li>
-        <li class="nav-item">
+
+         <li class="nav-item">
+          <a class="nav-link" href="production.html" data-page="production">
+            <div class="nav-icon">
+              <i class="bi bi-layer-backward"></i>
+            </div>
+            <span>Production</span>
+          </a>
+        </li>
+       
+        
+        <div class="sidebar-divider">
+          <span>SALES</span>
+        </div>
+         <li class="nav-item">
           <a class="nav-link" href="orders.html" data-page="orders">
             <div class="nav-icon">
-              <i class="bi bi-people"></i>
+              <i class="bi bi-basket2"></i>
             </div>
             <span>Orders</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="delivery.html" data-page="delivery">
-            <div class="nav-icon">
-              <i class="bi bi-truck"></i>
-            </div>
-            <span>Delivery</span>
-          </a>
-        </li>
-        
-        <div class="sidebar-divider">
-          <span>SALES</span>
-        </div>
-        
-        <li class="nav-item">
-          <a class="nav-link" href="pos.html" data-page="pos">
+          <a class="nav-link" href="billing.html" data-page="delivery">
             <div class="nav-icon">
               <i class="bi bi-credit-card"></i>
             </div>
-            <span>POS</span>
+            <span>Billing</span>
           </a>
         </li>
+        
+        
         <li class="nav-item">
           <a class="nav-link" href="reports.html" data-page="reports">
             <div class="nav-icon">
-             <i class="bi bi-bar-chart"></i>
+              <i class="bi bi-bar-chart"></i>
             </div>
             <span>Reports</span>
           </a>
         </li>
+
+        <div class="sidebar-divider">
+          <span>USER</span>
+        </div>
+
+        <li class="nav-item">
+          <a class="nav-link" href="retailers.html" data-page="retailers">
+            <div class="nav-icon">
+              <i class="bi bi-person-heart"></i>
+            </div>
+            <span>Retailers</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="suppliers.html" data-page="suppliers">
+            <div class="nav-icon">
+              <i class="bi bi-person-fill-down"></i>
+            </div>
+            <span>Suppliers</span>
+          </a>
+        </li>
+
       </ul>
-      
-     
     </div>
   </div>
   
@@ -506,11 +585,30 @@
           </button>
           <h5 class="mb-0">Inventory Management</h5>
         </div>
-        <div class="dropdown user-profile-dropdown">
-          <div class="profile-circle dropdown-toggle" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+
+        
+  
+        <div class="dropdown user-profile-dropdown" >
+          <div class="profile-circle dropdown-toggle position-relative" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-person-fill"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" id="notification-badge" style="display: none;">
+              0
+              <span class="visually-hidden">unread notifications</span>
+            </span>
           </div>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown" style="width: 200px;">
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown" style="width: 350px;">
+            <li class="dropdown-item-text">
+              <div class="sidebar-divider">
+                <span>NOTIFICATIONS</span>
+                <div class="float-end">
+                  <button class="btn btn-sm btn-link text-decoration-none p-0" id="mark-all-read">Mark all as read</button>
+                </div>
+              </div>
+              <div id="notifications-container" class="notifications-container" style="max-height: 300px; overflow-y: auto;">
+                <div class="text-center py-3 text-muted" id="no-notifications-message">No new notifications</div>
+              </div>
+            </li>
+            <li><hr class="dropdown-divider"></li>
             <li class="dropdown-item-text">
               <div class="sidebar-divider">
                 <span>ACCOUNT</span>
@@ -536,8 +634,7 @@
       <div class="main-content-inner">
         <!-- Inventory Content -->
         <div class="inventory-section">
-          <h5 class="section-title">
-          </h5>
+          <h5 class="section-title"></h5>
           
           <div class="row mb-4">
             <div class="col-md-12">
@@ -588,7 +685,7 @@
                   <!-- View Toggle Dropdown -->
                   
                 </div>
-            <i style="color: #edd414;"></i>
+                <i style="color: #edd414;"></i>
                 <button class="btn btn-primary" id="add-product-btn" style="background-color: #f5cc39; color: #000000">
                   <i class="bi bi-plus-lg me-1"></i> Add New Product
                 </button>
@@ -1160,7 +1257,6 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         tableView.style.display = 'none';
         cardView.style.display = 'block';
-        currentView = 'card';
         
         // If we're switching to card view, render the cards
         renderProductCards();
@@ -2128,6 +2224,7 @@ document.addEventListener("DOMContentLoaded", () => {
   </div>
 </div>
 
+
 <!-- Add this script tag at the end of your HTML file, before the closing </body> tag -->
 <script>
   // Enhanced function to calculate expiration date based on manufacturing date and duration
@@ -2934,5 +3031,40 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
   </script>
+
+<!-- Updated Edit Batch Modal -->
+<div class="modal fade" id="editBatchModal" tabindex="-1" aria-labelledby="editBatchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="editBatchModalLabel">Edit Batch</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-batch-form">
+          <input type="hidden" name="batchId" id="edit-batch-id">
+          <input type="hidden" name="productId" id="edit-product-id">
+
+          <div class="mb-3">
+            <label for="edit-batch-quantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="edit-batch-quantity" name="quantity" min="1" required>
+          </div>
+
+          <div class="modal-footer px-0 pb-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg me-1"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save me-1"></i> Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 </body>
 </html>

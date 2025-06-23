@@ -1,52 +1,50 @@
 <?php
-// Enable error reporting for debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 // Set headers for JSON response
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
 
-// Include database connection
+// Include database configuration
 require_once 'db_connection.php';
 
+// Initialize response array
+$response = [
+    'status' => 'success',
+    'categories' => [],
+    'message' => ''
+];
+
 try {
-    // Query to get unique categories
-    $query = "SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != '' ORDER BY category";
-    $result = mysqli_query($conn, $query);
+    // Query to get distinct product categories
+    $query = "
+        SELECT DISTINCT category 
+        FROM products 
+        WHERE category IS NOT NULL
+        ORDER BY category
+    ";
     
-    if (!$result) {
-        throw new Exception("Query failed: " . mysqli_error($conn));
+    // Execute the query
+    $result = $conn->query($query);
+    
+    // Process results
+    if ($result) {
+        $categories = [];
+        while ($row = $result->fetch_assoc()) {
+            $categories[] = $row['category'];
+        }
+        
+        $response['categories'] = $categories;
+        $response['count'] = count($categories);
+    } else {
+        throw new Exception("Error executing query: " . $conn->error);
     }
-    
-    // Fetch categories
-    $categories = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $categories[] = $row['category'];
-    }
-    
-    // Log the categories found
-    error_log("Categories found: " . count($categories));
-    
-    // Return JSON response
-    echo json_encode([
-        'success' => true,
-        'categories' => $categories
-    ]);
     
 } catch (Exception $e) {
-    // Log the error
-    error_log("Error in fetch_categories.php: " . $e->getMessage());
-    
-    // Return error response
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
-} finally {
-    // Close connection
-    mysqli_close($conn);
+    $response['status'] = 'error';
+    $response['message'] = 'Error fetching categories: ' . $e->getMessage();
 }
-?>
 
+// Close database connection
+$conn->close();
+
+// Return JSON response
+echo json_encode($response);
+?>
