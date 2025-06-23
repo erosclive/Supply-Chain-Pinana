@@ -200,7 +200,6 @@ function setActiveNavigation() {
     }
   }
   
-  // Initialize the script
   document.addEventListener("DOMContentLoaded", () => {
     setActiveNavigation()
     setupSidebarToggle()
@@ -209,14 +208,31 @@ function setActiveNavigation() {
     updateNotificationsUI()
     startNotificationPolling()
   
-    // Uncomment to add a test button for creating notifications
-    const testButton = document.createElement('button');
-    testButton.textContent = 'Create Test Notification';
-    testButton.className = 'btn btn-sm btn-primary position-fixed';
-    testButton.style.bottom = '20px';
-    testButton.style.right = '20px';
-    testButton.style.zIndex = '1000';
-    testButton.addEventListener('click', createTestNotification);
-    document.body.appendChild(testButton);
+    // Test button has been removed
   })
   
+  // Add this JavaScript code to your script.js file if it's not already there
+document.addEventListener('DOMContentLoaded', function() {
+  // Get current page path
+  const currentPath = window.location.pathname;
+  const pageName = currentPath.split('/').pop();
+  
+  // Check if current page is inventory.html or supplies.html
+  if (pageName === 'inventory.html' || pageName === 'supplies.html') {
+    // Expand the inventory submenu
+    const inventorySubmenu = document.getElementById('inventorySubmenu');
+    if (inventorySubmenu) {
+      inventorySubmenu.classList.add('show');
+      const dropdownToggle = document.querySelector('a[href="#inventorySubmenu"]');
+      if (dropdownToggle) {
+        dropdownToggle.setAttribute('aria-expanded', 'true');
+      }
+    }
+    
+    // Set active class on the appropriate submenu item
+    const activeLink = document.querySelector(`a[href="${pageName}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
+    }
+  }
+});

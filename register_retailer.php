@@ -125,9 +125,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Set token expiration (24 hours from now)
         $tokenExpiration = date('Y-m-d H:i:s', strtotime('+24 hours'));
         
-        // Create user record
+        // Create user record with pending approval status
+        // Set email_verified = 0 and is_active = 0 for pending retailers
         $fullName = $firstName . ' ' . $lastName;
-        $insert_user_sql = "INSERT INTO users (username, password, email, full_name, role, email_verified, verification_token, verification_expires, created_at) VALUES (?, ?, ?, ?, 'retailer', 0, ?, ?, NOW())";
+        $insert_user_sql = "INSERT INTO users (username, password, email, full_name, role, email_verified, verification_token, verification_expires, approval_status, is_active, created_at) VALUES (?, ?, ?, ?, 'retailer', 0, ?, ?, 'pending', 0, NOW())";
         $insert_user_stmt = mysqli_prepare($conn, $insert_user_sql);
         
         if (!$insert_user_stmt) {
@@ -147,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $businessAddress = "$houseNumber, Barangay $barangay, $city, $province";
         
         // Create retailer profile
-        $insert_profile_sql = "INSERT INTO retailer_profiles (user_id, first_name, last_name, birthday, age, business_name, business_type, province, city, barangay, house_number, address_notes, business_address, phone, facebook, instagram, tiktok) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $insert_profile_sql = "INSERT INTO retailer_profiles (user_id, first_name, last_name, birthday, age, business_name, business_type, province, city, barangay, house_number, address_notes, business_address, phone, facebook, instagram, tiktok, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
         $insert_profile_stmt = mysqli_prepare($conn, $insert_profile_sql);
         
         if (!$insert_profile_stmt) {
@@ -163,7 +164,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_stmt_close($insert_profile_stmt);
         
         // Send verification email
-        $emailSent = sendVerificationEmail($email, $fullName, $verificationToken);
+        $emailSent = false;
+        if (function_exists('sendVerificationEmail')) {
+            $emailSent = sendVerificationEmail($email, $fullName, $verificationToken);
+        }
         
         if (!$emailSent) {
             // Log error but continue with registration
@@ -174,13 +178,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_commit($conn);
         
         // Log success
-        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Registration successful for: $firstName $lastName, Email: $email, User ID: $userId\n", FILE_APPEND);
+        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Registration successful for: $firstName $lastName, Email: $email, User ID: $userId (Status: pending, Active: 0)\n", FILE_APPEND);
         
         // Return success response
         echo json_encode([
             'success' => true,
-            'message' => 'Registration successful',
+            'message' => 'Registration successful! Your account is pending admin approval. You will receive an email notification once your account is approved.',
             'requiresVerification' => true,
+            'requiresApproval' => true,
             'email' => $email
         ]);
         

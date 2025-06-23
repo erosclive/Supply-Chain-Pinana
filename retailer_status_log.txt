@@ -1,0 +1,13 @@
+2025-05-27 19:07:09 - Retailer status updated: User ID 28 (zorinmagnus@gmail.com) changed to approved
+2025-05-27 19:07:14 - Retailer status updated: User ID 24 (fohrtargaryen@gmail.com) changed to rejected
+2025-05-27 19:07:19 - Retailer status updated: User ID 24 (fohrtargaryen@gmail.com) changed to approved
+2025-05-27 19:07:26 - Retailer status updated: User ID 19 (sevencetargaryen@gmail.com) changed to pending
+2025-05-27 19:07:32 - Retailer status updated: User ID 28 (zorinmagnus@gmail.com) changed to pending
+2025-05-27 19:07:38 - Retailer status updated: User ID 19 (sevencetargaryen@gmail.com) changed to approved
+2025-05-27 19:07:42 - Retailer status updated: User ID 18 (siextargaryen@gmail.com) changed to pending
+2025-05-27 19:07:45 - Retailer status updated: User ID 18 (siextargaryen@gmail.com) changed to approved
+2025-05-28 05:37:40 - Retailer status updated: User ID 29 (zorinmagnus@gmail.com) changed to approved
+2025-05-28 08:12:08 - Retailer status updated: User ID 20 (vanngaming2003@gmail.com) changed to pending
+2025-05-28 08:27:39 - Retailer status updated: User ID 20 (vanngaming2003@gmail.com) changed to approved
+2025-06-09 08:15:04 - Retailer status updated: User ID 16 (jhovanmagno74@gmail.com) changed to rejected
+2025-06-19 21:42:27 - Retailer status updated: User ID 16 (jhovanmagno74@gmail.com) changed to rejected

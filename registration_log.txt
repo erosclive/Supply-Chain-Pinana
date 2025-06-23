@@ -1,2 +1,20 @@
 2025-04-23 12:30:39 - Registration attempt for: Fohr Targaryen, Email: fohrtargaryen@gmail.com
 2025-04-23 12:30:46 - Registration successful for: Fohr Targaryen, Email: fohrtargaryen@gmail.com, User ID: 24
+2025-05-02 06:03:44 - Registration attempt for: Pepito Manaloto, Email: jamesaaron.guevarra@lu.edu.ph
+2025-05-02 06:04:16 - Registration attempt for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com
+2025-05-02 06:04:27 - Registration attempt for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com
+2025-05-02 06:04:39 - Registration attempt for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com
+2025-05-02 06:04:48 - Registration attempt for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com
+2025-05-02 06:07:09 - Registration attempt for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com
+2025-05-02 06:07:17 - Registration successful for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com, User ID: 25
+2025-05-05 06:49:55 - Registration attempt for: gds dbds, Email: jhovanmagno@gmail.com
+2025-05-06 07:26:11 - Registration attempt for: Noine Targaryen, Email: noinetargaryen@gmail.com
+2025-05-06 07:26:18 - Registration successful for: Noine Targaryen, Email: noinetargaryen@gmail.com, User ID: 26
+2025-05-06 14:34:44 - Registration attempt for: Noine Targaryen, Email: noinetargaryen@gmail.com
+2025-05-06 14:34:55 - Registration successful for: Noine Targaryen, Email: noinetargaryen@gmail.com, User ID: 27
+2025-05-27 08:20:31 - Registration attempt for: Zorin Magnus, Email: zorinmagnus@gmail.com
+2025-05-27 08:20:38 - Registration successful for: Zorin Magnus, Email: zorinmagnus@gmail.com, User ID: 28 (Pending Approval)
+2025-05-28 05:36:05 - Registration attempt for: Zorin Magnus, Email: zorinmagnus@gmail.com
+2025-05-28 05:36:13 - Registration successful for: Zorin Magnus, Email: zorinmagnus@gmail.com, User ID: 29 (Status: pending, Active: 0)
+2025-06-20 08:39:31 - Registration attempt for: Pepito Manaloto, Email: tureetargaryen@gmail.com
+2025-06-20 08:39:58 - Registration successful for: Pepito Manaloto, Email: tureetargaryen@gmail.com, User ID: 30 (Status: pending, Active: 0)

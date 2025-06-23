@@ -62,8 +62,8 @@ try {
             $productName = mysqli_real_escape_string($conn, $item['name']);
             $quantity = floatval($item['quantity']);
             $unitPrice = floatval($item['price']);
-            $taxPercent = 10.00; // 10% tax rate
-            $itemTaxAmount = ($unitPrice * $quantity) * 0.1;
+            $taxPercent = 0; // 10% tax rate
+            $itemTaxAmount = ($unitPrice * $quantity) * 0.0;
             $itemSubtotal = $unitPrice * $quantity;
             $itemTotal = $itemSubtotal + $itemTaxAmount;
             

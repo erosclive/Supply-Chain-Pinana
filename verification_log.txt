@@ -133,3 +133,21 @@
 2025-04-23 12:31:50 - Verification attempt with token: 7094862806dcb7e31946e18f8414745c126a981205194f1ed34e65cc3cb72b1c
 2025-04-23 12:31:56 - Welcome email sent to: fohrtargaryen@gmail.com
 2025-04-23 12:31:56 - Success: Email verified for user ID: 24
+2025-05-02 06:07:26 - Resent verification email to: jamesguevarra070827@gmail.com
+2025-05-06 07:26:24 - Resent verification email to: noinetargaryen@gmail.com
+2025-05-06 14:35:08 - Resent verification email to: noinetargaryen@gmail.com
+2025-05-27 08:20:45 - Resent verification email to: zorinmagnus@gmail.com
+2025-05-27 08:21:12 - Verification attempt with token: f5648fe8a4a14a3990a7018c2ca532a4827c2a80a1368ffbcbbd52338ac87950
+2025-05-27 08:21:12 - Error: Invalid or already used token
+2025-05-27 08:21:22 - Verification attempt with token: a7edc8cbcbce3b1ff2980ad4d8e01f6ea502b64e04a68e29f03ea1f7f09bcd3a
+2025-05-27 08:21:28 - Welcome email sent to: zorinmagnus@gmail.com
+2025-05-27 08:21:28 - Success: Email verified for user ID: 28
+2025-05-28 05:36:20 - Resent verification email to: zorinmagnus@gmail.com
+2025-05-28 05:36:54 - Verification attempt with token: 72ec9f9fed996856ddb0b5ca406bf4efc27899ffee241b567de98027a716e980
+2025-05-28 05:37:00 - Welcome email sent to: zorinmagnus@gmail.com
+2025-05-28 05:37:00 - Success: Email verified for user ID: 29
+2025-06-20 08:40:15 - Resent verification email to: tureetargaryen@gmail.com
+2025-06-20 08:41:17 - Verification attempt with token: 27d6a7fee75b8479f31a3dc4a64cf3bef0879a7340b70c25ca6af13a9d7da346
+2025-06-20 08:41:17 - Error: Invalid or already used token
+2025-06-20 08:41:29 - Verification attempt with token: 27d6a7fee75b8479f31a3dc4a64cf3bef0879a7340b70c25ca6af13a9d7da346
+2025-06-20 08:41:29 - Error: Invalid or already used token

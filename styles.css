@@ -116,7 +116,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 120px; /* Fixed height */
+  height: 100px; /* Fixed height */
   width: 100%; /* Fixed width to match sidebar */
 }
 
@@ -3406,4 +3406,176 @@ input[type="date"].form-control {
 #invoicePrintContent table th {
   background-color: #f8f9fa;
   font-weight: bold;
+}
+
+.form-section {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Metrics */
+.metric-card {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.metric-title {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #343a40;
+}
+
+/* Charts */
+.chart-container {
+  position: relative;
+  margin: auto;
+  height: 400px;
+}
+
+/* Tables */
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  font-weight: 600;
+  color: #495057;
+  border-top: none;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+/* Loading Indicator */
+#loadingIndicator {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Error Container */
+#errorContainer {
+  display: none;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 767.98px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    display: none;
+  }
+
+  .sidebar.show {
+    display: block;
+  }
+
+  .fixed-top-header {
+    margin-left: 0;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding-top: 60px;
+  }
+
+  .navbar-toggler {
+    display: block;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .sidebar,
+  .fixed-top-header,
+  #applyFilters,
+  #exportReport,
+  #printReport {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .card {
+    break-inside: avoid;
+  }
+
+  .chart-container {
+    height: 300px !important;
+  }
+}
+
+/* DateRangePicker Customization */
+.daterangepicker {
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  border: none;
+}
+
+.daterangepicker .ranges li.active {
+  background-color: #0d6efd;
+}
+
+.daterangepicker td.active,
+.daterangepicker td.active:hover {
+  background-color: #0d6efd;
+}
+
+/* Add these styles if they're not already in your styles.css file */
+/* Submenu styles */
+.submenu {
+  padding-left: 2rem;
+  list-style: none;
+}
+
+.submenu .nav-item {
+  margin-bottom: 0.25rem;
+}
+
+.submenu .nav-link {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.submenu .nav-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.nav-link.dropdown-toggle::after {
+  display: inline-block;
+  margin-left: auto;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.nav-link.dropdown-toggle[aria-expanded="true"]::after {
+  transform: translateY(-50%) rotate(180deg);
 }
