@@ -74,6 +74,8 @@ unset($_SESSION['error_message']);
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="mono-green.png">
+
   <!-- Profile specific CSS -->
   <style>
     :root {
@@ -548,6 +550,36 @@ unset($_SESSION['error_message']);
         padding: 1rem;
       }
     }
+
+    @media (max-width: 576px) {
+    .profile-image-preview {
+      max-width: 150px !important;
+      height: 150px !important;
+    }
+    
+    .modal-body {
+      padding: 1rem;
+    }
+    
+    .btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  /* Center all buttons */
+  .modal-body .btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Improve form layout */
+  #profileImageForm {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
   </style>
 </head>
 <body>
@@ -585,9 +617,9 @@ unset($_SESSION['error_message']);
               </div>
             </div>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-              <li><a class="dropdown-item" href="rt_dashboard.php"><i class="bi bi-grid me-2"></i>Dashboard</a></li>
-              <li><a class="dropdown-item" href="rt_inventory.php"><i class="bi bi-box me-2"></i>Inventory</a></li>
-              <li><a class="dropdown-item" href="rt_orders.php"><i class="bi bi-cart me-2"></i>Orders</a></li>
+              <li><a class="dropdown-item" href="home.html"><i class="bi bi-grid me-2"></i>Home</a></li>
+              <li><a class="dropdown-item" href="inventory.html"><i class="bi bi-box me-2"></i>Inventory</a></li>
+              <li><a class="dropdown-item" href="orders.html"><i class="bi bi-cart me-2"></i>Orders</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="#" id="logoutButton"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
             </ul>
@@ -718,10 +750,6 @@ unset($_SESSION['error_message']);
                 </div>
               </div>
             </div>
-
-
-
-
             
             <!-- Social Media -->
             <div class="card profile-card mt-4">

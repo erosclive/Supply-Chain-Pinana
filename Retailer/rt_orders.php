@@ -471,11 +471,11 @@ if ($row = $result->fetch_assoc()) {
           
           <ul class="nav flex-column sidebar-nav">
             <li class="nav-item">
-              <a class="nav-link " href="rt_dashboard.php" data-page="dashboard">
+              <a class="nav-link " href="rt_home.php" data-page="home">
                 <div class="nav-icon">
                   <i class="bi bi-grid"></i>
                 </div>
-                <span>Dashboard</span>
+                <span>Home</span>
               </a>
             </li>
             <li class="nav-item">
@@ -494,14 +494,7 @@ if ($row = $result->fetch_assoc()) {
                 <span>Orders</span>
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="rt_payments.php" data-page="payment">
-                <div class="nav-icon">
-                  <i class="bi bi-credit-card"></i>
-                </div>
-                <span>Payments</span>
-              </a>
-            </li>
+          
           </ul>
           
         </div>

@@ -1,79 +1,78 @@
 <?php
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Include database connection
+// Start session and include database connection
+session_start();
 require_once 'db_connection.php';
-
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 // Set header to return JSON
 header('Content-Type: application/json');
 
-// Initialize response array
-$response = ['success' => false, 'message' => '', 'history' => []];
-
-// Get user ID from session
-$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-
-try {
-    // Check if user is logged in
-    if (!$user_id) {
-        throw new Exception("User not logged in");
-    }
-    
-    // Check if product_id is provided
-    if (!isset($_GET['product_id'])) {
-        throw new Exception("Product ID is required");
-    }
-    
-    $product_id = $_GET['product_id'];
-    
-    // Get price history for the product
-    $historyQuery = "SELECT 
-                        ph.history_id,
-                        ph.product__id,
-                        ph.previous_price,
-                        ph.new_price,
-                        ph.updated_by,
-                        ph.created_at
-                    FROM 
-                        product_price_history ph
-                    WHERE 
-                        ph.retailer_id = ? AND ph.product_id = ?
-                    ORDER BY 
-                        ph.created_at DESC";
-    
-    $historyStmt = $conn->prepare($historyQuery);
-    
-    if (!$historyStmt) {
-        throw new Exception("Prepare failed for history query: " . $conn->error);
-    }
-    
-    $historyStmt->bind_param("is", $user_id, $product_id);
-    
-    if (!$historyStmt->execute()) {
-        throw new Exception("Execute failed for history query: " . $historyStmt->error);
-    }
-    
-    $historyResult = $historyStmt->get_result();
-    
-    $history = [];
-    while ($historyRow = $historyResult->fetch_assoc()) {
-        $history[] = $historyRow;
-    }
-    
-    $response['success'] = true;
-    $response['history'] = $history;
-    
-} catch (Exception $e) {
-    $response['message'] = "Error: " . $e->getMessage();
-    error_log("Error fetching price history: " . $e->getMessage());
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'message' => 'User not logged in']);
+    exit;
 }
 
-echo json_encode($response);
+// Check if product_id is provided
+if (!isset($_GET['product_id'])) {
+    echo json_encode(['success' => false, 'message' => 'Product ID is required']);
+    exit;
+}
+
+$retailer_id = $_SESSION['user_id'];
+$product_id = $_GET['product_id'];
+
+try {
+    // Get price history for this product
+    $query = "SELECT 
+                pp.pricing_id,
+                pp.retail_price,
+                pp.wholesale_price,
+                pp.last_updated,
+                p.product_name,
+                p.product_id
+              FROM 
+                product_pricing pp
+              JOIN
+                products p ON pp.product_id = p.product_id
+              WHERE 
+                pp.retailer_id = ? AND pp.product_id = ?
+              ORDER BY 
+                pp.last_updated DESC
+              LIMIT 10";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param('is', $retailer_id, $product_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $history = [];
+    $product_name = '';
+    
+    while ($row = $result->fetch_assoc()) {
+        $product_name = $row['product_name'];
+        
+        $history[] = [
+            'pricing_id' => $row['pricing_id'],
+            'retail_price' => $row['retail_price'],
+            'retail_price_formatted' => '₱' . number_format($row['retail_price'], 2),
+            'wholesale_price' => $row['wholesale_price'],
+            'wholesale_price_formatted' => '₱' . number_format($row['wholesale_price'], 2),
+            'last_updated' => $row['last_updated'],
+            'last_updated_formatted' => date('M d, Y h:i A', strtotime($row['last_updated']))
+        ];
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'product_id' => $product_id,
+        'product_name' => $product_name,
+        'history' => $history
+    ]);
+    
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error: ' . $e->getMessage()
+    ]);
+}
 ?>
