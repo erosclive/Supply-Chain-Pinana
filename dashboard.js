@@ -456,22 +456,33 @@ function updatePaymentMethodsLegend(paymentData) {
   legendContainer.innerHTML = legendHtml;
 }
 
+// Store the original products data for filtering
+let originalProductsData = []
+
+
+
 // Update Top Products Table
-function updateTopProductsTable(productsData) {
-  const tableBody = document.getElementById('top-products-table');
-  if (!tableBody) return;
-  
+function updateTopProductsTable(productsData, sortBy = "units") {
+  const tableBody = document.getElementById("top-products-table")
+  if (!tableBody) return
+
+  // Store original data for filtering
+  originalProductsData = [...productsData]
+
+  // Sort the data based on the selected filter
+  const sortedData = sortProductsData(productsData, sortBy)
+
   // Generate table rows
-  let tableHtml = '';
-  
-  if (productsData.length === 0) {
+  let tableHtml = ""
+
+  if (sortedData.length === 0) {
     tableHtml = `
       <tr>
         <td colspan="3" class="text-center py-3">No product data available</td>
       </tr>
-    `;
+    `
   } else {
-    productsData.forEach(product => {
+    sortedData.forEach((product) => {
       tableHtml += `
         <tr>
           <td>
@@ -483,12 +494,52 @@ function updateTopProductsTable(productsData) {
           <td class="text-center">${product.units_sold}</td>
           <td class="text-end">${product.revenue_formatted}</td>
         </tr>
-      `;
-    });
+      `
+    })
   }
-  
-  tableBody.innerHTML = tableHtml;
+
+  tableBody.innerHTML = tableHtml
 }
+
+// Function to sort products data
+function sortProductsData(productsData, sortBy) {
+  const sortedData = [...productsData]
+
+  if (sortBy === "revenue") {
+    // Sort by revenue (descending)
+    sortedData.sort((a, b) => b.revenue - a.revenue)
+  } else {
+    // Sort by units sold (descending) - default
+    sortedData.sort((a, b) => b.units_sold - a.units_sold)
+  }
+
+  return sortedData
+}
+
+// Add event listeners for filter buttons
+document.addEventListener("DOMContentLoaded", () => {
+  const filterButtons = document.querySelectorAll('input[name="productFilter"]')
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("change", function () {
+      if (this.checked && originalProductsData.length > 0) {
+        updateTopProductsTable(originalProductsData, this.value)
+      }
+    })
+  })
+})
+
+// Function to handle filter change (can be called externally)
+function changeProductFilter(filterType) {
+  const filterButton = document.getElementById(filterType === "revenue" ? "filterRevenue" : "filterUnits")
+  if (filterButton) {
+    filterButton.checked = true
+    if (originalProductsData.length > 0) {
+      updateTopProductsTable(originalProductsData, filterType)
+    }
+  }
+}
+
 
 // Update Recent Transactions Table
 function updateRecentTransactionsTable(transactionsData) {
@@ -526,4 +577,3 @@ function updateRecentTransactionsTable(transactionsData) {
   
   tableBody.innerHTML = tableHtml;
 }
-

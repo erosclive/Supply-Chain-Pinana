@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   // Declare bootstrap, showResponseMessage, and fetchInventoryData
   let bootstrap
@@ -239,12 +238,8 @@ document.addEventListener("DOMContentLoaded", () => {
       })
   }
 
-  // Function to open edit batch modal - FIXED TO PREVENT DOUBLE MODAL
-  const openEditBatchModal = (batchId, productId) => {
-    // CRITICAL FIX: Close any existing modals first
-    closeAllModals()
-
-    // Fetch batch details
+  // Updated Edit Batch Modal Logic
+  function openEditBatchModal(batchId, productId) {
     fetch(`get_batch.php?batch_id=${batchId}`)
       .then((response) => {
         if (!response.ok) {
@@ -254,81 +249,13 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .then((data) => {
         if (data.success) {
-          // Format dates for display
           const batch = data.batch
-          if (batch.manufacturing_date) {
-            batch.manufacturing_date = formatDateForInput(batch.manufacturing_date)
-          }
-          if (batch.expiration_date) {
-            batch.expiration_date = formatDateForInput(batch.expiration_date)
-          }
+          document.getElementById("edit-batch-id").value = batch.batch_id
+          document.getElementById("edit-product-id").value = batch.product_id
+          document.getElementById("edit-batch-quantity").value = batch.quantity
 
-          // Create and show edit modal
-          const modalHtml = `
-            <div class="modal-overlay">
-              <div class="modal-container">
-                <div class="modal-header">
-                  <h3>Edit Batch</h3>
-                  <button class="modal-close-btn" aria-label="Close">×</button>
-                </div>
-                <div class="modal-body">
-                  <form id="edit-batch-form" class="batch-form">
-                    <input type="hidden" name="batchId" value="${batch.batch_id}">
-                    <input type="hidden" name="productId" value="${batch.product_id}">
-                    
-                    <div class="form-group">
-                      <label for="edit-batch-code">Batch Code</label>
-                      <input type="text" id="edit-batch-code" name="batchCode" class="form-control" value="${batch.batch_code}" required>
-                    </div>
-                    
-                    <div class="form-group">
-                      <label for="edit-batch-quantity">Quantity</label>
-                      <input type="number" id="edit-batch-quantity" name="quantity" class="form-control" value="${batch.quantity}" min="1" required>
-                    </div>
-                    
-                    <div class="form-group">
-                      <label for="edit-manufacturing-date">Manufacturing Date</label>
-                      <input type="date" id="edit-manufacturing-date" name="manufacturingDate" class="form-control" value="${batch.manufacturing_date}" required>
-                    </div>
-                    
-                    <div class="form-group">
-                      <label for="edit-expiration-date">Expiration Date</label>
-                      <input type="date" id="edit-expiration-date" name="expirationDate" class="form-control" value="${batch.expiration_date}" required>
-                    </div>
-                    
-                    <div class="form-actions">
-                      <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
-                      <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          `
-
-          const modalContainer = document.getElementById("edit-batch-modal-container")
-          modalContainer.innerHTML = modalHtml
-          modalContainer.style.display = "block"
-
-          // Add event listener for manufacturing date change
-          const manufacturingDateInput = document.getElementById("edit-manufacturing-date")
-          if (manufacturingDateInput) {
-            manufacturingDateInput.addEventListener("change", function () {
-              const expirationDateInput = document.getElementById("edit-expiration-date")
-              if (expirationDateInput && this.value) {
-                expirationDateInput.value = generateExpirationDate(this.value)
-              }
-            })
-          }
-
-          // Add event listener for form submission
-          const editForm = document.getElementById("edit-batch-form")
-          if (editForm) {
-            editForm.addEventListener("submit", function (e) {
-              e.preventDefault()
-              updateBatch(this)
-            })
-          }
+          const editBatchModal = new bootstrap.Modal(document.getElementById("editBatchModal"))
+          editBatchModal.show()
         } else {
           showToast("error", data.error || "Failed to fetch batch details")
         }
@@ -427,6 +354,64 @@ document.addEventListener("DOMContentLoaded", () => {
       })
   }
 
+  // Function to update product status based on total batch quantities
+  function updateProductStatusFromBatches(productId) {
+    // Fetch all batches for this product
+    fetch(`fetch_product_batches.php?product_id=${productId}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok")
+        }
+        return response.json()
+      })
+      .then((data) => {
+        if (data.success) {
+          const batches = data.batches
+
+          // Calculate total quantity across all batches
+          let totalQuantity = 0
+          batches.forEach((batch) => {
+            totalQuantity += Number.parseInt(batch.quantity, 10)
+          })
+
+          // Determine new status based on total quantity
+          let newStatus = "Out of Stock"
+          if (totalQuantity > 10) {
+            newStatus = "In Stock"
+          } else if (totalQuantity > 0) {
+            newStatus = "Low Stock"
+          }
+
+          // Update the product status in the database
+          const formData = new FormData()
+          formData.append("productId", productId)
+          formData.append("totalStock", totalQuantity)
+          formData.append("newStatus", newStatus)
+
+          fetch("update_product_status.php", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                console.log("Product status updated successfully")
+                // Refresh inventory table to show updated status
+                if (typeof fetchInventoryData === "function") {
+                  fetchInventoryData(currentPage, currentFilter, currentSort, currentSearch)
+                }
+              }
+            })
+            .catch((error) => {
+              console.error("Error updating product status:", error)
+            })
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching batches for status update:", error)
+      })
+  }
+
   // Override the original editBatch function to use our enhanced modal
   // CRITICAL FIX: This prevents double modal issue
   const originalEditBatch = window.editBatch || (() => {})
@@ -493,6 +478,3 @@ document.addEventListener("DOMContentLoaded", () => {
   // Run initialization
   init()
 })
-
-
-
