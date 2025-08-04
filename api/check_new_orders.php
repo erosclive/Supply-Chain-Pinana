@@ -96,12 +96,23 @@ try {
         // Generate a unique notification ID
         $notificationId = uniqid('notif_');
         
+        // Get user_id for the retailer
+        $userIdQuery = "SELECT user_id FROM retailer_profiles WHERE first_name = ? OR business_name = ? LIMIT 1";
+        $userIdStmt = $conn->prepare($userIdQuery);
+        $userIdStmt->bind_param("ss", $order['retailer_name'], $order['retailer_name']);
+        $userIdStmt->execute();
+        $userIdResult = $userIdStmt->get_result();
+        $user_id = null;
+        if ($userIdResult && $row = $userIdResult->fetch_assoc()) {
+            $user_id = $row['user_id'];
+        }
+        $userIdStmt->close();
         // Insert notification
-        $insertNotifSql = "INSERT INTO notifications (notification_id, related_id, type, message) 
-                          VALUES (?, ?, ?, ?)";
+        $insertNotifSql = "INSERT INTO notifications (notification_id, related_id, type, message, user_id) 
+                          VALUES (?, ?, ?, ?, ?)";
         $insertStmt = mysqli_prepare($conn, $insertNotifSql);
         $type = 'new_order';
-        mysqli_stmt_bind_param($insertStmt, "ssss", $notificationId, $order['order_id'], $type, $message);
+        mysqli_stmt_bind_param($insertStmt, "ssssi", $notificationId, $order['order_id'], $type, $message, $user_id);
         
         if (mysqli_stmt_execute($insertStmt)) {
             $notificationsCreated[] = [

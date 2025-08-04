@@ -1,0 +1,2906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piñana Gourmet - Production Management</title>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<!-- Flatpickr for date picking -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Custom CSS -->
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="Retailer/mono-green.png">
+
+<style>
+  /* Enhanced Production Management Styles */
+  :root {
+    --primary-green: #28a745;
+    --secondary-green: #20c997;
+    --accent-yellow: #ffc107;
+    --light-green: #d4edda;
+    --dark-green: #155724;
+    --gradient-primary: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    --gradient-secondary: linear-gradient(135deg, #ffc107 0%, #ffeb3b 100%);
+    --shadow-light: 0 2px 15px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 4px 25px rgba(0, 0, 0, 0.12);
+    --shadow-heavy: 0 8px 40px rgba(0, 0, 0, 0.15);
+    --border-radius: 16px;
+    --border-radius-small: 8px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Enhanced Status Cards */
+  .status-overview-cards {
+    margin-bottom: 1.5rem;
+  }
+
+  .status-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(40, 167, 69, 0.1);
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .status-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    transition: var(--transition);
+  }
+
+  .status-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .status-card.active {
+    border-color: var(--primary-green);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .status-card-in-progress::before {
+    background: linear-gradient(135deg, #ffc107 0%, #ffeb3b 100%);
+  }
+
+  .status-card-completed::before {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  }
+
+  .status-card-pending::before {
+    background: linear-gradient(135deg, #6c757d 0%, #adb5bd 100%);
+  }
+
+  .status-card-quality-check::before {
+    background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+  }
+
+  .status-card-cancelled::before {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+  }
+
+  .status-card-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+    margin-bottom: 0.75rem;
+    transition: var(--transition);
+  }
+
+  .status-card:hover .status-card-icon {
+    transform: scale(1.1);
+  }
+
+  .status-card-in-progress .status-card-icon {
+    background: linear-gradient(135deg, #ffc107 0%, #ffeb3b 100%);
+  }
+
+  .status-card-completed .status-card-icon {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  }
+
+  .status-card-pending .status-card-icon {
+    background: linear-gradient(135deg, #6c757d 0%, #adb5bd 100%);
+  }
+
+  .status-card-quality-check .status-card-icon {
+    background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+  }
+
+  .status-card-cancelled .status-card-icon {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+  }
+
+  .status-card-count {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-green);
+    margin-bottom: 0.25rem;
+    line-height: 1;
+  }
+
+  .status-card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--dark-green);
+    margin-bottom: 0.15rem;
+  }
+
+  .status-card-subtitle {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-bottom: 0;
+  }
+
+  /* Enhanced Date Filter Section */
+  .date-filter-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(40, 167, 69, 0.1);
+  }
+
+  /* Enhanced Date Filter Dropdown */
+  .dropdown-menu {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium);
+    padding: 0.5rem 0;
+    min-width: 220px;
+  }
+
+  .dropdown-header {
+    font-weight: 600;
+    color: var(--dark-green);
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .date-filter-option {
+    padding: 0.75rem 1rem;
+    color: #6c757d;
+    transition: var(--transition);
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .date-filter-option:hover {
+    background: var(--light-green);
+    color: var(--dark-green);
+    text-decoration: none;
+  }
+
+  .date-filter-option.active {
+    background: var(--gradient-primary);
+    color: white;
+  }
+
+  .date-filter-option.active:hover {
+    color: white;
+  }
+
+  .dropdown-divider {
+    margin: 0.5rem 0;
+    border-color: #e9ecef;
+  }
+
+  .date-filter-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark-green);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .date-filter-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .date-filter-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e9ecef;
+    background: white;
+    color: #6c757d;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: var(--transition);
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+
+  .date-filter-btn:hover {
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+    transform: translateY(-2px);
+  }
+
+  .date-filter-btn.active {
+    background: var(--gradient-primary);
+    border-color: var(--primary-green);
+    color: white;
+    box-shadow: var(--shadow-light);
+  }
+
+  .custom-date-range {
+    display: none;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: var(--border-radius-small);
+    border: 1px solid #e9ecef;
+    margin-top: 1rem;
+  }
+
+  .custom-date-range.show {
+    display: block;
+    animation: fadeInUp 0.3s ease-out;
+  }
+
+  /* Enhanced Production Section Headers */
+  .production-section-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem 0;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .production-section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dark-green);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .production-section-title i {
+    width: 40px;
+    height: 40px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+  }
+
+  .production-count-badge {
+    background: var(--gradient-secondary);
+    color: #856404;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  /* Enhanced Filter and Search Bar */
+  .filter-search-bar {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(40, 167, 69, 0.1);
+  }
+
+  .search-input-group {
+    position: relative;
+  }
+
+  .search-input-group .form-control {
+    padding-left: 3rem;
+    border-radius: 25px;
+    border: 2px solid #e9ecef;
+    transition: var(--transition);
+  }
+
+  .search-input-group .form-control:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+  }
+
+  .search-input-group .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 5;
+  }
+
+  /* Wizard Styles */
+  .wizard-container {
+    max-height: 95vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .wizard-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-bottom: none;
+    flex-shrink: 0;
+  }
+
+  .wizard-progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .wizard-progress::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    z-index: 1;
+  }
+
+  .wizard-progress-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 2px;
+    background: white;
+    transition: width 0.3s ease;
+    z-index: 2;
+  }
+
+  .wizard-step {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    position: relative;
+    z-index: 3;
+    transition: all 0.3s ease;
+  }
+
+  .wizard-step.active {
+    background: white;
+    color: var(--primary-green);
+    border-color: white;
+  }
+
+  .wizard-step.completed {
+    background: white;
+    color: var(--primary-green);
+    border-color: white;
+  }
+
+  .wizard-step-label {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0.8;
+  }
+
+  .wizard-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    background: #f8f9fa;
+  }
+
+  .wizard-step-content {
+    display: none;
+    animation: fadeInUp 0.3s ease-out;
+  }
+
+  .wizard-step-content.active {
+    display: block;
+  }
+
+  .wizard-footer {
+    background: white;
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Submenu styles */
+  .submenu {
+    padding-left: 2rem;
+    list-style: none;
+  }
+
+  .submenu .nav-item {
+    margin-bottom: 0.25rem;
+  }
+
+  .submenu .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .submenu .nav-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .nav-link.dropdown-toggle::after {
+    display: inline-block;
+    margin-left: auto;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* Enhanced Header */
+  .main-content-inner {
+   margin-top: -3rem;
+  }
+
+  /* Enhanced Production Cards */
+  .production-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(40, 167, 69, 0.1);
+    transition: var(--transition);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .production-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--gradient-primary);
+  }
+
+  .production-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .production-card-header {
+    padding: 1.5rem 1.5rem 0;
+    display: flex;
+    justify-content: between;
+    align-items: flex-start;
+  }
+
+  .production-info h6 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark-green);
+    margin-bottom: 0.25rem;
+  }
+
+  .production-meta {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+  }
+
+  .production-status {
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-in-progress {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    color: #856404;
+    border: 1px solid #ffc107;
+  }
+
+  .status-completed {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    color: #0c5460;
+    border: 1px solid #17a2b8;
+  }
+
+  .status-pending {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border: 1px solid #dc3545;
+  }
+
+  .status-quality-check {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border: 1px solid #28a745;
+  }
+
+  /* Enhanced Progress Ring */
+  .progress-ring-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+
+  .progress-ring {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .progress-ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .progress-ring circle {
+    fill: none;
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+
+  .progress-ring .bg {
+    stroke: #e9ecef;
+  }
+
+  .progress-ring .progress {
+    stroke: url(#progressGradient);
+    stroke-dasharray: 188;
+    stroke-dashoffset: 188;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .progress-percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-green);
+  }
+
+  /* Enhanced Timeline */
+  .production-timeline {
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: var(--border-radius-small);
+    border-left: 4px solid var(--primary-green);
+  }
+
+  .timeline-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+
+  .timeline-content {
+    flex: 1;
+  }
+
+  .timeline-title {
+    font-weight: 600;
+    color: var(--dark-green);
+    margin-bottom: 0.25rem;
+  }
+
+  .timeline-time {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+
+  /* Enhanced Action Buttons */
+  .action-buttons {
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+  }
+
+  .btn-enhanced {
+    border-radius: var(--border-radius-small);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-enhanced:hover::before {
+    left: 100%;
+  }
+
+  .btn-primary-enhanced {
+    background: var(--gradient-primary);
+    color: white;
+  }
+
+  .btn-primary-enhanced:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    color: white;
+  }
+
+  .btn-outline-enhanced {
+    background: transparent;
+    border: 2px solid var(--primary-green);
+    color: var(--primary-green);
+  }
+
+  .btn-outline-enhanced:hover {
+    background: var(--primary-green);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* Enhanced Modal Styles */
+  .modal-content {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-heavy);
+    overflow: hidden;
+  }
+
+  .modal-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 2rem;
+    border-bottom: none;
+  }
+
+  .modal-header .modal-title {
+    font-weight: 500;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+    font-size: 1.2rem;
+  }
+
+  .modal-body {
+    padding: 2rem;
+    background: #f8f9fa;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .modal-footer {
+    background: rgb(255, 255, 255);
+    border-top: 1px solid #ffffff;
+    
+  }
+
+  /* Enhanced Form Sections */
+  .form-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(40, 167, 69, 0.1);
+    position: relative;
+  }
+
+  .form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+  }
+
+  .form-section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark-green);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .form-section-title i {
+    width: 40px;
+    height: 40px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+  }
+
+  /* Enhanced Form Controls */
+  .form-label {
+    font-weight: 600;
+    color: var(--dark-green);
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .form-control, .form-select {
+    border-radius: var(--border-radius-small);
+    border: 2px solid #e9ecef;
+    padding: 0.875rem 1rem;
+    transition: var(--transition);
+    font-size: 0.95rem;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+  }
+
+  .input-group-text {
+    background: var(--light-green);
+    border: 2px solid var(--primary-green);
+    border-radius: var(--border-radius-small) 0 0 var(--border-radius-small);
+    color: var(--dark-green);
+    font-weight: 600;
+  }
+
+  /* Enhanced Production Option Cards */
+  .production-option-card {
+    border: 2px solid #e9ecef;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .production-option-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: transparent;
+    transition: var(--transition);
+  }
+
+  .production-option-card:hover {
+    border-color: var(--primary-green);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .production-option-card:hover::before {
+    background: var(--gradient-primary);
+  }
+
+  .production-option-card.selected {
+    border-color: var(--primary-green);
+    background: linear-gradient(135deg, var(--light-green) 0%, #ffffff 100%);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .production-option-card.selected::before {
+    background: var(--gradient-primary);
+  }
+
+  .production-option-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 2rem;
+    transition: var(--transition);
+  }
+
+  .production-option-card:hover .production-option-icon {
+    transform: scale(1.1);
+  }
+
+  .production-option-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dark-green);
+    margin-bottom: 0.75rem;
+  }
+
+  .production-option-description {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  /* Enhanced Tracking Type Cards */
+  .tracking-type-card {
+    border: 2px solid #e9ecef;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: white;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .tracking-type-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: transparent;
+    transition: var(--transition);
+  }
+
+  .tracking-type-card:hover {
+    border-color: var(--primary-green);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+  }
+
+  .tracking-type-card:hover::before {
+    background: var(--gradient-primary);
+  }
+
+  .tracking-type-card.selected {
+    border-color: var(--primary-green);
+    background: linear-gradient(135deg, var(--light-green) 0%, #ffffff 100%);
+  }
+
+  .tracking-type-card.selected::before {
+    background: var(--gradient-primary);
+  }
+
+  .tracking-type-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--gradient-secondary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: #856404;
+    font-size: 1.2rem;
+  }
+
+  .tracking-type-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark-green);
+    margin-bottom: 0.5rem;
+  }
+
+  .tracking-type-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  /* Enhanced Recipe Items */
+  .recipe-item {
+    background: white;
+    border-radius: var(--border-radius-small);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border: 2px solid #e9ecef;
+    transition: var(--transition);
+  }
+
+  .recipe-item:hover {
+    border-color: var(--primary-green);
+    box-shadow: var(--shadow-light);
+  }
+
+  .material-unit {
+    font-weight: 600;
+    color: var(--primary-green);
+    padding: 0.875rem 1rem;
+    background: var(--light-green);
+    border-radius: var(--border-radius-small);
+    border: 2px solid var(--primary-green);
+    text-align: center;
+  }
+
+  .material-cost {
+    font-weight: 600;
+    color: var(--dark-green);
+    padding: 0.875rem 1rem;
+    background: #fff3cd;
+    border-radius: var(--border-radius-small);
+    border: 2px solid var(--accent-yellow);
+    text-align: center;
+  }
+
+  .stock-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+    min-width: 120px;
+  }
+
+  .stock-available {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    color: #0c5460;
+    border: 1px solid #17a2b8;
+  }
+
+  .stock-insufficient {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border: 1px solid #dc3545;
+  }
+
+  .stock-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    color: #856404;
+    border: 1px solid #ffc107;
+  }
+
+  /* Cost Summary Styles */
+  .cost-summary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border: 2px solid var(--primary-green);
+  }
+
+  .cost-summary-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark-green);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .cost-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .cost-item:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--dark-green);
+    border-top: 2px solid var(--primary-green);
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Enhanced Tables */
+  .table-enhanced {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(40, 167, 69, 0.1);
+  }
+
+  .table-enhanced thead th {
+    background: var(--gradient-primary);
+    color: white;
+    font-weight: 700;
+    border: none;
+    padding: 1.25rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .table-enhanced tbody td {
+    padding: 1.25rem;
+    border-top: 1px solid #e9ecef;
+    vertical-align: middle;
+  }
+
+  .table-enhanced tbody tr:hover {
+    background: #f8f9fa;
+  }
+
+  /* Enhanced Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(40, 167, 69, 0.1);
+  }
+
+  .empty-state-icon {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    color: #6c757d;
+    font-size: 3rem;
+  }
+
+  .empty-state h4 {
+    color: var(--dark-green);
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state p {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Responsive Enhancements */
+  @media (max-width: 768px) {
+    .wizard-container {
+      max-height: 90vh;
+    }
+
+    .wizard-body {
+      padding: 1rem;
+    }
+
+    .wizard-footer {
+      padding: 1rem;
+    }
+
+    .form-section {
+      padding: 1.5rem;
+    }
+
+    .production-option-card {
+      padding: 1.5rem;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .wizard-step-label {
+      display: none;
+    }
+
+    .date-filter-buttons {
+      justify-content: center;
+    }
+
+    .status-overview-cards .col-lg-2 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+
+    /* Make status cards even more compact on mobile */
+    .status-card {
+      padding: 0.75rem;
+    }
+
+    .status-card-icon {
+      width: 35px;
+      height: 35px;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-card-count {
+      font-size: 1.5rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .status-card-title {
+      font-size: 0.8rem;
+      margin-bottom: 0.1rem;
+    }
+
+    .status-card-subtitle {
+      font-size: 0.7rem;
+    }
+  }
+
+  /* Loading States */
+  .loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  /* Custom Scrollbar */
+  .wizard-body::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .wizard-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  .wizard-body::-webkit-scrollbar-thumb {
+    background: var(--primary-green);
+    border-radius: 4px;
+  }
+
+  .wizard-body::-webkit-scrollbar-thumb:hover {
+    background: var(--dark-green);
+  }
+
+  /* Enhanced Modal Styles - Add to your existing CSS */
+
+/* Enhanced Loading Modal */
+#loadingModal .modal-content {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+#loadingModal .modal-body {
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+#loadingModal .spinner-border {
+  width: 5rem;
+  height: 5rem;
+  border-width: 0.4rem;
+  margin-bottom: 2rem;
+  animation: spin 1s linear infinite, pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+#loadingModal .fw-bold {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+#loadingModal .text-muted {
+  font-size: 1rem;
+  color: #6c757d !important;
+  line-height: 1.5;
+}
+
+/* Enhanced Success Modal */
+#successModal .modal-content {
+  background: linear-gradient(135deg, #d4edda 0%, #ffffff 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(40, 167, 69, 0.2);
+  overflow: hidden;
+}
+
+#successModal .modal-body {
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+#successModal .text-success {
+  margin-bottom: 2rem;
+}
+
+#successModal .bi-check-circle-fill {
+  font-size: 5rem;
+  animation: successBounce 0.6s ease-out;
+  filter: drop-shadow(0 4px 8px rgba(40, 167, 69, 0.3));
+}
+
+@keyframes successBounce {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+#successModal #successModalMessage {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+#successModal .text-muted {
+  font-size: 1rem;
+  color: #6c757d !important;
+  line-height: 1.5;
+}
+
+/* Enhanced Error Modal */
+#errorModal .modal-content {
+  background: linear-gradient(135deg, #f8d7da 0%, #ffffff 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(220, 53, 69, 0.2);
+  overflow: hidden;
+}
+
+#errorModal .modal-body {
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+#errorModal .text-danger {
+  margin-bottom: 2rem;
+}
+
+#errorModal .bi-x-circle-fill {
+  font-size: 5rem;
+  animation: errorShake 0.6s ease-out;
+  filter: drop-shadow(0 4px 8px rgba(220, 53, 69, 0.3));
+}
+
+@keyframes errorShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+#errorModal #errorModalMessage {
+  color: #dc3545;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+#errorModal .text-muted {
+  font-size: 1rem;
+  color: #6c757d !important;
+  line-height: 1.5;
+  margin-bottom: 2rem;
+}
+
+/* Modal Backdrop Enhancement */
+.modal-backdrop.show {
+  opacity: 0.6;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(40, 167, 69, 0.1) 100%);
+}
+
+/* Responsive Enhancements */
+@media (max-width: 768px) {
+  #loadingModal .modal-body,
+  #successModal .modal-body,
+  #errorModal .modal-body {
+    padding: 2rem 1.5rem;
+  }
+
+  #loadingModal .spinner-border {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  #successModal .bi-check-circle-fill,
+  #errorModal .bi-x-circle-fill {
+    font-size: 4rem;
+  }
+
+  #loadingModal .fw-bold,
+  #successModal #successModalMessage,
+  #errorModal #errorModalMessage {
+    font-size: 1.25rem;
+  }
+}
+
+/* Additional Animation Classes */
+.modal.fade .modal-dialog {
+  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+  transform: translate(0, -50px) scale(0.9);
+}
+
+.modal.show .modal-dialog {
+  transform: translate(0, 0) scale(1);
+}
+
+/* Progress Indicator for Loading */
+.loading-progress {
+  width: 100%;
+  height: 4px;
+  background: #e9ecef;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.loading-progress-bar {
+  height: 100%;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-radius: 2px;
+  animation: progressSlide 2s ease-in-out;
+}
+
+@keyframes progressSlide {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+</style>
+</head>
+<body>
+<!-- Response Message Alert -->
+<div id="response-message" class="alert" role="alert"></div>
+
+<div class="container-fluid">
+  <div class="row">
+ <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+        <div class="sidebar-inner">
+            <div class="logo-container d-flex align-items-center mb-4 mt-3">
+                <img src="images/final-light.png" class="pineapple-logo">
+            </div>
+          
+          <div class="sidebar-divider" style="margin-top: -1.5rem;">
+            <span>MAIN MENU</span>
+          </div>
+          
+          <ul class="nav flex-column sidebar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="dashboard.html" data-page="dashboard">
+                <div class="nav-icon">
+                  <i class="bi bi-grid"></i>
+                </div>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link dropdown-toggle" href="#inventorySubmenu" data-bs-toggle="collapse" aria-expanded="false">
+                <div class="nav-icon">
+                  <i class="bi bi-box"></i>
+                </div>
+                <span>Inventory</span>
+              </a>
+              <ul class="collapse submenu" id="inventorySubmenu">
+                <li class="nav-item">
+                  <a class="nav-link" href="inventory.html" data-page="inventory">
+                    <div class="nav-icon">
+                      <i class="bi bi-box-seam"></i>
+                    </div>
+                    <span>Products</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="supplies.html" data-page="supplies">
+                    <div class="nav-icon">
+                      <i class="bi bi-tools"></i>
+                    </div>
+                    <span>Supplies</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="production.html" data-page="production">
+                <div class="nav-icon">
+                  <i class="bi bi-layer-backward"></i>
+                </div>
+                <span>Production</span>
+              </a>
+            </li>
+            
+            <div class="sidebar-divider">
+              <span>SALES</span>
+            </div>
+            <li class="nav-item">
+              <a class="nav-link" href="orders.html" data-page="orders">
+                <div class="nav-icon">
+                  <i class="bi bi-people"></i>
+                </div>
+                <span>Orders</span>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              <a class="nav-link" href="billing.html" data-page="billing">
+                <div class="nav-icon">
+                  <i class="bi bi-credit-card"></i>
+                </div>
+                <span>Billing</span>
+              </a>
+            </li>
+            
+            
+            <li class="nav-item">
+              <a class="nav-link" href="reports.html" data-page="reports">
+                <div class="nav-icon">
+                  <i class="bi bi-bar-chart"></i>
+                </div>
+                <span>Reports</span>
+              </a>
+            </li>
+    
+            <div class="sidebar-divider">
+              <span>USER</span>
+            </div>
+    
+            <li class="nav-item">
+              <a class="nav-link" href="retailers.html" data-page="retailers">
+                <div class="nav-icon">
+                  <i class="bi bi-person-heart"></i>
+                </div>
+                <span>Retailers</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="suppliers.html" data-page="suppliers">
+                <div class="nav-icon">
+                  <i class="bi bi-person-fill-down"></i>
+                </div>
+                <span>Suppliers</span>
+              </a>
+            </li>
+    
+          </ul>
+        </div>
+      </div>
+  
+  <!-- Main content -->
+  <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+    <!-- Header -->
+    <div class="fixed-top-header">
+      <div class="d-flex justify-content-between align-items-center w-100">
+        <div class="d-flex align-items-center">
+          <button class="navbar-toggler d-md-none collapsed me-2" type="button" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+          </button>
+          <h5 class="mb-0">Production Management</h5>
+        </div>
+        <div class="d-flex align-items-center">
+          <span id="current-date" class="text-muted small me-2" style="white-space: nowrap; min-width: 110px;"></span>
+          <!-- User Profile Dropdown -->
+          <div class="dropdown user-profile-dropdown" >
+            <div class="profile-circle dropdown-toggle position-relative" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-fill"></i>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" id="notification-badge" style="display: none;">
+                0
+                <span class="visually-hidden">unread notifications</span>
+              </span>
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown" style="width: 350px;">
+              <li class="dropdown-item-text">
+                <div class="sidebar-divider">
+                  <span>NOTIFICATIONS</span>
+                  <div class="float-end">
+                    <button class="btn btn-sm btn-link text-decoration-none p-0" id="mark-all-read">Mark all as read</button>
+                  </div>
+                </div>
+                <div id="notifications-container" class="notifications-container" style="max-height: 300px; overflow-y: auto;">
+                  <div class="text-center py-3 text-muted" id="no-notifications-message">No new notifications</div>
+                </div>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li class="dropdown-item-text">
+                <div class="sidebar-divider">
+                  <span>ACCOUNT</span>
+                </div>
+                <div class="user-info d-flex align-items-center">
+                  <div class="user-avatar">
+                    <i class="bi bi-person-circle"></i>
+                  </div>
+                  <div class="user-details">
+                    <div class="user-name">Admin User</div>
+                    <div class="user-role">Piñana Gourmet</div>
+                  </div>
+                </div>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#" id="logoutButton" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content-inner">
+      <!-- Status Overview Cards -->
+      <div class="status-overview-cards" style="margin-top: 10px;">
+        <div class="row">
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="status-card status-card-in-progress" data-status="in-progress">
+              <div class="status-card-icon">
+                <i class="bi bi-gear-fill"></i>
+              </div>
+              <div class="status-card-count" id="in-progress-count">0</div>
+              <div class="status-card-title">In Progress</div>
+              <div class="status-card-subtitle">Active productions</div>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="status-card status-card-completed" data-status="completed">
+              <div class="status-card-icon">
+                <i class="bi bi-check-circle-fill"></i>
+              </div>
+              <div class="status-card-count" id="completed-count">0</div>
+              <div class="status-card-title">Completed</div>
+              <div class="status-card-subtitle">Finished today</div>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="status-card status-card-pending" data-status="pending">
+              <div class="status-card-icon">
+                <i class="bi bi-clock-fill"></i>
+              </div>
+              <div class="status-card-count" id="pending-count">0</div>
+              <div class="status-card-title">Pending</div>
+              <div class="status-card-subtitle">Awaiting start</div>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="status-card status-card-quality-check" data-status="quality-check">
+              <div class="status-card-icon">
+                <i class="bi bi-shield-check"></i>
+              </div>
+              <div class="status-card-count" id="quality-check-count">0</div>
+              <div class="status-card-title">Quality Check</div>
+              <div class="status-card-subtitle">Under review</div>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="status-card status-card-cancelled" data-status="cancelled">
+              <div class="status-card-icon">
+                <i class="bi bi-x-circle-fill"></i>
+              </div>
+              <div class="status-card-count" id="cancelled-count">0</div>
+              <div class="status-card-title">Cancelled</div>
+              <div class="status-card-subtitle">This period</div>
+            </div>
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+            <div class="status-card" data-status="all">
+              <div class="status-card-icon" style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);">
+                <i class="bi bi-collection-fill"></i>
+              </div>
+              <div class="status-card-count" id="total-count">0</div>
+              <div class="status-card-title">Total</div>
+              <div class="status-card-subtitle">All productions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Filter Section -->
+      <div class="date-filter-section d-none" id="date-filter-section">
+        <div class="date-filter-title">
+          <i class="bi bi-calendar-range"></i>
+          Filter by Date Range
+        </div>
+        <div class="date-filter-buttons">
+          <button class="date-filter-btn active" data-range="all">All Time</button>
+          <button class="date-filter-btn" data-range="today">Today</button>
+          <button class="date-filter-btn" data-range="yesterday">Yesterday</button>
+          <button class="date-filter-btn" data-range="this-week">This Week</button>
+          <button class="date-filter-btn" data-range="last-week">Last Week</button>
+          <button class="date-filter-btn" data-range="this-month">This Month</button>
+          <button class="date-filter-btn" data-range="last-month">Last Month</button>
+          <button class="date-filter-btn" data-range="custom">Custom Range</button>
+        </div>
+        
+        <!-- Custom Date Range Picker -->
+        <div class="custom-date-range" id="custom-date-range">
+          <div class="row">
+            <div class="col-md-4">
+              <label class="form-label">Start Date</label>
+              <input type="date" class="form-control" id="custom-start-date">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">End Date</label>
+              <input type="date" class="form-control" id="custom-end-date">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button class="btn btn-primary-enhanced btn-enhanced w-100" id="apply-custom-range">
+                <i class="bi bi-funnel me-2"></i>Apply Filter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter and Search Bar -->
+      <div class="filter-search-bar">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="search-input-group">
+              <i class="bi bi-search search-icon"></i>
+              <input type="text" class="form-control" id="production-search" placeholder="Search productions by product name, ID, or status...">
+            </div>
+          </div>
+          <div class="col-md-6 text-end">
+            <div class="d-flex gap-2 justify-content-end">
+              <!-- Date Filter Dropdown -->
+              <div class="dropdown">
+                <button class="btn btn-outline-enhanced btn-enhanced dropdown-toggle" type="button" id="dateFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-calendar-range me-2"></i>Filter by Date
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dateFilterDropdown">
+                  <li><h6 class="dropdown-header">Quick Filters</h6></li>
+                  <li><a class="dropdown-item date-filter-option active" href="#" data-range="all">
+                    <i class="bi bi-calendar me-2"></i>All Time
+                  </a></li>
+                  <li><a class="dropdown-item date-filter-option" href="#" data-range="today">
+                    <i class="bi bi-calendar-day me-2"></i>Today
+                  </a></li>
+                  <li><a class="dropdown-item date-filter-option" href="#" data-range="yesterday">
+                    <i class="bi bi-calendar-minus me-2"></i>Yesterday
+                  </a></li>
+                  <li><a class="dropdown-item date-filter-option" href="#" data-range="this-week">
+                    <i class="bi bi-calendar-week me-2"></i>This Week
+                  </a></li>
+                  <li><a class="dropdown-item date-filter-option" href="#" data-range="last-week">
+                    <i class="bi bi-calendar-week me-2"></i>Last Week
+                  </a></li>
+                  <li><a class="dropdown-item date-filter-option" href="#" data-range="this-month">
+                    <i class="bi bi-calendar-month me-2"></i>This Month
+                  </a></li>
+                  <li><a class="dropdown-item date-filter-option" href="#" data-range="last-month">
+                    <i class="bi bi-calendar-month me-2"></i>Last Month
+                  </a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><h6 class="dropdown-header">Custom Range</h6></li>
+                  <li><a class="dropdown-item date-filter-option" href="#" data-range="custom">
+                    <i class="bi bi-calendar-range me-2"></i>Custom Range
+                  </a></li>
+                </ul>
+              </div>
+              
+              <!-- Start New Production Button -->
+              <button type="button" class="btn btn-primary-enhanced btn-enhanced" id="produce-product-btn">
+                <i class="bi bi-plus-circle me-2"></i>Start New Production
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Production Section Header -->
+      <div class="production-section-header">
+        <h2 class="production-section-title">
+          <i class="bi bi-gear"></i>
+          Active Productions
+          <span class="production-count-badge" id="active-productions-badge">0</span>
+        </h2>
+      </div>
+
+      <!-- Ongoing Productions Display -->
+      <div class="row" id="ongoing-productions">
+        <!-- Production cards will be loaded here dynamically -->
+      </div>
+
+      <!-- Enhanced Empty State -->
+      <div class="row d-none" id="empty-state">
+        <div class="col-12">
+          <div class="empty-state fade-in-up">
+            <div class="empty-state-icon">
+              <i class="bi bi-gear"></i>
+            </div>
+            <h4>No Active Productions</h4>
+            <p>Ready to start manufacturing? Create your first production batch and begin tracking your manufacturing process in real-time.</p>
+            <button type="button" class="btn btn-primary-enhanced btn-enhanced" id="start-first-production">
+              <i class="bi bi-play-circle me-2"></i>Start Your First Production
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Production History -->
+      <div class="row mt-5">
+        <div class="col-12">
+          <div class="table-enhanced">
+            <div class="card-header bg-white p-4 border-0">
+              <div class="production-section-header" style="margin-bottom: 0; padding: 0; border: none;">
+                <h2 class="production-section-title" style="font-size: 1.2rem;">
+                  <i class="bi bi-clock-history"></i>
+                  Production History
+                  <span class="production-count-badge" id="history-count-badge">0</span>
+                </h2>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Production ID</th>
+                    <th>Product</th>
+                    <th>Batch Size</th>
+                    <th>Start Date</th>
+                    <th>Completion Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="production-history-body">
+                  <!-- Production history will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Production Wizard Modal -->
+<div class="modal fade" id="produceProductModal" tabindex="-1" aria-labelledby="produceProductModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-xl" >
+    <div class="modal-content" >
+      <div class="wizard-container">
+        <!-- Wizard Header -->
+        <div class="wizard-header">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="modal-title" id="produceProductModalLabel">
+              <i class="bi bi-gear me-2"></i>Start New Production
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          
+          <!-- Wizard Progress -->
+          <div class="wizard-progress">
+            <div class="wizard-progress-line" id="wizard-progress-line"></div>
+            <div class="wizard-step active" data-step="1">
+              1
+              <div class="wizard-step-label">Type</div>
+            </div>
+            <div class="wizard-step" data-step="2">
+              2
+              <div class="wizard-step-label">Product</div>
+            </div>
+            <div class="wizard-step" data-step="3">
+              3
+              <div class="wizard-step-label">Materials</div>
+            </div>
+            <div class="wizard-step" data-step="4">
+              4
+              <div class="wizard-step-label">Schedule</div>
+            </div>
+            <div class="wizard-step" data-step="5">
+              5
+              <div class="wizard-step-label">Review</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wizard Body -->
+        <div class="wizard-body">
+          <!-- Step 1: Production Type Selection -->
+          <div class="wizard-step-content active" id="step-1">
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-list-check"></i>
+                Select Production Type
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <div class="production-option-card" data-option="new-product">
+                    <div class="production-option-icon">
+                      <i class="bi bi-plus-circle"></i>
+                    </div>
+                    <div class="production-option-title">New Product</div>
+                    <div class="production-option-description">
+                      Create a completely new product with custom recipe and specifications
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="production-option-card" data-option="existing-batch">
+                    <div class="production-option-icon">
+                      <i class="bi bi-arrow-repeat"></i>
+                    </div>
+                    <div class="production-option-title">Another Batch</div>
+                    <div class="production-option-description">
+                      Produce another batch of an existing product using saved recipe
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Product Information -->
+          <div class="wizard-step-content" id="step-2">
+            <!-- New Product Form -->
+            <div id="new-product-step-content" class="d-none">
+              <form id="new-product-production-form" enctype="multipart/form-data" method="POST" action="start_production.php">
+                <!-- Tracking Type Selection -->
+                <div class="form-section">
+                  <div class="form-section-title">
+                    <i class="bi bi-toggle-on"></i>
+                    Product Tracking Type
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="tracking-type-card" data-tracking="normal">
+                        <div class="tracking-type-icon">
+                          <i class="bi bi-box"></i>
+                        </div>
+                        <div class="tracking-type-title">Normal Track</div>
+                        <div class="tracking-type-description">
+                          Simple stock tracking without batch details
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="tracking-type-card" data-tracking="batch">
+                        <div class="tracking-type-icon">
+                          <i class="bi bi-layers"></i>
+                        </div>
+                        <div class="tracking-type-title">Batch Product Storing</div>
+                        <div class="tracking-type-description">
+                          Advanced tracking with batch codes and expiration dates
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Product Information Section -->
+                <div class="form-section">
+                  <div class="form-section-title">
+                    <i class="bi bi-box"></i>
+                    Product Information
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <label for="new-product-id" class="form-label">Product ID</label>
+                      <input type="text" class="form-control calculated-field" id="new-product-id" name="product_id" readonly placeholder="Auto-generated">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label for="new-product-category" class="form-label">Category *</label>
+                      <select class="form-select" id="new-product-category" name="product_category" required>
+                        <option value="">Select category</option>
+                        <option value="Preserves">Preserves</option>
+                        <option value="Beverages">Beverages</option>
+                        <option value="Snacks">Snacks</option>
+                        <option value="Detergent">Detergent</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label for="new-product-name" class="form-label">Product Name *</label>
+                      <input type="text" class="form-control" id="new-product-name" name="product_name" required placeholder="Enter product name">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="size-option" class="form-label">Product Size Option *</label>
+                      <select class="form-select" id="size-option" required>
+                        <option value="onesize">One Size</option>
+                        <!-- <option value="multiple">Multiple Sizes</option> -->
+                      </select>
+                    </div>
+                    <div class="col-md-6 mb-3" id="size-type-group" style="display: none;">
+                      <label for="size-type" class="form-label">Size Type</label>
+                      <select class="form-select" id="size-type">
+                        <option value="">Select type</option>
+                        <option value="sml">Small / Medium / Large</option>
+                        <option value="ml">Unit Measurement (grams/liters etc.)</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="new-product-price" class="form-label">Price (₱) *</label>
+                      <input type="number" class="form-control" id="new-product-price" name="price" required min="0" step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="col-md-6 mb-3" id="single-quantity-group">
+                      <label for="new-product-quantity" class="form-label">Quantity *</label>
+                      <input type="number" class="form-control" id="new-product-quantity" name="quantity" required min="1" placeholder="0">
+                    </div>
+                  </div>
+
+                  <div id="size-price-group" style="display: none;">
+                    <label class="form-label">Sizes, Quantities and Prices</label>
+                    <div class="row mb-2">
+                      <div class="col-md-3"><small class="text-muted">Size</small></div>
+                      <div class="col-md-2"><small class="text-muted">Unit</small></div>
+                      <div class="col-md-3"><small class="text-muted">Quantity</small></div>
+                      <div class="col-md-3"><small class="text-muted">Price (₱)</small></div>
+                      <div class="col-md-1"></div>
+                    </div>
+                    <div id="sizes-container"></div>
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addSizeRow()">+ Add Size</button>
+                  </div>
+
+                  <div class="row" style="margin-top: 0.5rem;">
+                    <div class="col-md-12 mb-3">
+                      <label for="new-product-photo" class="form-label">Product Photo</label>
+                      <input style="height: 3rem;" type="file" class="form-control" id="new-product-photo" name="product_photo" accept="image/*">
+                    </div>
+                  </div>
+                </div>
+
+            
+
+                <div id="batch-track-fields" class="d-none">
+                  <div class="form-section">
+                    <div class="form-section-title">
+                      <i class="bi bi-layers"></i>
+                      Initial Batch Details
+                    </div>
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
+                        <label for="batch-code" class="form-label">Batch Code</label>
+                        <input type="text" class="form-control calculated-field" id="batch-code" name="batch_code" readonly placeholder="Auto-generated">
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label for="batch-manufacturing-date" class="form-label">Manufacturing Date</label>
+                        <input type="date" class="form-control calculated-field" id="batch-manufacturing-date" name="manufacturing_date" readonly>
+                      </div>
+                      <!-- Manufacturing Date input added as read-only, pre-filled with today -->
+                    </div>
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
+                        <label for="expiration-duration" class="form-label">Expiration Duration *</label>
+                        <select class="form-select" id="expiration-duration" name="expiration_duration">
+                          <option value="">Select duration</option>
+                          <option value="2_weeks">2 weeks</option>
+                          <option value="5_months">5 months</option>
+                          <option value="8_months">8 months</option>
+                          <option value="1_year">1 year</option>
+                          <option value="custom">Custom</option>
+                        </select>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <div class="custom-duration-fields" id="custom-duration-fields">
+                          <label for="custom-duration-value" class="form-label">Custom Duration *</label>
+                          <div class="input-group">
+                            <input type="number" class="form-control" id="custom-duration-value" name="custom_duration_value" min="1" placeholder="0">
+                            <select class="form-select" id="custom-duration-unit" name="custom_duration_unit" style="max-width: 100px;">
+                              <option value="days">Days</option>
+                              <option value="months">Months</option>
+                              <option value="years">Years</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label for="calculated-expiration-date" class="form-label">Calculated Expiration Date</label>
+                        <input type="date" class="form-control calculated-field" id="calculated-expiration-date" name="expiration_date" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Hidden fields for tracking type -->
+                <input type="hidden" id="tracking-type" name="tracking_type" value="">
+              </form>
+            </div>
+
+            <!-- Existing Product Form -->
+            <div id="existing-product-step-content" class="d-none">
+              <form id="existing-product-production-form">
+                <div class="form-section">
+                  <div class="form-section-title">
+                    <i class="bi bi-box-seam"></i>
+                    Select Existing Product
+                  </div>
+                  
+                  <div class="row">
+                    <div class="col-md-12 mb-3">
+                      <label for="existing-product-select" class="form-label">Product *</label>
+                      <select class="form-select" id="existing-product-select" name="product_id" required>
+                        <option value="">Select existing product</option>
+                        <!-- Products will be loaded dynamically -->
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="existing-size-option" class="form-label">Batch Size Option *</label>
+                      <select class="form-select" id="existing-size-option" required>
+                        <option value="onesize">One Size</option>
+                        <option value="multiple">Multiple Sizes</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6 mb-3" id="existing-size-type-group" style="display: none;">
+                      <label for="existing-size-type" class="form-label">Size Type</label>
+                      <select class="form-select" id="existing-size-type">
+                        <option value="">Select type</option>
+                        <option value="sml">Small / Medium / Large</option>
+                        <option value="ml">Unit Measurement (grams/liters etc.)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3" id="existing-single-batch-group">
+                      <label for="existing-batch-size" class="form-label">Batch Size *</label>
+                      <div class="input-group">
+                        <input type="number" class="form-control" id="existing-batch-size" name="batch_size" required min="1" placeholder="0">
+                        <span class="input-group-text">units</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="existing-size-batch-group" style="display: none;">
+                    <label class="form-label">Sizes and Batch Quantities</label>
+                    <div class="row mb-2">
+                      <div class="col-md-3"><small class="text-muted">Size</small></div>
+                      <div class="col-md-2"><small class="text-muted">Unit</small></div>
+                      <div class="col-md-6"><small class="text-muted">Batch Quantity</small></div>
+                      <div class="col-md-1"></div>
+                    </div>
+                    <div id="existing-sizes-container"></div>
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addExistingSizeRow()">+ Add Size</button>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <div class="form-section-title">
+                    <i class="bi bi-info-circle"></i>
+                    Product Details
+                  </div>
+                  <div id="existing-product-details">
+                    <div class="text-muted text-center py-3">
+                      <i class="bi bi-arrow-up me-2"></i>Select a product above to view details
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Step 3: Materials -->
+          <div class="wizard-step-content" id="step-3">
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-list-ul"></i>
+                Recipe & Materials
+              </div>
+              <div id="recipe-materials">
+                <div class="recipe-item">
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Material *</label>
+                      <select class="form-select material-select" name="materials[]" required>
+                        <option value="">Select material</option>
+                        <!-- Materials will be loaded dynamically -->
+                      </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                      <label class="form-label">Quantity</label>
+                      <input type="number" class="form-control quantity-input" name="quantities[]" step="0.01" required min="0" placeholder="0.00" style="min-width: 5rem;">
+                    </div>
+                    <div class="col-md-2 mb-3">
+                      <label class="form-label">Unit</label>
+                      <div class="material-unit">-</div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                      <label class="form-label">Unit Cost (₱)</label>
+                      <div class="material-cost">0.00</div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                      <label class="form-label">Total Cost (₱)</label>
+                      <input type="number" class="form-control material-total-cost" name="material_costs[]" step="0.01" readonly placeholder="0.00">
+                    </div>
+                    <div class="col-md-1 mb-3">
+                      <label class="form-label">Stock</label>
+                      <div class="stock-indicator">
+                        <span class="stock-status"></span>
+                      </div>
+                    </div>
+                    <div class="col-md-1 mb-3" style="margin-left: 5rem;">
+                      <label class="form-label">&nbsp;</label>
+                      <button type="button" class="btn btn-outline-danger remove-material w-100">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-enhanced btn-enhanced" id="add-material-btn">
+                <i class="bi bi-plus me-2"></i>Add Material
+              </button>
+
+              <!-- Material Cost Summary -->
+              <div class="cost-summary" id="material-cost-summary">
+                <div class="cost-summary-title">
+                  <i class="bi bi-calculator"></i>
+                  Material Cost Summary
+                </div>
+                <div class="cost-item">
+                  <span>Total Material Cost:</span>
+                  <span id="total-material-cost">₱0.00</span>
+                </div>
+                <div class="cost-item">
+                  <span>Cost per Unit:</span>
+                  <span id="material-cost-per-unit">₱0.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Operational Costs -->
+          <!-- <div class="wizard-step-content" id="step-4">
+            <!-- This step is now removed. The content will be moved to the Complete Production modal. -->
+          <!-- </div> -->
+
+          <!-- Step 5: Production Schedule -->
+          <div class="wizard-step-content" id="step-4">
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-clock"></i>
+                Production Schedule
+              </div>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="schedule-start-date" class="form-label">Start Date *</label>
+                  <input type="date" class="form-control" id="schedule-start-date" name="start_date" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="schedule-start-time" class="form-label">Start Time</label>
+                  <input type="time" class="form-control" id="schedule-start-time" name="start_time" value="08:00">
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="schedule-estimated-duration" class="form-label">Estimated Duration (hours)</label>
+                  <input type="number" class="form-control" id="schedule-estimated-duration" name="estimated_duration" min="1" value="8" step="0.5">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="schedule-assigned-to" class="form-label">Operator</label>
+                  <select class="form-select" id="schedule-assigned-to" name="assigned_to">
+                    <option value="admin">Admin User</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="schedule-priority" class="form-label">Priority Level</label>
+                  <select class="form-select" id="schedule-priority" name="priority">
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12 mb-3">
+                  <label for="schedule-production-notes" class="form-label">Production Notes</label>
+                  <textarea class="form-control" id="schedule-production-notes" name="production_notes" rows="2" placeholder="Special instructions or notes..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 5: Review & Confirm -->
+          <div class="wizard-step-content" id="step-5">
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-check-circle"></i>
+                Review Production Details
+              </div>
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Review your production setup before starting.</strong> 
+                Make sure all details are correct as some information cannot be changed once production begins.
+              </div>
+              <div id="review-content">
+                <!-- Dynamic review content -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wizard Footer -->
+        <div class="wizard-footer">
+          <button type="button" class="btn btn-outline-secondary" id="wizard-prev-btn" style="display: none;">
+            <i class="bi bi-arrow-left me-1"></i>Previous
+          </button>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg me-1"></i>Cancel
+            </button>
+            <button type="button" class="btn btn-primary-enhanced btn-enhanced" id="wizard-next-btn">
+              Next<i class="bi bi-arrow-right ms-1"></i>
+            </button>
+            <button type="button" class="btn btn-success" id="wizard-finish-btn" style="display: none;">
+              <i class="bi bi-play-circle me-1"></i>Start Production
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Production Details Modal -->
+<div class="modal fade" id="productionDetailsModal" tabindex="-1" aria-labelledby="productionDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productionDetailsModalLabel">
+          <i class="bi bi-info-circle me-2"></i>Production Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="production-details-content">
+        <!-- Production details will be loaded here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary-enhanced btn-enhanced" id="start-production-modal-btn" style="display: none;">
+          <i class="bi bi-play-circle me-1"></i>Start
+        </button>
+        <button type="button" class="btn btn-warning btn-enhanced" id="finish-production-modal-btn" style="display: none;">
+          <i class="bi bi-flag-checkered me-1"></i>Finish
+        </button>
+        <button type="button" class="btn btn-success btn-enhanced" id="complete-production-modal-btn" style="display: none;">
+          <i class="bi bi-check-circle me-1"></i>Complete Production
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Production Completion Modal -->
+<div class="modal fade" id="completeProductionModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-check-circle me-2"></i>Complete Production
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="completeProductionForm">
+          <input type="hidden" id="complete_production_id" name="production_id">
+          <!-- Product Selection for Missing Product ID -->
+          <div id="product-selection-section" class="form-section" style="display: none;">
+            <div class="form-section-title">
+              <i class="bi bi-exclamation-triangle text-warning"></i>Product Selection Required
+            </div>
+            <div class="alert alert-warning">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Note:</strong> This production was created before the system update. Please select the existing product for this batch.
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Select Existing Product *</label>
+              <select class="form-control" id="completion-product-select" name="completion_product_id">
+                <option value="">-- Select Product --</option>
+              </select>
+              <div class="form-text">Choose the existing product that this batch belongs to</div>
+            </div>
+          </div>
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-clipboard-data"></i>Production Results
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Total Quantity Produced *</label>
+                  <input type="number" class="form-control" id="quantity_produced" name="quantity_produced" required min="0" placeholder="0">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Quantity Passed QC *</label>
+                  <input type="number" class="form-control" id="quantity_passed_qc" name="quantity_passed_qc" required min="0" placeholder="0">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Quantity Failed QC</label>
+                  <input type="number" class="form-control" id="quantity_failed_qc" name="quantity_failed_qc" min="0" value="0" readonly>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label">Quality Score (0-100)</label>
+                  <input type="number" class="form-control" id="quality_score" name="quality_score" min="0" max="100" step="0.1" value="95">
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Production Notes</label>
+              <textarea class="form-control" id="completion_notes" name="notes" rows="3" placeholder="Any notes about the production process, quality issues, or improvements..."></textarea>
+            </div>
+          </div>
+          <!-- Moved Costs Section Here -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-lightning-charge"></i>
+              Operational Costs
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="electricity-cost" class="form-label">Electricity Cost (₱)</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-lightning-charge"></i></span>
+                  <input type="number" class="form-control operational-cost" id="electricity-cost" name="electricity_cost" min="0" step="0.01" placeholder="0.00">
+                </div>
+                <div class="form-text">Estimated electricity consumption for this batch</div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="gas-cost" class="form-label">Gas Cost (₱)</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-fire"></i></span>
+                  <input type="number" class="form-control operational-cost" id="gas-cost" name="gas_cost" min="0" step="0.01" placeholder="0.00">
+                </div>
+                <div class="form-text">Gas consumption for heating/cooking</div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="labor-cost" class="form-label">Labor Cost (₱)</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
+                  <input type="number" class="form-control operational-cost" id="labor-cost" name="labor_cost" min="0" step="0.01" placeholder="0.00">
+                </div>
+                <div class="form-text">Labor cost for this production batch</div>
+              </div>
+            </div>
+            <!-- Quick Labor Cost Calculator -->
+            <div class="row mt-3">
+              <div class="col-md-12">
+                <div class="alert alert-info">
+                  <h6><i class="bi bi-calculator me-2"></i>Quick Labor Cost Calculator</h6>
+                  <div class="row">
+                    <div class="col-md-3">
+                      <label class="form-label">Workers</label>
+                      <input type="number" class="form-control" id="worker-count" min="1" value="1" placeholder="1">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label">Hours</label>
+                      <input type="number" class="form-control" id="work-hours" min="0.5" step="0.5" value="8" placeholder="8">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label">Rate per Hour (₱)</label>
+                      <input type="number" class="form-control" id="hourly-rate" min="0" step="0.01" value="75" placeholder="75.00">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label">&nbsp;</label>
+                      <button type="button" class="btn btn-outline-primary w-100" id="calculate-labor-btn">
+                        <i class="bi bi-calculator me-1"></i>Calculate
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Operational Cost Summary -->
+            <div class="cost-summary" id="operational-cost-summary">
+              <div class="cost-summary-title">
+                <i class="bi bi-gear"></i>
+                Operational Cost Summary
+              </div>
+              <div class="cost-item">
+                <span>Electricity:</span>
+                <span id="electricity-cost-display">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Gas:</span>
+                <span id="gas-cost-display">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Labor:</span>
+                <span id="labor-cost-display">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Total Operational Cost:</span>
+                <span id="total-operational-cost">₱0.00</span>
+              </div>
+            </div>
+          </div>
+          <!-- Total Production Cost Analysis -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-currency-dollar"></i>
+              Total Production Cost Analysis
+            </div>
+            <div class="cost-summary">
+              <div class="cost-item">
+                <span>Material Costs:</span>
+                <span id="final-material-cost">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Operational Costs:</span>
+                <span id="final-operational-cost">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Total Production Cost:</span>
+                <span id="total-production-cost">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Cost per Unit:</span>
+                <span id="final-cost-per-unit">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Revenue per Unit:</span>
+                <span id="revenue-per-unit">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Profit per Unit:</span>
+                <span id="profit-per-unit">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Total Revenue:</span>
+                <span id="total-revenue">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Total Profit:</span>
+                <span id="total-profit">₱0.00</span>
+              </div>
+              <div class="cost-item">
+                <span>Profit Margin:</span>
+                <span id="profit-margin">0%</span>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Note:</strong> Completing this production will:
+            <ul class="mb-0 mt-2">
+              <li>Create a new product/batch in your inventory</li>
+              <li>Update material stock levels</li>
+              <li>Calculate final production costs</li>
+              <li>Generate batch tracking information</li>
+            </ul>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="submit-completion-btn">
+          <i class="bi bi-check-circle me-2"></i>Complete Production
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Loading Modal with Progress Bar -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center border-0">
+      <div class="modal-body py-5">
+        <div class="spinner-border text-primary mb-3" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="fw-bold fs-4 text-primary">Processing Production...</div>
+        <div class="text-muted mt-2">Please wait while we set up your production batch</div>
+        
+        <!-- Progress Bar -->
+        <div class="loading-progress">
+          <div class="loading-progress-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Success Modal with Better Animation -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center border-0">
+      <div class="modal-body py-5">
+        <div class="text-success mb-4">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div id="successModalMessage" class="fw-bold fs-4 text-success mb-3">Production Started Successfully!</div>
+        <div class="text-muted">Your production batch has been created and is now being tracked</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Error Modal with Better Styling -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center border-0">
+      <div class="modal-body py-5">
+        <div class="text-danger mb-4">
+          <i class="bi bi-x-circle-fill"></i>
+        </div>
+        <div id="errorModalMessage" class="fw-bold fs-4 text-danger mb-3">Production Error</div>
+        <div class="text-muted mb-4">Please check your inputs and try again</div>
+        <button type="button" class="btn btn-danger btn-enhanced" data-bs-dismiss="modal">
+          <i class="bi bi-arrow-left me-2"></i>Try Again
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Quality Check Confirmation Modal -->
+<div class="modal fade" id="qualityCheckModal" tabindex="-1" aria-labelledby="qualityCheckModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="qualityCheckModalLabel">
+          <i class="bi bi-shield-check me-2"></i>Quality Check Confirmation
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Production Summary -->
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Production Summary</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>Production ID:</strong> <span id="qc-production-id">-</span></p>
+                <p><strong>Product:</strong> <span id="qc-product-name">-</span></p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>Batch Size:</strong> <span id="qc-batch-size">-</span></p>
+                <p><strong>Start Date:</strong> <span id="qc-start-date">-</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality Check Form -->
+        <form id="qualityCheckForm">
+          <div class="card">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Quality Assessment</h6>
+            </div>
+            <div class="card-body">
+              <!-- Production Quantities -->
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="qc-estimated-quantity" class="form-label">Total Quantity Produced *</label>
+                  <input type="number" class="form-control" id="qc-estimated-quantity" min="0" required>
+                  <div class="form-text">Total units produced in this batch</div>
+                </div>
+                <div class="col-md-4">
+                  <label for="qc-estimated-passed" class="form-label">Passed QC *</label>
+                  <input type="number" class="form-control" id="qc-estimated-passed" min="0" required>
+                  <div class="form-text">Units that passed quality control</div>
+                </div>
+                <div class="col-md-4">
+                  <label for="qc-estimated-failed" class="form-label">Failed QC</label>
+                  <input type="number" class="form-control" id="qc-estimated-failed" min="0" readonly>
+                  <div class="form-text">Auto-calculated failed units</div>
+                </div>
+              </div>
+
+              <!-- Quality Score and Status -->
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="qc-estimated-quality-score" class="form-label">Quality Score (%)</label>
+                  <input type="number" class="form-control" id="qc-estimated-quality-score" min="0" max="100" readonly>
+                  <div class="form-text">Auto-calculated based on pass rate</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="qc-quality-status" class="form-label">Quality Status</label>
+                  <select class="form-select" id="qc-quality-status">
+                    <option value="excellent">Excellent (95-100%)</option>
+                    <option value="good">Good (85-94%)</option>
+                    <option value="acceptable">Acceptable (70-84%)</option>
+                    <option value="needs_improvement">Needs Improvement (<70%)</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Quality Inspector and Time -->
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="qc-checked-by" class="form-label">Quality Checked By</label>
+                  <input type="text" class="form-control" id="qc-checked-by" placeholder="Inspector name">
+                </div>
+                <div class="col-md-6">
+                  <label for="qc-checked-at" class="form-label">Quality Check Time</label>
+                  <input type="datetime-local" class="form-control" id="qc-checked-at">
+                </div>
+              </div>
+
+              <!-- Quality Notes -->
+              <div class="mb-3">
+                <label for="qc-quality-notes" class="form-label">Quality Notes</label>
+                <textarea class="form-control" id="qc-quality-notes" rows="3" placeholder="Any observations, defects found, or quality remarks..."></textarea>
+              </div>
+
+              <!-- Quality Check Summary -->
+              <div class="alert alert-info">
+                <h6><i class="bi bi-info-circle me-2"></i>Quality Check Summary</h6>
+                <ul class="mb-0">
+                  <li>Review the production quantities carefully</li>
+                  <li>Ensure quality score reflects actual product quality</li>
+                  <li>Document any quality issues or observations</li>
+                  <li>This data will be used for the final production completion</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i>Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="confirm-quality-check">
+          <i class="bi bi-check-circle me-1"></i>Confirm Quality Check
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SVG Definitions for Gradients -->
+<svg width="0" height="0" style="position: absolute;">
+  <defs>
+    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#28a745;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#20c997;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
+
+  <script>
+// Redirect to login page if user accessed the site directly (no referrer)
+window.onload = function () {
+  const isLoggedIn = false; // Replace this with your actual login check logic
+
+  if (document.referrer === '' && !isLoggedIn) {
+    // Redirect only if not already on login page
+    if (!window.location.pathname.includes("index.html")) {
+      window.location.href = "index.html"; // Adjust this to your actual login page path
+    }
+  }
+};
+</script>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Custom JavaScript -->
+<script src="script.js"></script>
+<script src="mobile-menu.js"></script>
+<script src="production.js"></script>
+<script src="logout.js"></script>
+
+<!-- Notice Modal for Blank Inputs -->
+<div class="modal fade" id="noticeModal" tabindex="-1" aria-labelledby="noticeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center border-0">
+      <div class="modal-body py-5">
+        <div class="text-warning mb-4">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <div id="noticeModalMessage" class="fw-bold fs-4 text-warning mb-3">Please complete all required fields before proceeding.</div>
+        <button type="button" class="btn btn-warning btn-enhanced" data-bs-dismiss="modal">
+          <i class="bi bi-arrow-left me-2"></i>OK
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add current date display script -->
+<script>
+function updateCurrentDate() {
+  const now = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  const formattedDate = now.toLocaleDateString(undefined, options);
+  document.getElementById('current-date').textContent = formattedDate;
+}
+updateCurrentDate();
+setInterval(updateCurrentDate, 60000);
+</script>
+
+<!-- Insufficient Materials Modal -->
+<div class="modal fade" id="insufficientMaterialsModal" tabindex="-1" aria-labelledby="insufficientMaterialsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title" id="insufficientMaterialsModalLabel">Insufficient Materials</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Insufficient material stock. Please adjust quantities or restock before proceeding.
+      </div>
+      <div class="modal-footer">
+        <a href="supplies.html" class="btn btn-primary">Go to Supplies</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to logout?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmLogout">Logout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+
+

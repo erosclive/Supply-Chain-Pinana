@@ -138,15 +138,32 @@ function updateDashboard(data) {
 
 // Update KPI cards with data
 function updateKPICards(kpiData) {
-  // Format currency values
-  const formatCurrency = value => '₱' + parseFloat(value).toLocaleString('en-PH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+  // Ensure kpiData exists and has required properties
+  if (!kpiData) {
+    console.error('KPI data is missing');
+    return;
+  }
   
-  // Format growth indicators
+  // Format currency values
+  const formatCurrency = value => {
+    const numValue = parseFloat(value) || 0;
+    return '₱' + numValue.toLocaleString('en-PH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+  
+  // Format growth indicators with 100% cap
   const formatGrowth = (value, element) => {
-    const growthValue = parseFloat(value);
+    let growthValue = parseFloat(value) || 0;
+    
+    // Cap growth at 100% maximum and -100% minimum
+    if (growthValue > 100) {
+      growthValue = 100;
+    } else if (growthValue < -100) {
+      growthValue = -100;
+    }
+    
     let icon, colorClass;
     
     if (growthValue > 0) {
@@ -164,21 +181,18 @@ function updateKPICards(kpiData) {
     element.className = colorClass;
   };
   
-  // Total Sales
-  document.getElementById('total-sales').textContent = formatCurrency(kpiData.total_sales);
-  formatGrowth(kpiData.sales_growth, document.getElementById('sales-growth-badge'));
+  // Update KPI values with fallbacks
+  document.getElementById('total-sales').textContent = formatCurrency(kpiData.total_sales || 0);
+  formatGrowth(kpiData.sales_growth || 0, document.getElementById('sales-growth-badge'));
   
-  // Total Transactions
-  document.getElementById('total-transactions').textContent = parseInt(kpiData.total_transactions).toLocaleString();
-  formatGrowth(kpiData.transactions_growth, document.getElementById('transactions-growth-badge'));
+  document.getElementById('total-transactions').textContent = parseInt(kpiData.total_transactions || 0).toLocaleString();
+  formatGrowth(kpiData.transactions_growth || 0, document.getElementById('transactions-growth-badge'));
   
-  // Average Transaction Value
-  document.getElementById('avg-transaction').textContent = formatCurrency(kpiData.avg_transaction_value);
-  formatGrowth(kpiData.avg_transaction_growth, document.getElementById('avg-transaction-growth-badge'));
+  document.getElementById('avg-transaction').textContent = formatCurrency(kpiData.avg_transaction_value || 0);
+  formatGrowth(kpiData.avg_transaction_growth || 0, document.getElementById('avg-transaction-growth-badge'));
   
-  // Total Items Sold
-  document.getElementById('items-sold').textContent = parseInt(kpiData.total_items_sold).toLocaleString();
-  formatGrowth(kpiData.items_sold_growth, document.getElementById('items-sold-growth-badge'));
+  document.getElementById('items-sold').textContent = parseInt(kpiData.total_items_sold || 0).toLocaleString();
+  formatGrowth(kpiData.items_sold_growth || 0, document.getElementById('items-sold-growth-badge'));
 }
 
 // Update Sales Trend Chart
@@ -456,22 +470,32 @@ function updatePaymentMethodsLegend(paymentData) {
   legendContainer.innerHTML = legendHtml;
 }
 
+// Store the original products data for filtering
+let originalProductsData = []
+
+
+
 // Update Top Products Table
-function updateTopProductsTable(productsData) {
-  const tableBody = document.getElementById('top-products-table');
-  if (!tableBody) return;
-  
+function updateTopProductsTable(productsData, sortBy = "units") {
+  const tableBody = document.getElementById("top-products-table")
+  if (!tableBody) return
+
+  // Store original data for filtering
+  originalProductsData = [...productsData]
+
+  // Sort the data based on the selected filter
+  const sortedData = sortProductsData(productsData, sortBy)
+
   // Generate table rows
-  let tableHtml = '';
-  
-  if (productsData.length === 0) {
-    tableHtml = `
-      <tr>
+  let tableHtml = ""
+
+  if (sortedData.length === 0) {
+    tableHtml = `      <tr>
         <td colspan="3" class="text-center py-3">No product data available</td>
       </tr>
-    `;
+    `
   } else {
-    productsData.forEach(product => {
+    sortedData.forEach((product) => {
       tableHtml += `
         <tr>
           <td>
@@ -483,12 +507,52 @@ function updateTopProductsTable(productsData) {
           <td class="text-center">${product.units_sold}</td>
           <td class="text-end">${product.revenue_formatted}</td>
         </tr>
-      `;
-    });
+      `
+    })
   }
-  
-  tableBody.innerHTML = tableHtml;
+
+  tableBody.innerHTML = tableHtml
 }
+
+// Function to sort products data
+function sortProductsData(productsData, sortBy) {
+  const sortedData = [...productsData]
+
+  if (sortBy === "revenue") {
+    // Sort by revenue (descending)
+    sortedData.sort((a, b) => b.revenue - a.revenue)
+  } else {
+    // Sort by units sold (descending) - default
+    sortedData.sort((a, b) => b.units_sold - a.units_sold)
+  }
+
+  return sortedData
+}
+
+// Add event listeners for filter buttons
+document.addEventListener("DOMContentLoaded", () => {
+  const filterButtons = document.querySelectorAll('input[name="productFilter"]')
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("change", function () {
+      if (this.checked && originalProductsData.length > 0) {
+        updateTopProductsTable(originalProductsData, this.value)
+      }
+    })
+  })
+})
+
+// Function to handle filter change (can be called externally)
+function changeProductFilter(filterType) {
+  const filterButton = document.getElementById(filterType === "revenue" ? "filterRevenue" : "filterUnits")
+  if (filterButton) {
+    filterButton.checked = true
+    if (originalProductsData.length > 0) {
+      updateTopProductsTable(originalProductsData, filterType)
+    }
+  }
+}
+
 
 // Update Recent Transactions Table
 function updateRecentTransactionsTable(transactionsData) {
@@ -499,8 +563,7 @@ function updateRecentTransactionsTable(transactionsData) {
   let tableHtml = '';
   
   if (transactionsData.length === 0) {
-    tableHtml = `
-      <tr>
+    tableHtml = `      <tr>
         <td colspan="6" class="text-center py-3">No transaction data available</td>
       </tr>
     `;

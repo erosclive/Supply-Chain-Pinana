@@ -1,14 +1,11 @@
 <?php
-// get_order_batch_details.php
-// This file retrieves batch details for a specific product in a completed order
-
 // Include database connection
 require_once 'db_connection.php';
 
 // Set header to return JSON
 header('Content-Type: application/json');
 
-// Check if required parameters are provided
+// Check if order ID and product ID are provided
 if (!isset($_GET['order_id']) || !isset($_GET['product_id'])) {
     echo json_encode(['success' => false, 'message' => 'Order ID and Product ID are required']);
     exit;
@@ -18,49 +15,7 @@ $orderId = $_GET['order_id'];
 $productId = $_GET['product_id'];
 
 try {
-    // First check if the order exists and is completed
-    $orderQuery = "SELECT order_id, order_number, status FROM retailer_orders WHERE order_id = ?";
-    $orderStmt = $conn->prepare($orderQuery);
-    $orderStmt->bind_param('i', $orderId);
-    $orderStmt->execute();
-    $orderResult = $orderStmt->get_result();
-    
-    if (!$orderResult || $orderResult->num_rows === 0) {
-        echo json_encode(['success' => false, 'message' => 'Order not found']);
-        exit;
-    }
-    
-    $order = $orderResult->fetch_assoc();
-    
-    if ($order['status'] !== 'completed') {
-        echo json_encode([
-            'success' => false, 
-            'message' => 'Order is not completed. Batch details are only available for completed orders.'
-        ]);
-        exit;
-    }
-    
-    // Get the inventory log entry for this order and product
-    $logQuery = "SELECT log_id, change_type, quantity, previous_stock, new_stock, 
-                batch_details, notes, created_at 
-                FROM inventory_log 
-                WHERE order_id = ? AND product_id = ? AND change_type = 'order_completion'";
-    $logStmt = $conn->prepare($logQuery);
-    $logStmt->bind_param('is', $orderId, $productId);
-    $logStmt->execute();
-    $logResult = $logStmt->get_result();
-    
-    if (!$logResult || $logResult->num_rows === 0) {
-        echo json_encode([
-            'success' => false, 
-            'message' => 'No batch deduction records found for this product in this order'
-        ]);
-        exit;
-    }
-    
-    $log = $logResult->fetch_assoc();
-    
-    // Get product details
+    // Get product details first to check if batch tracking is enabled
     $productQuery = "SELECT product_id, product_name, batch_tracking FROM products WHERE product_id = ?";
     $productStmt = $conn->prepare($productQuery);
     $productStmt->bind_param('s', $productId);
@@ -74,42 +29,72 @@ try {
     
     $product = $productResult->fetch_assoc();
     
-    // If batch tracking is not enabled or no batch details, return empty
-    if ($product['batch_tracking'] != 1 || empty($log['batch_details'])) {
+    // Check if batch tracking is enabled for this product
+    $batchTrackingEnabled = ($product['batch_tracking'] == 1);
+    
+    // Get order details
+    $orderQuery = "SELECT ro.order_id, COALESCE(ro.po_number, ro.order_id) as order_number, 
+                  roi.quantity, roi.unit_price, roi.total_price
+                  FROM retailer_orders ro
+                  JOIN retailer_order_items roi ON ro.order_id = roi.order_id
+                  WHERE ro.order_id = ? AND roi.product_id = ?";
+    
+    $orderStmt = $conn->prepare($orderQuery);
+    $orderStmt->bind_param('is', $orderId, $productId);
+    $orderStmt->execute();
+    $orderResult = $orderStmt->get_result();
+    
+    if (!$orderResult || $orderResult->num_rows === 0) {
+        echo json_encode(['success' => false, 'message' => 'Order or product not found in order']);
+        exit;
+    }
+    
+    $order = $orderResult->fetch_assoc();
+    
+    // If batch tracking is not enabled, return empty batch details
+    if (!$batchTrackingEnabled) {
         echo json_encode([
             'success' => true,
+            'batch_tracking_enabled' => false,
             'order' => $order,
-            'product' => $product,
-            'batch_tracking_enabled' => ($product['batch_tracking'] == 1),
-            'quantity_deducted' => $log['quantity'],
             'batch_details' => []
         ]);
         exit;
     }
     
-    // Parse the batch details JSON
-    $batchDetails = json_decode($log['batch_details'], true);
+    // Get batch deduction details from inventory log
+    $logQuery = "SELECT il.log_id, il.quantity as quantity_deducted, il.batch_details, il.created_at as deduction_date
+                FROM inventory_log il
+                WHERE il.order_id = ? AND il.product_id = ? AND il.change_type = 'order_completion'
+                ORDER BY il.created_at DESC
+                LIMIT 1";
     
-    // If batch details couldn't be parsed, return empty
-    if (!$batchDetails) {
-        echo json_encode([
-            'success' => true,
-            'order' => $order,
-            'product' => $product,
-            'batch_tracking_enabled' => true,
-            'quantity_deducted' => $log['quantity'],
-            'batch_details' => []
-        ]);
-        exit;
+    $logStmt = $conn->prepare($logQuery);
+    $logStmt->bind_param('is', $orderId, $productId);
+    $logStmt->execute();
+    $logResult = $logStmt->get_result();
+    
+    $batchDetails = [];
+    $deductionDate = null;
+    $quantityDeducted = 0;
+    
+    if ($logResult && $logResult->num_rows > 0) {
+        $log = $logResult->fetch_assoc();
+        $deductionDate = $log['deduction_date'];
+        $quantityDeducted = $log['quantity_deducted'];
+        
+        // Parse batch details JSON if available
+        if (!empty($log['batch_details'])) {
+            $batchDetails = json_decode($log['batch_details'], true);
+        }
     }
     
     echo json_encode([
         'success' => true,
-        'order' => $order,
-        'product' => $product,
         'batch_tracking_enabled' => true,
-        'quantity_deducted' => $log['quantity'],
-        'deduction_date' => $log['created_at'],
+        'order' => $order,
+        'quantity_deducted' => $quantityDeducted,
+        'deduction_date' => $deductionDate,
         'batch_details' => $batchDetails
     ]);
     

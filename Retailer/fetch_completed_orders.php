@@ -45,12 +45,15 @@ try {
     if ($userRow = $userResult->fetch_assoc()) {
         $userEmail = $userRow['email'];
         
-        // Get ONLY orders with status = 'completed'
+        // Get orders with status = 'completed' AND payment_status NOT 'paid' AND payment_status NOT 'Partial'
+        // This ensures partial payment orders don't appear in the Consignment Inventory tab
         $query = "SELECT o.*, 
                   DATEDIFF(DATE_ADD(o.created_at, INTERVAL o.consignment_term DAY), CURDATE()) as days_remaining
                   FROM retailer_orders o 
                   WHERE o.retailer_email = ? 
                   AND o.status = 'completed'
+                  AND (o.payment_status != 'paid' OR o.payment_status IS NULL)
+                  AND (o.payment_status != 'Partial')
                   ORDER BY o.created_at DESC";
         
         $stmt = $conn->prepare($query);

@@ -1,0 +1,2832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piñana Gourmet - Suppliers</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Modal Enhancements CSS -->
+  <link rel="stylesheet" href="modal-enhancements.css">
+  <!-- Modal Animations CSS -->
+  <link rel="stylesheet" href="modal-animations.css">
+  <!-- Datepicker CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="icon" href="Retailer/mono-green.png">
+
+  <style>
+    /* Enhanced Suppliers Management Styles - Production Theme (Main Content Only) */
+    :root {
+      --primary-green: #28a745;
+      --secondary-green: #20c997;
+      --accent-yellow: #ffc107;
+      --light-green: #d4edda;
+      --dark-green: #155724;
+      --gradient-primary: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      --gradient-secondary: linear-gradient(135deg, #ffc107 0%, #ffeb3b 100%);
+      --shadow-light: 0 2px 15px rgba(0, 0, 0, 0.08);
+      --shadow-medium: 0 4px 25px rgba(0, 0, 0, 0.12);
+      --shadow-heavy: 0 8px 40px rgba(0, 0, 0, 0.15);
+      --border-radius: 16px;
+      --border-radius-small: 8px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Enhanced Body and Container Styles */
+    body {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      color: var(--dark-green);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .main-content {
+      background: transparent;
+    }
+
+    .main-content-inner {
+      padding: 2rem 0;
+      margin-top: -3rem;
+    }
+
+    /* Enhanced Card Styles */
+    .card {
+      background: white;
+      border: none;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+      border: 1px solid rgba(40, 167, 69, 0.1);
+      transition: var(--transition);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--gradient-primary);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .card-header {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      padding: 1.5rem 1.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .card-body {
+      padding: 2rem;
+    }
+
+    /* Enhanced Fixed Pineapple Card */
+    .fixed-pineapple-card {
+      background: white;
+      border: 1px solid rgba(255, 193, 7, 0.2);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fixed-pineapple-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--gradient-secondary);
+    }
+
+    .fixed-pineapple-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .fixed-pineapple-card .card-header {
+      background: rgba(255, 193, 7, 0.1);
+      color: #856404;
+      border-bottom: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    /* Enhanced Button Styles */
+    .btn {
+      border-radius: 25px;
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      transition: var(--transition);
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-light);
+    }
+
+    .btn-success {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-light);
+    }
+
+    .btn-outline-primary {
+      border: 2px solid var(--primary-green);
+      color: var(--primary-green);
+      background: transparent;
+    }
+
+    .btn-outline-primary:hover {
+      background: var(--primary-green);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-light);
+    }
+
+    .btn-outline-success {
+      border: 2px solid var(--primary-green);
+      color: var(--primary-green);
+      background: transparent;
+    }
+
+    .btn-outline-success:hover {
+      background: var(--primary-green);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-light);
+    }
+
+    /* Enhanced Form Controls */
+    .form-control, .form-select {
+      border-radius: 25px;
+      border: 2px solid #e9ecef;
+      padding: 0.875rem 1rem;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      background: white;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--dark-green);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    /* Enhanced Table Styles */
+    .table {
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-light);
+    }
+
+    .table th {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      color: var(--dark-green);
+      font-weight: 600;
+      border: none;
+      padding: 1rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .table td {
+      padding: 1rem;
+      border-color: rgba(40, 167, 69, 0.1);
+      vertical-align: middle;
+    }
+
+    .table tbody tr {
+      transition: var(--transition);
+    }
+
+    .table tbody tr:hover {
+      background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(32, 201, 151, 0.05) 100%);
+      transform: scale(1.01);
+    }
+
+    /* Enhanced Badge Styles */
+    .badge {
+      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge.bg-primary {
+      background: var(--gradient-primary) !important;
+    }
+
+    .badge.bg-success {
+      background: var(--gradient-primary) !important;
+    }
+
+    .badge.bg-warning {
+      background: var(--gradient-secondary) !important;
+      color: #856404 !important;
+    }
+
+    /* Enhanced Search Input */
+    .input-group {
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: var(--shadow-light);
+    }
+
+    .input-group .form-control {
+      border: none;
+      border-radius: 0;
+    }
+
+    .input-group .btn {
+      border-radius: 0;
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+    }
+
+    /* Enhanced View Toggle Buttons */
+    .btn-group {
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: var(--shadow-light);
+    }
+
+    .btn-group .btn {
+      border-radius: 0;
+      border: none;
+      background: white;
+      color: #6c757d;
+    }
+
+    .btn-group .btn.active {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    /* Enhanced Modal Styles */
+    .modal-content {
+      border: none;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-heavy);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .modal-footer {
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      padding: 1.5rem 2rem;
+    }
+
+    /* Enhanced Toast Styles */
+    .toast {
+      border: none;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-medium);
+      background: white;
+    }
+
+    .toast-header {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    /* Enhanced Alternative Details Section */
+    .alternative-details-section {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      margin-top: 2rem;
+      border: 1px solid #bae6fd;
+    }
+
+    .alternative-details-section .alert {
+      border-radius: var(--border-radius-small);
+      border: none;
+      box-shadow: var(--shadow-light);
+    }
+
+    /* Enhanced Location Dropdowns */
+    .location-dropdowns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: var(--border-radius);
+      margin: 1rem 0;
+    }
+
+    .location-dropdowns .form-group {
+      margin-bottom: 0;
+    }
+
+    .location-dropdowns .form-label {
+      font-weight: 600;
+      color: var(--dark-green);
+      margin-bottom: 0.75rem;
+    }
+
+    .location-dropdowns .form-select {
+      border-radius: var(--border-radius-small);
+      border: 2px solid #e9ecef;
+      transition: var(--transition);
+    }
+
+    .location-dropdowns .form-select:focus {
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+    }
+
+    /* Enhanced Loading States */
+    .location-dropdowns .form-select.loading {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"), url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='%2328a745' d='M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM7 3a1 1 0 0 0-2 0v5.268l-1.732-1.732a1 1 0 0 0-1.414 1.414l3.5 3.5a1 1 0 0 0 1.414 0l3.5-3.5a1 1 0 0 0-1.414-1.414L9 8.268V3a1 1 0 0 0-2 0z'/%3e%3c/svg%3e");
+      background-position: right 0.75rem center, right 2.25rem center;
+      background-size: 16px 12px, 12px 12px;
+    }
+
+    /* Enhanced Success/Error States */
+    .location-dropdowns .form-select.completed {
+      border-color: var(--primary-green);
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+
+    .location-dropdowns .form-select.error {
+      border-color: #dc3545;
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    }
+
+    /* Enhanced Responsive Design */
+    @media (max-width: 768px) {
+      .location-dropdowns {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .card-body {
+        padding: 1.5rem;
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+      }
+
+      .btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Enhanced Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Enhanced Hover Effects */
+    .supplier-card {
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .supplier-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    /* Enhanced Alternative Row Styles */
+    .alternative-row {
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .alternative-row:hover {
+      background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(32, 201, 151, 0.1) 100%) !important;
+      transform: scale(1.02);
+    }
+
+    .alternative-row.selected {
+      background: linear-gradient(135deg, rgba(40, 167, 69, 0.2) 0%, rgba(32, 201, 151, 0.2) 100%) !important;
+      border-left: 4px solid var(--primary-green);
+    }
+
+    /* Enhanced Table Hover */
+    .table-hover tbody tr:hover {
+      cursor: pointer;
+      background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(32, 201, 151, 0.05) 100%);
+      transform: scale(1.01);
+    }
+
+    /* Enhanced Loading Modal */
+    #loadingModal .modal-content {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+
+    .spinner-border {
+      color: var(--primary-green);
+    }
+
+    /* Enhanced Success/Error Modals */
+    #successModal .modal-content,
+    #errorModal .modal-content {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+
+    /* Enhanced Form Validation */
+    .form-control.is-valid {
+      border-color: var(--primary-green);
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+
+    .form-control.is-invalid {
+      border-color: #dc3545;
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    }
+
+    .valid-feedback {
+      color: var(--primary-green);
+      font-weight: 500;
+    }
+
+    .invalid-feedback {
+      color: #dc3545;
+      font-weight: 500;
+    }
+
+    /* Enhanced Country Code Dropdown */
+    .country-code-btn {
+      border-radius: var(--border-radius-small) 0 0 var(--border-radius-small);
+      border: 2px solid #e9ecef;
+      border-right: none;
+      background: #f8f9fa;
+      color: var(--dark-green);
+      font-weight: 500;
+    }
+
+    .country-code-dropdown {
+      border: none;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-medium);
+      background: white;
+    }
+
+    .country-code-dropdown .dropdown-item {
+      border-radius: var(--border-radius-small);
+      margin: 0.25rem;
+      transition: var(--transition);
+    }
+
+    .country-code-dropdown .dropdown-item:hover {
+      background: var(--gradient-primary);
+      color: white;
+      transform: translateX(5px);
+    }
+
+    /* Enhanced Phone Input */
+    .phone-input {
+      border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
+      border: 2px solid #e9ecef;
+      border-left: none;
+    }
+
+    /* Enhanced Custom Select Styles */
+    .harvest-season-select,
+    .planting-cycle-select,
+    .variety-select,
+    .shelf-life-select {
+      border-radius: var(--border-radius-small);
+      border: 2px solid #e9ecef;
+      transition: var(--transition);
+    }
+
+    .harvest-season-select:focus,
+    .planting-cycle-select:focus,
+    .variety-select:focus,
+    .shelf-life-select:focus {
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+    }
+
+    /* Enhanced Custom Input Groups */
+    .harvest-season-custom .input-group,
+    .planting-cycle-custom .input-group,
+    .shelf-life-custom .input-group {
+      border-radius: var(--border-radius-small);
+      overflow: hidden;
+      box-shadow: var(--shadow-light);
+    }
+
+    .harvest-season-custom .form-select,
+    .planting-cycle-custom .form-control,
+    .shelf-life-custom .form-control {
+      border: none;
+      border-radius: 0;
+    }
+
+    .harvest-season-custom .input-group-text,
+    .planting-cycle-custom .input-group-text,
+    .shelf-life-custom .input-group-text {
+      background: #f8f9fa;
+      border: none;
+      color: #6c757d;
+      font-weight: 500;
+    }
+
+    /* Enhanced Custom Input Fields */
+    .variety-custom-input {
+      border-radius: var(--border-radius-small);
+      border: 2px solid #e9ecef;
+      transition: var(--transition);
+    }
+
+    .variety-custom-input:focus {
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+    }
+
+    /* Enhanced Textarea Styles */
+    textarea.form-control {
+      border-radius: var(--border-radius-small);
+      border: 2px solid #e9ecef;
+      transition: var(--transition);
+      resize: vertical;
+    }
+
+    textarea.form-control:focus {
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+    }
+
+    /* Enhanced Close Button */
+    .close-alternative-details {
+      background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .close-alternative-details:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-light);
+    }
+
+    /* Enhanced Modal Transitions */
+    .modal-dialog {
+      transition: var(--transition);
+    }
+
+    .modal.show .modal-dialog {
+      transform: scale(1);
+    }
+
+    .modal:not(.show) .modal-dialog {
+      transform: scale(0.9);
+    }
+
+    /* Enhanced Toast Animations */
+    .toast {
+      animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Enhanced Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--gradient-primary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+    }
+
+    /* Enhanced Focus States */
+    .btn:focus,
+    .form-control:focus,
+    .form-select:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+    }
+
+    /* Enhanced Disabled States */
+    .btn:disabled,
+    .form-control:disabled,
+    .form-select:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Enhanced Loading States */
+    .btn.loading {
+      position: relative;
+      color: transparent;
+    }
+
+    .btn.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Enhanced Empty States */
+    .text-muted {
+      color: #6c757d !important;
+      font-style: italic;
+    }
+
+    /* Enhanced Section Titles */
+    .section-title {
+      color: var(--dark-green);
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5rem;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: var(--gradient-primary);
+      border-radius: 2px;
+    }
+
+    /* Enhanced Grid Layout */
+    .row {
+      margin-right: -0.75rem;
+      margin-left: -0.75rem;
+    }
+
+    .col-md-3, .col-md-6, .col-md-9, .col-lg-2, .col-lg-10 {
+      padding-right: 0.75rem;
+      padding-left: 0.75rem;
+    }
+
+    /* Enhanced Spacing */
+    .mb-4 {
+      margin-bottom: 2rem !important;
+    }
+
+    .mt-3 {
+      margin-top: 1.5rem !important;
+    }
+
+    .p-3 {
+      padding: 1.5rem !important;
+    }
+
+    /* Enhanced Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      color: var(--dark-green);
+    }
+
+    p {
+      color: #6c757d;
+      line-height: 1.6;
+    }
+
+    small {
+      color: #6c757d;
+      font-weight: 500;
+    }
+
+    /* Enhanced Icons */
+    .bi {
+      transition: var(--transition);
+    }
+
+    .btn:hover .bi {
+      transform: scale(1.1);
+    }
+
+    /* Enhanced Responsive Typography */
+    @media (max-width: 768px) {
+      .section-title {
+        font-size: 1.25rem;
+      }
+
+      .card-header {
+        padding: 1rem 1.25rem;
+      }
+
+      .card-body {
+        padding: 1.25rem;
+      }
+    }
+
+    /* Enhanced Print Styles */
+    @media print {
+      .btn, .modal, .toast-container {
+        display: none !important;
+      }
+
+      .card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+      }
+    }
+
+    /* Submenu styles */
+    .submenu {
+      padding-left: 2rem;
+      list-style: none;
+    }
+
+    .submenu .nav-item {
+      margin-bottom: 0.25rem;
+    }
+
+    .submenu .nav-link {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .submenu .nav-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .nav-link.dropdown-toggle::after {
+      display: inline-block;
+      margin-left: auto;
+      content: "";
+      border-top: 0.3em solid;
+      border-right: 0.3em solid transparent;
+      border-bottom: 0;
+      border-left: 0.3em solid transparent;
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .submenu-link {
+      padding-left: 3rem !important;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .submenu-link:hover {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .submenu-link.active {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    #inventorySubmenu {
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+    }
+
+    .nav-link.dropdown-toggle::after {
+      display: inline-block;
+      margin-left: auto;
+      content: "";
+      border-top: 0.3em solid;
+      border-right: 0.3em solid transparent;
+      border-bottom: 0;
+      border-left: 0.3em solid transparent;
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .nav-link.dropdown-toggle[aria-expanded="true"]::after {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    /* Additional styles from suppliers.js */
+    .supplier-card {
+      transition: all 0.3s ease;
+    }
+    .supplier-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .fixed-pineapple-card {
+      transition: all 0.3s ease;
+      border-left: 4px solid #ffc107;
+    }
+    .fixed-pineapple-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .fixed-pineapple-card .card-body {
+      position: relative;
+    }
+    .fixed-pineapple-card .add-alternative-btn {
+      z-index: 10;
+    }
+
+    /* Location dropdown styles */
+    .location-dropdowns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .location-dropdowns .form-group {
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .location-dropdowns {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Enhanced Location Dropdown Styles */
+    .location-dropdowns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .location-dropdowns .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .location-dropdowns .form-label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .location-dropdowns .form-select:disabled {
+      background-color: #f8f9fa;
+      opacity: 0.65;
+    }
+
+    .location-dropdowns .form-select:focus {
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    @media (max-width: 768px) {
+      .location-dropdowns {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Loading state for dropdowns */
+    .location-dropdowns .form-select.loading {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"), url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='%2328a745' d='M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM7 3a1 1 0 0 0-2 0v5.268l-1.732-1.732a1 1 0 0 0-1.414 1.414l3.5 3.5a1 1 0 0 0 1.414 0l3.5-3.5a1 1 0 0 0-1.414-1.414L9 8.268V3a1 1 0 0 0-2 0z'/%3e%3c/svg%3e");
+      background-position: right 0.75rem center, right 2.25rem center;
+      background-size: 16px 12px, 12px 12px;
+    }
+
+    /* Success state for completed selection */
+    .location-dropdowns .form-select.completed {
+      border-color: var(--primary-green);
+      background-color: #f8fff9;
+    }
+
+    /* Error state for validation */
+    .location-dropdowns .form-select.error {
+      border-color: #dc3545;
+      background-color: #fff5f5;
+    }
+
+    /* Validation feedback */
+    .location-dropdowns .invalid-feedback {
+      display: block;
+      width: 100%;
+      margin-top: 0.25rem;
+      font-size: 0.875em;
+      color: #dc3545;
+    }
+
+    .location-dropdowns .valid-feedback {
+      display: block;
+      width: 100%;
+      margin-top: 0.25rem;
+      font-size: 0.875em;
+      color: var(--primary-green);
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+        <div class="sidebar-inner">
+            <div class="logo-container d-flex align-items-center mb-4 mt-3">
+                <img src="images/final-light.png" class="pineapple-logo">
+            </div>
+          
+          <div class="sidebar-divider" style="margin-top: -1.5rem;">
+            <span>MAIN MENU</span>
+          </div>
+          
+          <ul class="nav flex-column sidebar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="dashboard.html" data-page="dashboard">
+                <div class="nav-icon">
+                  <i class="bi bi-grid"></i>
+                </div>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link dropdown-toggle" href="#inventorySubmenu" data-bs-toggle="collapse" aria-expanded="false">
+                <div class="nav-icon">
+                  <i class="bi bi-box"></i>
+                </div>
+                <span>Inventory</span>
+              </a>
+              <ul class="collapse submenu" id="inventorySubmenu">
+                <li class="nav-item">
+                  <a class="nav-link" href="inventory.html" data-page="inventory">
+                    <div class="nav-icon">
+                      <i class="bi bi-box-seam"></i>
+                    </div>
+                    <span>Products</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="supplies.html" data-page="supplies">
+                    <div class="nav-icon">
+                      <i class="bi bi-tools"></i>
+                    </div>
+                    <span>Supplies</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link " href="production.html" data-page="production">
+                <div class="nav-icon">
+                  <i class="bi bi-layer-backward"></i>
+                </div>
+                <span>Production</span>
+              </a>
+            </li>
+            
+            <div class="sidebar-divider">
+              <span>SALES</span>
+            </div>
+            <li class="nav-item">
+              <a class="nav-link" href="orders.html" data-page="orders">
+                <div class="nav-icon">
+                  <i class="bi bi-people"></i>
+                </div>
+                <span>Orders</span>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              <a class="nav-link" href="billing.html" data-page="billing">
+                <div class="nav-icon">
+                  <i class="bi bi-credit-card"></i>
+                </div>
+                <span>Billing</span>
+              </a>
+            </li>
+            
+            
+            <li class="nav-item">
+              <a class="nav-link" href="reports.html" data-page="reports">
+                <div class="nav-icon">
+                  <i class="bi bi-bar-chart"></i>
+                </div>
+                <span>Reports</span>
+              </a>
+            </li>
+    
+            <div class="sidebar-divider">
+              <span>USER</span>
+            </div>
+    
+            <li class="nav-item">
+              <a class="nav-link" href="retailers.html" data-page="retailers">
+                <div class="nav-icon">
+                  <i class="bi bi-person-heart"></i>
+                </div>
+                <span>Retailers</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="suppliers.html" data-page="suppliers">
+                <div class="nav-icon">
+                  <i class="bi bi-person-fill-down"></i>
+                </div>
+                <span>Suppliers</span>
+              </a>
+            </li>
+    
+          </ul>
+        </div>
+      </div>
+      <!-- Main content -->
+      <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+        <!-- Header -->
+        <div class="fixed-top-header">
+          <div class="d-flex justify-content-between align-items-center w-100">
+            <div class="d-flex align-items-center">
+              <button class="navbar-toggler d-md-none collapsed me-2" type="button" id="sidebarToggle">
+                <i class="bi bi-list"></i>
+              </button>
+              <h5 class="mb-0">Suppliers Management</h5>
+            </div>
+            <div class="d-flex align-items-center">
+              <div class="dropdown user-profile-dropdown" >
+                <div class="profile-circle dropdown-toggle position-relative" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person-fill"></i>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" id="notification-badge" style="display: none;">
+                    0
+                    <span class="visually-hidden">unread notifications</span>
+                  </span>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown" style="width: 350px;">
+                  <li class="dropdown-item-text">
+                    <div class="sidebar-divider">
+                      <span>NOTIFICATIONS</span>
+                      <div class="float-end">
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" id="mark-all-read">Mark all as read</button>
+                      </div>
+                    </div>
+                    <div id="notifications-container" class="notifications-container" style="max-height: 300px; overflow-y: auto;">
+                      <div class="text-center py-3 text-muted" id="no-notifications-message">No new notifications</div>
+                    </div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li class="dropdown-item-text">
+                    <div class="sidebar-divider">
+                      <span>ACCOUNT</span>
+                    </div>
+                    <div class="user-info d-flex align-items-center">
+                      <div class="user-avatar">
+                        <i class="bi bi-person-circle"></i>
+                      </div>
+                      <div class="user-details">
+                        <div class="user-name">Admin User</div>
+                        <div class="user-role">Piñana Gourmet</div>
+                      </div>
+                    </div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="#" id="logoutButton"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-content-inner">
+          <h5 class="section-title"> </h5>
+          
+        
+          
+         <!-- Fixed Pineapple Supplier Section -->
+<div class="card shadow-sm mb-4 fixed-pineapple-card">
+  <div class="card-header bg-warning bg-opacity-10 d-flex align-items-center">
+    <h5 class="mb-0 me-auto">Pineapple Supplier</h5>
+    <button class="btn btn-sm btn-outline-primary edit-fixed-supplier-btn me-2">
+      <i class="bi bi-pencil me-1"></i>Edit
+    </button>
+    <button class="btn btn-sm btn-outline-success add-alternative-btn" data-supplier-id="fixed-pineapple">
+      <i class="bi bi-plus-circle me-1"></i>Add Alternative
+    </button>
+  </div>
+  <div class="card-body">
+    <div class="d-flex align-items-center">
+      <div class="flex-grow-1">
+        <h6 class="mb-1">Calauan Pineapple Farm</h6>
+        <p class="mb-1 text-muted small"><i class="bi bi-geo-alt me-1"></i>Calauan, Laguna</p>
+        <p class="mb-0 text-muted small"><i class="bi bi-telephone me-1"></i>+63 9495027266</p>
+      </div>
+      <div>
+        <span class="badge bg-warning text-dark">0 Alternatives</span>
+      </div>
+    </div>
+    <div class="mt-2 text-end">
+      <small class="text-muted">Click to view details</small>
+    </div>
+  </div>
+</div>
+
+  <!-- Controls Section -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <!-- Right side: View toggle buttons -->
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-outline-primary active" id="table-view-btn">
+                <i class="bi bi-table me-2"></i>Table View
+              </button>
+              <button type="button" class="btn btn-outline-primary" id="card-view-btn">
+                <i class="bi bi-grid-3x3-gap me-2"></i>Card View
+              </button>
+            </div>
+            <!-- Left side: Search input -->
+            <div class="input-group" style="max-width: 400px;">
+              <input type="text" class="form-control" placeholder="Search suppliers..." id="supplier-search">
+              <button class="btn btn-outline-secondary" type="button">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+            
+        
+          </div>
+          
+      <!-- Suppliers Container -->
+<div id="suppliers-container" class="mt-3">
+  <div class="card shadow-sm">
+    <div class="card-header bg-success bg-opacity-10 d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Supplier List</h5>
+      <!-- Add supplier button aligned to the right -->
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addSupplierModal">
+        <i class="bi bi-plus-circle me-2"></i>Add New Supplier
+      </button>
+    </div>
+    <div class="card-body">
+      <!-- Table view will be inserted here by JS -->
+    </div>
+  </div>
+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to logout?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmLogout">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Supplier Modal -->
+  <div class="modal fade" id="addSupplierModal" tabindex="-1" aria-labelledby="addSupplierModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addSupplierModalLabel">Add New Supplier</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="add-supplier-form">
+            <div class="mb-3">
+              <label for="supplier-type" class="form-label">Supplier Type</label>
+              <select class="form-select" id="supplier-type" required>
+                <option value="" selected disabled>Select supplier type</option>
+                <option value="physical">Physical/Market Supplier</option>
+                <option value="online">Online Shop Supplier</option>
+              </select>
+            </div>
+            
+            <!-- Common field for all supplier types -->
+            <div class="mb-3">
+              <label for="supplier-name" class="form-label">Supplier Name</label>
+              <input type="text" class="form-control" id="supplier-name" required>
+            </div>
+            
+            <!-- Physical/Market Supplier Fields -->
+            <div id="physical-fields" style="display: none;">
+              <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <div class="location-dropdowns">
+                  <div class="form-group">
+                    <label for="add-supplier-location-region" class="form-label">Region</label>
+                    <select class="form-select" id="add-supplier-location-region">
+                      <option value="">Select Region</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="add-supplier-location-province" class="form-label">Province</label>
+                    <select class="form-select" id="add-supplier-location-province">
+                      <option value="">Select Province</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="add-supplier-location-city" class="form-label">City/Municipality</label>
+                    <select class="form-select" id="add-supplier-location-city">
+                      <option value="">Select City/Municipality</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="add-supplier-location-barangay" class="form-label">Barangay</label>
+                    <select class="form-select" id="add-supplier-location-barangay">
+                      <option value="">Select Barangay</option>
+                    </select>
+                  </div>
+                </div>
+                <input type="hidden" class="form-control" id="address">
+              </div>
+              
+              <div class="mb-3">
+                <label for="contact-name" class="form-label">Contact Name</label>
+                <input type="text" class="form-control" id="contact-name" placeholder="Contact person name">
+              </div>
+
+              <div class="mb-3">
+                <label for="contact-number" class="form-label">Contact Number</label>
+                <div class="input-group">
+                  <button class="btn btn-outline-secondary dropdown-toggle country-code-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">+63</button>
+                  <ul class="dropdown-menu country-code-dropdown">
+                    <li><a class="dropdown-item" href="#" data-code="+63">Philippines (+63)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+1">USA (+1)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+44">UK (+44)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+61">Australia (+61)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+81">Japan (+81)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+86">China (+86)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+65">Singapore (+65)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+60">Malaysia (+60)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+66">Thailand (+66)</a></li>
+                  </ul>
+                  <input type="text" class="form-control phone-input" id="contact-number" placeholder="Phone number">
+                  <input type="hidden" class="form-control full-contact-info" id="contact-info-field">
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email">
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">Opening Hours</label>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="time" class="form-control" id="opening-hours-start" required>
+                  <span>-</span>
+                  <input type="time" class="form-control" id="opening-hours-end" required>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="delivery-info" class="form-label">Delivery Info</label>
+                <select class="form-select" id="delivery-info">
+                  <option value="" selected disabled>Select delivery method</option>
+                  <option value="3rd Party">3rd Party</option>
+                  <option value="Business Driver">Business Driver</option>
+                  <option value="Pick Up">Pick Up</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div id="other-delivery-container" style="display: none;">
+                <div class="mb-3">
+                  <label for="other-delivery" class="form-label">Specify Delivery Method</label>
+                  <input type="text" class="form-control" id="other-delivery">
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="communication-mode" class="form-label">Mode of Communication</label>
+                <select class="form-select" id="communication-mode">
+                  <option value="" selected disabled>Select communication mode</option>
+                  <option value="Text">Text</option>
+                  <option value="Call">Call</option>
+                  <option value="WhatsApp">WhatsApp</option>
+                  <option value="Telegram">Telegram</option>
+                  <option value="Viber">Viber</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div id="other-communication-container" style="display: none;">
+                <div class="mb-3">
+                  <label for="other-communication" class="form-label">Specify Communication Mode</label>
+                  <input type="text" class="form-control" id="other-communication">
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <textarea class="form-control" id="notes" rows="3"></textarea>
+              </div>
+            </div>
+            
+            <!-- Online Shop Supplier Fields -->
+            <div id="online-fields" style="display: none;">
+              <div class="mb-3">
+                <label for="link" class="form-label">Link</label>
+                <input type="url" class="form-control" id="link">
+              </div>
+              
+              <div class="mb-3">
+                <label for="platform" class="form-label">Platform Used</label>
+                <select class="form-select" id="platform">
+                  <option value="" selected disabled>Select platform</option>
+                  <option value="Shopee">Shopee</option>
+                  <option value="Lazada">Lazada</option>
+                  <option value="Tiktok Shop">Tiktok Shop</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <div id="other-platform-container" style="display: none;">
+                <div class="mb-3">
+                  <label for="other-platform" class="form-label">Specify Platform</label>
+                  <input type="text" class="form-control" id="other-platform">
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="online-delivery-info" class="form-label">Delivery Info</label>
+                <select class="form-select" id="online-delivery-info">
+                  <option value="" selected disabled>Select delivery method</option>
+                  <option value="3rd Party">3rd Party</option>
+                  <option value="Business Driver">Business Driver</option>
+                  <option value="Pick Up">Pick Up</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div id="other-online-delivery-container" style="display: none;">
+                <div class="mb-3">
+                  <label for="other-online-delivery" class="form-label">Specify Delivery Method</label>
+                  <input type="text" class="form-control" id="other-online-delivery">
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="online-notes" class="form-label">Notes</label>
+                <textarea class="form-control" id="online-notes" rows="3"></textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success" id="save-supplier-btn">Save Supplier</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Supplier Modal -->
+  <div class="modal fade" id="editSupplierModal" tabindex="-1" aria-labelledby="editSupplierModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editSupplierModalLabel">Edit Supplier</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-supplier-form">
+            <input type="hidden" id="edit-supplier-id">
+            <input type="hidden" id="edit-supplier-type">
+            
+            <div class="mb-3">
+              <label for="edit-supplier-type-display" class="form-label">Supplier Type</label>
+              <input type="text" class="form-control" id="edit-supplier-type-display" readonly>
+            </div>
+            
+            <div class="mb-3">
+              <label for="edit-supplier-name" class="form-label">Supplier Name</label>
+              <input type="text" class="form-control" id="edit-supplier-name" required>
+            </div>
+            
+            <!-- Physical supplier fields -->
+            <div id="edit-physical-fields">
+              <div class="mb-3">
+                <label for="edit-address" class="form-label">Address</label>
+                <div class="location-dropdowns">
+                  <div class="form-group">
+                    <label for="edit-supplier-location-region" class="form-label">Region</label>
+                    <select class="form-select" id="edit-supplier-location-region">
+                      <option value="">Select Region</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="edit-supplier-location-province" class="form-label">Province</label>
+                    <select class="form-select" id="edit-supplier-location-province">
+                      <option value="">Select Province</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="edit-supplier-location-city" class="form-label">City/Municipality</label>
+                    <select class="form-select" id="edit-supplier-location-city">
+                      <option value="">Select City/Municipality</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="edit-supplier-location-barangay" class="form-label">Barangay</label>
+                    <select class="form-select" id="edit-supplier-location-barangay">
+                      <option value="">Select Barangay</option>
+                    </select>
+                  </div>
+                </div>
+                <input type="hidden" class="form-control" id="edit-address">
+              </div>
+              
+              <div class="mb-3">
+                <label for="edit-contact-name" class="form-label">Contact Name</label>
+                <input type="text" class="form-control" id="edit-contact-name" placeholder="Contact person name">
+              </div>
+
+              <div class="mb-3">
+                <label for="edit-contact-number" class="form-label">Contact Number</label>
+                <div class="input-group">
+                  <button class="btn btn-outline-secondary dropdown-toggle country-code-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">+63</button>
+                  <ul class="dropdown-menu country-code-dropdown">
+                    <li><a class="dropdown-item" href="#" data-code="+63">Philippines (+63)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+1">USA (+1)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+44">UK (+44)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+61">Australia (+61)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+81">Japan (+81)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+86">China (+86)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+65">Singapore (+65)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+60">Malaysia (+60)</a></li>
+                    <li><a class="dropdown-item" href="#" data-code="+66">Thailand (+66)</a></li>
+                  </ul>
+                  <input type="text" class="form-control phone-input" id="edit-contact-number" placeholder="Phone number">
+                  <input type="hidden" class="form-control full-contact-info" id="edit-contact-info-field">
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="edit-email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="edit-email">
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">Opening Hours</label>
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="time" class="form-control" id="edit-opening-hours-start" required>
+                  <span>-</span>
+                  <input type="time" class="form-control" id="edit-opening-hours-end" required>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="edit-delivery-info" class="form-label">Delivery Info</label>
+                <select class="form-select" id="edit-delivery-info">
+                  <option value="" selected disabled>Select delivery method</option>
+                  <option value="3rd Party">3rd Party</option>
+                  <option value="Business Driver">Business Driver</option>
+                  <option value="Pick Up">Pick Up</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <div id="edit-other-delivery-container" style="display: none;">
+                <div class="mb-3">
+                  <label for="edit-other-delivery" class="form-label">Specify Delivery Method</label>
+                  <input type="text" class="form-control" id="edit-other-delivery">
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="edit-communication-mode" class="form-label">Mode of Communication</label>
+                <select class="form-select" id="edit-communication-mode">
+                  <option value="" selected disabled>Select communication mode</option>
+                  <option value="Text">Text</option>
+                  <option value="Call">Call</option>
+                  <option value="WhatsApp">WhatsApp</option>
+                  <option value="Telegram">Telegram</option>
+                  <option value="Viber">Viber</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <div id="edit-other-communication-container" style="display: none;">
+                <div class="mb-3">
+                  <label for="edit-other-communication" class="form-label">Specify Communication Mode</label>
+                  <input type="text" class="form-control" id="edit-other-communication">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Online supplier fields -->
+            <div id="edit-online-fields">
+              <div class="mb-3">
+                <label for="edit-link" class="form-label">Link</label>
+                <input type="url" class="form-control" id="edit-link">
+              </div>
+              
+              <div class="mb-3">
+                <label for="edit-platform" class="form-label">Platform Used</label>
+                <select class="form-select" id="edit-platform">
+                  <option value="" selected disabled>Select platform</option>
+                  <option value="Shopee">Shopee</option>
+                  <option value="Lazada">Lazada</option>
+                  <option value="Tiktok Shop">Tiktok Shop</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <div id="edit-other-platform-container" style="display: none;">
+                <div class="mb-3">
+                  <label for="edit-other-platform" class="form-label">Specify Platform</label>
+                  <input type="text" class="form-control" id="edit-other-platform">
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="edit-online-delivery-info" class="form-label">Delivery Info</label>
+                <select class="form-select" id="edit-online-delivery-info">
+                  <option value="" selected disabled>Select delivery method</option>
+                  <option value="3rd Party">3rd Party</option>
+                  <option value="Business Driver">Business Driver</option>
+                  <option value="Pick Up">Pick Up</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <div id="edit-other-online-delivery-container" style="display: none;">
+                <div class="mb-3">
+                  <label for="edit-other-online-delivery" class="form-label">Specify Delivery Method</label>
+                  <input type="text" class="form-control" id="edit-other-online-delivery">
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="edit-notes" class="form-label">Notes</label>
+              <textarea class="form-control" id="edit-notes" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="update-supplier-btn">Update Supplier</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteSupplierModal" tabindex="-1" aria-labelledby="deleteSupplierModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteSupplierModalLabel">Confirm Delete</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this supplier? This action cannot be undone.</p>
+          <input type="hidden" id="delete-supplier-id">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Pineapple Alternative Supplier Confirmation Modal -->
+  <div class="modal fade" id="deletePineappleAlternativeModal" tabindex="-1" aria-labelledby="deletePineappleAlternativeModalLabel" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-warning bg-opacity-10">
+          <h5 class="modal-title" id="deletePineappleAlternativeModalLabel">Confirm Delete Pineapple Alternative</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-exclamation-triangle-fill text-warning me-3" style="font-size: 2rem;"></i>
+            <div>
+              <h6 class="mb-1">Delete Alternative Supplier</h6>
+              <p class="mb-0 text-muted">Are you sure you want to delete this pineapple alternative supplier? This action cannot be undone.</p>
+            </div>
+          </div>
+          <div class="alert alert-warning">
+            <strong>Alternative Name:</strong> <span id="delete-pineapple-alternative-name"></span><br>
+            <strong>Contact Info:</strong> <span id="delete-pineapple-alternative-contact"></span><br>
+            <strong>Farm Location:</strong> <span id="delete-pineapple-alternative-location"></span>
+          </div>
+          <input type="hidden" id="delete-pineapple-alternative-id">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirm-delete-pineapple-alternative-btn">
+            <i class="bi bi-trash me-2"></i>Delete Alternative
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Regular Alternative Supplier Confirmation Modal -->
+  <div class="modal fade" id="deleteRegularAlternativeModal" tabindex="-1" aria-labelledby="deleteRegularAlternativeModalLabel" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger bg-opacity-10">
+          <h5 class="modal-title" id="deleteRegularAlternativeModalLabel">Confirm Delete Alternative</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-exclamation-triangle-fill text-danger me-3" style="font-size: 2rem;"></i>
+            <div>
+              <h6 class="mb-1">Delete Alternative Supplier</h6>
+              <p class="mb-0 text-muted">Are you sure you want to delete this alternative supplier? This action cannot be undone.</p>
+            </div>
+          </div>
+          <div class="alert alert-danger">
+            <strong>Alternative Name:</strong> <span id="delete-regular-alternative-name"></span><br>
+            <strong>Contact Info:</strong> <span id="delete-regular-alternative-contact"></span><br>
+            <strong>Website:</strong> <span id="delete-regular-alternative-website"></span><br>
+            <strong>Parent Supplier:</strong> <span id="delete-regular-alternative-parent"></span>
+          </div>
+          <input type="hidden" id="delete-regular-alternative-id">
+          <input type="hidden" id="delete-regular-alternative-supplier-id">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirm-delete-regular-alternative-btn">
+            <i class="bi bi-trash me-2"></i>Delete Alternative
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Alternative Loading Modal -->
+  <div class="modal fade" id="deleteAlternativeLoadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" style="z-index: 1080;">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-body py-5">
+          <div class="spinner-border text-danger mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+          <div class="fw-bold fs-5">Deleting Alternative Supplier...</div>
+          <div class="text-muted mt-2">Please wait while we process your request.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Alternative Success Modal -->
+  <div class="modal fade" id="deleteAlternativeSuccessModal" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-body py-5">
+          <div class="text-success mb-3">
+            <i class="bi bi-check-circle-fill" style="font-size: 3rem;"></i>
+          </div>
+          <div class="fw-bold fs-5 mb-2">Alternative Supplier Deleted Successfully!</div>
+          <div class="text-muted">The alternative supplier has been removed from the system.</div>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Alternative Error Modal -->
+  <div class="modal fade" id="deleteAlternativeErrorModal" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-body py-5">
+          <div class="text-danger mb-3">
+            <i class="bi bi-x-circle-fill" style="font-size: 3rem;"></i>
+          </div>
+          <div class="fw-bold fs-5 mb-2">Failed to Delete Alternative Supplier</div>
+          <div id="deleteAlternativeErrorMessage" class="text-muted">An error occurred while deleting the alternative supplier.</div>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Enhanced Add Alternative Modal with Fixed Location Dropdowns -->
+<div class="modal fade" id="addAlternativeModal" tabindex="-1" aria-labelledby="addAlternativeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAlternativeModalLabel">Add Alternative Supplier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="add-alternative-form">
+          <input type="hidden" id="parent-supplier-id">
+          
+          <!-- Supplier Type Selection (only shown for regular suppliers) -->
+          <div class="mb-3" id="alternative-supplier-type-container">
+            <label for="alternative-supplier-type" class="form-label">Supplier Type</label>
+            <select class="form-select" id="alternative-supplier-type" required>
+              <option value="" selected disabled>Select supplier type</option>
+              <option value="physical">Physical/Market Supplier</option>
+              <option value="online">Online Shop Supplier</option>
+            </select>
+          </div>
+          
+          <!-- Common field for all supplier types -->
+          <div class="mb-3" id="alternative-supplier-name-container">
+            <label for="alternative-supplier-name" class="form-label">Supplier Name</label>
+            <input type="text" class="form-control" id="alternative-supplier-name" required>
+          </div>
+          
+          <!-- Pineapple Supplier Fields (only shown for fixed pineapple supplier) -->
+          <div id="alternative-pineapple-fields" style="display: none;">
+            <div class="mb-3">
+              <label for="alternative-name" class="form-label">Supplier Name</label>
+              <input type="text" class="form-control" id="alternative-name" required>
+            </div>
+            
+            <!-- Contact Name Field -->
+            <div class="mb-3">
+              <label for="alternative-contact-name" class="form-label">Contact Name</label>
+              <input type="text" class="form-control" id="alternative-contact-name" placeholder="Contact person name">
+            </div>
+
+            <!-- Contact Number Field with Country Code Dropdown -->
+            <div class="mb-3">
+              <label for="alternative-contact-number" class="form-label">Contact Number</label>
+              <div class="input-group">
+                <button class="btn btn-outline-secondary dropdown-toggle country-code-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">+63</button>
+                <ul class="dropdown-menu country-code-dropdown">
+                  <li><a class="dropdown-item" href="#" data-code="+63">Philippines (+63)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+1">USA (+1)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+44">UK (+44)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+61">Australia (+61)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+81">Japan (+81)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+86">China (+86)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+65">Singapore (+65)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+60">Malaysia (+60)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+66">Thailand (+66)</a></li>
+                </ul>
+                <input type="text" class="form-control phone-input" id="alternative-contact-number" placeholder="Phone number">
+                <input type="hidden" class="form-control full-contact-info" id="contact-info-field">
+              </div>
+            </div>
+
+            <!-- FIXED: Farm Location Field with Philippine Location Dropdowns -->
+            <div class="mb-3">
+              <label for="farm-location" class="form-label">Farm Location</label>
+              <div class="location-dropdowns">
+                <div class="form-group">
+                  <label for="location-region" class="form-label">Region</label>
+                  <select class="form-select location-region" id="location-region" required>
+                    <option value="">Select Region</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="location-province" class="form-label">Province</label>
+                  <select class="form-select location-province" id="location-province" disabled required>
+                    <option value="">Select Province</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="location-city" class="form-label">City/Municipality</label>
+                  <select class="form-select location-city" id="location-city" disabled required>
+                    <option value="">Select City/Municipality</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="location-barangay" class="form-label">Barangay</label>
+                  <select class="form-select location-barangay" id="location-barangay" disabled required>
+                    <option value="">Select Barangay</option>
+                  </select>
+                </div>
+              </div>
+              <input type="hidden" class="form-control full-location" id="farm-location-field" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="alternative-delivery" class="form-label">Delivery Method</label>
+              <select class="form-select" id="alternative-delivery">
+                <option value="">Select delivery method</option>
+                <option value="3rd Party">3rd Party</option>
+                <option value="Business Driver">Business Driver</option>
+                <option value="Pick Up">Pick Up</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="mb-3" id="alternative-other-delivery-container" style="display: none;">
+              <label for="alternative-other-delivery" class="form-label">Specify Delivery Method</label>
+              <input type="text" class="form-control" id="alternative-other-delivery">
+            </div>
+            <div class="mb-3">
+              <label for="alternative-communication" class="form-label">Communication Mode</label>
+              <select class="form-select" id="alternative-communication">
+                <option value="">Select communication mode</option>
+                <option value="Text">Text</option>
+                <option value="Call">Call</option>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Telegram">Telegram</option>
+                <option value="Viber">Viber</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="mb-3" id="alternative-other-communication-container" style="display: none;">
+              <label for="alternative-other-communication" class="form-label">Specify Communication Mode</label>
+              <input type="text" class="form-control" id="alternative-other-communication">
+            </div>
+            
+            <!-- Harvest Season Field with Date Range Picker -->
+            <div class="mb-3">
+              <label for="harvest-season" class="form-label">Harvest Season</label>
+              <select class="form-select harvest-season-select" id="harvest-season-select">
+                <option value="">Select harvest season</option>
+                <option value="Year-round">Year-round</option>
+                <option value="Year-round with peak in summer">Year-round with peak in summer</option>
+                <option value="January-April">January-April</option>
+                <option value="May-August">May-August</option>
+                <option value="September-December">September-December</option>
+                <option value="custom">Custom range...</option>
+              </select>
+              <div class="mt-2 harvest-season-custom" style="display: none;">
+                <div class="input-group">
+                  <span class="input-group-text">From</span>
+                  <select class="form-select harvest-from-month">
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                  </select>
+                  <span class="input-group-text">To</span>
+                  <select class="form-select harvest-to-month">
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                  </select>
+                </div>
+              </div>
+              <input type="hidden" class="form-control full-harvest-season" id="harvest-season-field">
+            </div>
+            
+            <!-- Planting Cycle Field with Options -->
+            <div class="mb-3">
+              <label for="planting-cycle" class="form-label">Planting Cycle</label>
+              <select class="form-select planting-cycle-select" id="planting-cycle-select">
+                <option value="">Select planting cycle</option>
+                <option value="12-18 months">12-18 months</option>
+                <option value="15-20 months">15-20 months</option>
+                <option value="18-24 months">18-24 months</option>
+                <option value="Plant crop">Plant crop</option>
+                <option value="Ratoon crop">Ratoon crop</option>
+                <option value="custom">Custom...</option>
+              </select>
+              <div class="mt-2 planting-cycle-custom" style="display: none;">
+                <div class="input-group">
+                  <input type="number" class="form-control planting-cycle-min" placeholder="Min months">
+                  <span class="input-group-text">to</span>
+                  <input type="number" class="form-control planting-cycle-max" placeholder="Max months">
+                  <span class="input-group-text">months</span>
+                </div>
+              </div>
+              <input type="hidden" class="form-control full-planting-cycle" id="planting-cycle-field">
+            </div>
+            
+            <!-- Pineapple Variety Field with Dropdown -->
+            <div class="mb-3">
+              <label for="variety" class="form-label">Pineapple Variety</label>
+              <select class="form-select variety-select" id="variety-select">
+                <option value="">Select variety</option>
+                <option value="MD-2 Sweet Gold">MD-2 Sweet Gold</option>
+                <option value="Smooth Cayenne">Smooth Cayenne</option>
+                <option value="Queen">Queen</option>
+                <option value="Red Spanish">Red Spanish</option>
+                <option value="Abacaxi">Abacaxi</option>
+                <option value="Sugarloaf">Sugarloaf</option>
+                <option value="custom">Other (specify)</option>
+              </select>
+              <div class="mt-2 variety-custom" style="display: none;">
+                <input type="text" class="form-control variety-custom-input" placeholder="Enter variety name">
+              </div>
+              <input type="hidden" class="form-control full-variety" id="variety-field">
+            </div>
+            
+            <!-- Shelf Life Field with Options -->
+            <div class="mb-3">
+              <label for="shelf-life" class="form-label">Shelf Life</label>
+              <select class="form-select shelf-life-select" id="shelf-life-select">
+                <option value="">Select shelf life</option>
+                <option value="5-7 days at room temperature, 10-14 days refrigerated">5-7 days at room temperature, 10-14 days refrigerated</option>
+                <option value="3-5 days at room temperature">3-5 days at room temperature</option>
+                <option value="7-10 days at room temperature">7-10 days at room temperature</option>
+                <option value="10-14 days refrigerated">10-14 days refrigerated</option>
+                <option value="14-21 days refrigerated">14-21 days refrigerated</option>
+                <option value="custom">Custom...</option>
+              </select>
+              <div class="mt-2 shelf-life-custom" style="display: none;">
+                <div class="row">
+                  <div class="col">
+                    <div class="input-group">
+                      <input type="number" class="form-control shelf-life-room-min" placeholder="Min days">
+                      <span class="input-group-text">to</span>
+                      <input type="number" class="form-control shelf-life-room-max" placeholder="Max days">
+                      <span class="input-group-text">days at room temp</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col">
+                    <div class="input-group">
+                      <input type="number" class="form-control shelf-life-refrig-min" placeholder="Min days">
+                      <span class="input-group-text">to</span>
+                      <input type="number" class="form-control shelf-life-refrig-max" placeholder="Max days">
+                      <span class="input-group-text">days refrigerated</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" class="form-control full-shelf-life" id="shelf-life-field">
+            </div>
+            
+            <div class="mb-3">
+              <label for="alternative-notes" class="form-label">Notes</label>
+              <textarea class="form-control" id="alternative-notes" rows="3"></textarea>
+            </div>
+          </div>
+          
+          <!-- Physical/Market Supplier Fields -->
+          <div id="alternative-physical-fields" style="display: none;">
+            <div class="mb-3">
+              <label for="alternative-address" class="form-label">Address</label>
+              <div class="location-dropdowns">
+                <div class="form-group">
+                  <label for="alternative-location-region" class="form-label">Region</label>
+                  <select class="form-select" id="alternative-location-region">
+                    <option value="">Select Region</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="alternative-location-province" class="form-label">Province</label>
+                  <select class="form-select" id="alternative-location-province">
+                    <option value="">Select Province</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="alternative-location-city" class="form-label">City/Municipality</label>
+                  <select class="form-select" id="alternative-location-city">
+                    <option value="">Select City/Municipality</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="alternative-location-barangay" class="form-label">Barangay</label>
+                  <select class="form-select" id="alternative-location-barangay">
+                    <option value="">Select Barangay</option>
+                  </select>
+                </div>
+              </div>
+              <input type="hidden" class="form-control" id="alternative-address">
+            </div>
+            
+            <div class="mb-3">
+              <label for="alternative-contact-name" class="form-label">Contact Name</label>
+              <input type="text" class="form-control" id="alternative-contact-name" placeholder="Contact person name">
+            </div>
+
+            <div class="mb-3">
+              <label for="alternative-contact-number" class="form-label">Contact Number</label>
+              <div class="input-group">
+                <button class="btn btn-outline-secondary dropdown-toggle country-code-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">+63</button>
+                <ul class="dropdown-menu country-code-dropdown">
+                  <li><a class="dropdown-item" href="#" data-code="+63">Philippines (+63)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+1">USA (+1)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+44">UK (+44)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+61">Australia (+61)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+81">Japan (+81)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+86">China (+86)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+65">Singapore (+65)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+60">Malaysia (+60)</a></li>
+                  <li><a class="dropdown-item" href="#" data-code="+66">Thailand (+66)</a></li>
+                </ul>
+                <input type="text" class="form-control phone-input" id="alternative-contact-number" placeholder="Phone number">
+                <input type="hidden" class="form-control full-contact-info" id="alternative-contact-info-field">
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="alternative-email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="alternative-email">
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Opening Hours</label>
+              <div class="d-flex gap-2 align-items-center">
+                <input type="time" class="form-control" id="alternative-opening-hours-start" required>
+                <span>-</span>
+                <input type="time" class="form-control" id="alternative-opening-hours-end" required>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="alternative-delivery-info" class="form-label">Delivery Info</label>
+              <select class="form-select" id="alternative-delivery-info">
+                <option value="" selected disabled>Select delivery method</option>
+                <option value="3rd Party">3rd Party</option>
+                <option value="Business Driver">Business Driver</option>
+                <option value="Pick Up">Pick Up</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div id="alternative-other-delivery-container" style="display: none;">
+              <div class="mb-3">
+                <label for="alternative-other-delivery" class="form-label">Specify Delivery Method</label>
+                <input type="text" class="form-control" id="alternative-other-delivery">
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="alternative-communication-mode" class="form-label">Mode of Communication</label>
+              <select class="form-select" id="alternative-communication-mode">
+                <option value="" selected disabled>Select communication mode</option>
+                <option value="Text">Text</option>
+                <option value="Call">Call</option>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Telegram">Telegram</option>
+                <option value="Viber">Viber</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div id="alternative-other-communication-container" style="display: none;">
+              <div class="mb-3">
+                <label for="alternative-other-communication" class="form-label">Specify Communication Mode</label>
+                <input type="text" class="form-control" id="alternative-other-communication">
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="alternative-physical-notes" class="form-label">Notes</label>
+              <textarea class="form-control" id="alternative-physical-notes" rows="3"></textarea>
+            </div>
+          </div>
+          
+          <!-- Online Shop Supplier Fields -->
+          <div id="alternative-online-fields" style="display: none;">
+            <div class="mb-3">
+              <label for="alternative-link" class="form-label">Link</label>
+              <input type="url" class="form-control" id="alternative-link">
+            </div>
+            
+            <div class="mb-3">
+              <label for="alternative-platform" class="form-label">Platform Used</label>
+              <select class="form-select" id="alternative-platform">
+                <option value="" selected disabled>Select platform</option>
+                <option value="Shopee">Shopee</option>
+                <option value="Lazada">Lazada</option>
+                <option value="Tiktok Shop">Tiktok Shop</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div id="alternative-other-platform-container" style="display: none;">
+              <div class="mb-3">
+                <label for="alternative-other-platform" class="form-label">Specify Platform</label>
+                <input type="text" class="form-control" id="alternative-other-platform">
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="alternative-online-delivery-info" class="form-label">Delivery Info</label>
+              <select class="form-select" id="alternative-online-delivery-info">
+                <option value="" selected disabled>Select delivery method</option>
+                <option value="3rd Party">3rd Party</option>
+                <option value="Business Driver">Business Driver</option>
+                <option value="Pick Up">Pick Up</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div id="alternative-other-online-delivery-container" style="display: none;">
+              <div class="mb-3">
+                <label for="alternative-other-online-delivery" class="form-label">Specify Delivery Method</label>
+                <input type="text" class="form-control" id="alternative-other-online-delivery">
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="alternative-online-notes" class="form-label">Notes</label>
+              <textarea class="form-control" id="alternative-online-notes" rows="3"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="save-alternative-btn">Add Alternative</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Supplier Details Modal -->
+  <div class="modal fade" id="supplierDetailsModal" tabindex="-1" aria-labelledby="supplierDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="supplierDetailsModalLabel">Supplier Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Physical supplier details -->
+          <div id="physical-supplier-details">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header bg-primary bg-opacity-10">
+                    <h6 class="mb-0">Basic Information</h6>
+                  </div>
+                  <div class="card-body">
+                    <p><strong>Name:</strong> <span id="physical-name"></span></p>
+                    <p><strong>Address:</strong> <span id="physical-address"></span></p>
+                    <p><strong>Opening Hours:</strong> <span id="physical-hours"></span></p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header bg-primary bg-opacity-10">
+                    <h6 class="mb-0">Contact Information</h6>
+                  </div>
+                  <div class="card-body">
+                    <p><strong>Contact Person:</strong> <span id="physical-contact"></span></p>
+                    <p><strong>Phone:</strong> <span id="physical-phone"></span></p>
+                    <p><strong>Email:</strong> <span id="physical-email"></span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card mb-3">
+              <div class="card-header bg-primary bg-opacity-10">
+                <h6 class="mb-0">Delivery & Communication</h6>
+              </div>
+              <div class="card-body">
+                <p><strong>Delivery Method:</strong> <span id="physical-delivery"></span></p>
+                <p><strong>Communication Mode:</strong> <span id="physical-communication"></span></p>
+                <p><strong>Notes:</strong> <span id="physical-notes"></span></p>
+              </div>
+            </div>
+            <div class="card mb-3">
+              <div class="card-header bg-primary bg-opacity-10">
+                <h6 class="mb-0">Record Information</h6>
+              </div>
+              <div class="card-body">
+                <p><strong>Created:</strong> <span id="physical-created"></span></p>
+                <p><strong>Last Updated:</strong> <span id="physical-updated"></span></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Online supplier details -->
+          <div id="online-supplier-details">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header bg-success bg-opacity-10">
+                    <h6 class="mb-0">Basic Information</h6>
+                  </div>
+                  <div class="card-body">
+                    <p><strong>Name:</strong> <span id="online-name"></span></p>
+                    <p><strong>Platform:</strong> <span id="online-platform"></span></p>
+                    <p><strong>Link:</strong> <a id="online-link" href="#" target="_blank"></a></p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-header bg-success bg-opacity-10">
+                    <h6 class="mb-0">Delivery Information</h6>
+                  </div>
+                  <div class="card-body">
+                    <p><strong>Delivery Method:</strong> <span id="online-delivery"></span></p>
+                    <p><strong>Notes:</strong> <span id="online-notes"></span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card mb-3">
+              <div class="card-header bg-success bg-opacity-10">
+                <h6 class="mb-0">Record Information</h6>
+              </div>
+              <div class="card-body">
+                <p><strong>Created:</strong> <span id="online-created"></span></p>
+                <p><strong>Last Updated:</strong> <span id="online-updated"></span></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alternatives section -->
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">Alternative Suppliers</h6>
+              <button class="btn btn-sm btn-outline-success" id="modal-add-alternative-btn">
+                <i class="bi bi-plus-circle me-1"></i>Add Alternative
+              </button>
+            </div>
+            <div class="card-body">
+              <div id="modal-alternatives-container">
+                <p class="text-muted">No alternative suppliers found.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-primary edit-supplier-btn">
+            <i class="bi bi-pencil me-1"></i>Edit
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed Pineapple Details Modal -->
+  <div class="modal fade" id="fixedPineappleDetailsModal" tabindex="-1" aria-labelledby="fixedPineappleDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-warning bg-opacity-10">
+          <h5 class="modal-title" id="fixedPineappleDetailsModalLabel">Pineapple Supplier Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h6 class="mb-0">Supplier Information</h6>
+                </div>
+                <div class="card-body">
+                  <p><strong>Name:</strong> <span id="modal-supplier-name">Premium Pineapple Farm</span></p>
+                  <p><strong>Contact Info:</strong> <span id="modal-supplier-contact">+1 (555) 789-0123</span></p>
+                  <p><strong>Delivery Method:</strong> <span id="modal-supplier-delivery">Business Driver</span></p>
+                  <p><strong>Communication:</strong> <span id="modal-supplier-communication">Call</span></p>
+                  <p><strong>Notes:</strong> <span id="modal-supplier-notes">Our primary pineapple supplier with premium quality</span></p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h6 class="mb-0">Pineapple Details</h6>
+                </div>
+                <div class="card-body">
+                  <p><strong>Variety:</strong> <span id="modal-pineapple-variety">MD-2 Sweet Gold</span></p>
+                  <p><strong>Harvest Season:</strong> <span id="modal-pineapple-harvest">Year-round with peak in summer</span></p>
+                  <p><strong>Planting Cycle:</strong> <span id="modal-pineapple-planting">12-18 months</span></p>
+                  <p><strong>Shelf Life:</strong> <span id="modal-pineapple-shelf">5-7 days at room temperature, 10-14 days refrigerated</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-3">
+            <div class="card-header">
+              <h6 class="mb-0">Record Information</h6>
+            </div>
+            <div class="card-body">
+              <p><strong>Created:</strong> <span id="modal-pineapple-created">Not available</span></p>
+              <p><strong>Last Updated:</strong> <span id="modal-pineapple-updated">Not available</span></p>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">Alternative Suppliers</h6>
+              <button class="btn btn-sm btn-outline-success add-alternative-btn" data-supplier-id="fixed-pineapple" data-bs-dismiss="modal">
+                <i class="bi bi-plus-circle me-1"></i>Add Alternative
+              </button>
+            </div>
+            <div class="card-body">
+              <div id="modal-fixed-alternatives-container">
+                <p class="text-muted">No alternative suppliers found.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-primary edit-fixed-supplier-btn">
+            <i class="bi bi-pencil me-1"></i>Edit
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Edit Fixed Pineapple Modal (farm location still removed from main supplier) -->
+<div class="modal fade" id="editFixedPineappleModal" tabindex="-1" aria-labelledby="editFixedPineappleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-warning bg-opacity-10">
+        <h5 class="modal-title" id="editFixedPineappleModalLabel">Edit Pineapple Supplier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="edit-fixed-modal">
+        <form id="edit-fixed-supplier-form">
+          <div class="mb-3">
+            <label for="edit-fixed-name" class="form-label">Supplier Name</label>
+            <input type="text" class="form-control" id="edit-fixed-name" required>
+          </div>
+
+          <!-- Contact Information Field with Country Code Dropdown -->
+          <div class="mb-3">
+            <label for="contact-info" class="form-label">Contact Information</label>
+            <div class="input-group">
+              <button class="btn btn-outline-secondary dropdown-toggle country-code-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">+63</button>
+              <ul class="dropdown-menu country-code-dropdown">
+                <li><a class="dropdown-item" href="#" data-code="+63">Philippines (+63)</a></li>
+                <li><a class="dropdown-item" href="#" data-code="+1">USA (+1)</a></li>
+                <li><a class="dropdown-item" href="#" data-code="+44">UK (+44)</a></li>
+                <li><a class="dropdown-item" href="#" data-code="+61">Australia (+61)</a></li>
+                <li><a class="dropdown-item" href="#" data-code="+81">Japan (+81)</a></li>
+                <li><a class="dropdown-item" href="#" data-code="+86">China (+86)</a></li>
+                <li><a class="dropdown-item" href="#" data-code="+65">Singapore (+65)</a></li>
+                <li><a class="dropdown-item" href="#" data-code="+60">Malaysia (+60)</a></li>
+                <li><a class="dropdown-item" href="#" data-code="+66">Thailand (+66)</a></li>
+              </ul>
+              <input type="text" class="form-control phone-input" placeholder="Phone number">
+              <input type="hidden" class="form-control full-contact-info" id="edit-fixed-contact">
+            </div>
+          </div>
+
+          <!-- Farm Location Field is still removed from main supplier edit -->
+
+          <div class="mb-3">
+            <label for="edit-fixed-delivery" class="form-label">Delivery Method</label>
+            <select class="form-select" id="edit-fixed-delivery">
+              <option value="">Select delivery method</option>
+              <option value="3rd Party">3rd Party</option>
+              <option value="Business Driver">Business Driver</option>
+              <option value="Pick Up">Pick Up</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="mb-3" id="edit-fixed-other-delivery-container" style="display: none;">
+            <label for="edit-fixed-other-delivery" class="form-label">Specify Delivery Method</label>
+            <input type="text" class="form-control" id="edit-fixed-other-delivery">
+          </div>
+
+          <div class="mb-3">
+            <label for="edit-fixed-communication" class="form-label">Communication Mode</label>
+            <select class="form-select" id="edit-fixed-communication">
+              <option value="">Select communication mode</option>
+              <option value="Text">Text</option>
+              <option value="Call">Call</option>
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="Telegram">Telegram</option>
+              <option value="Viber">Viber</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="mb-3" id="edit-fixed-other-communication-container" style="display: none;">
+            <label for="edit-fixed-other-communication" class="form-label">Specify Communication Mode</label>
+            <input type="text" class="form-control" id="edit-fixed-other-communication">
+          </div>
+
+          <!-- Harvest Season Field with Date Range Picker -->
+          <div class="mb-3">
+            <label for="harvest-season" class="form-label">Harvest Season</label>
+            <select class="form-select harvest-season-select" id="harvest-season-select">
+              <option value="">Select harvest season</option>
+              <option value="Year-round">Year-round</option>
+              <option value="Year-round with peak in summer">Year-round with peak in summer</option>
+              <option value="January-April">January-April</option>
+              <option value="May-August">May-August</option>
+              <option value="September-December">September-December</option>
+              <option value="custom">Custom range...</option>
+            </select>
+            <div class="mt-2 harvest-season-custom" style="display: none;">
+              <div class="input-group">
+                <span class="input-group-text">From</span>
+                <select class="form-select harvest-from-month">
+                  <option value="January">January</option>
+                  <option value="February">February</option>
+                  <option value="March">March</option>
+                  <option value="April">April</option>
+                  <option value="May">May</option>
+                  <option value="June">June</option>
+                  <option value="July">July</option>
+                  <option value="August">August</option>
+                  <option value="September">September</option>
+                  <option value="October">October</option>
+                  <option value="November">November</option>
+                  <option value="December">December</option>
+                </select>
+                <span class="input-group-text">To</span>
+                <select class="form-select harvest-to-month">
+                  <option value="January">January</option>
+                  <option value="February">February</option>
+                  <option value="March">March</option>
+                  <option value="April">April</option>
+                  <option value="May">May</option>
+                  <option value="June">June</option>
+                  <option value="July">July</option>
+                  <option value="August">August</option>
+                  <option value="September">September</option>
+                  <option value="October">October</option>
+                  <option value="November">November</option>
+                  <option value="December">December</option>
+                </select>
+              </div>
+            </div>
+            <input type="hidden" class="form-control full-harvest-season" id="edit-fixed-harvest">
+          </div>
+
+          <!-- Planting Cycle Field with Options -->
+          <div class="mb-3">
+            <label for="planting-cycle" class="form-label">Planting Cycle</label>
+            <select class="form-select planting-cycle-select" id="planting-cycle-select">
+              <option value="">Select planting cycle</option>
+              <option value="12-18 months">12-18 months</option>
+              <option value="15-20 months">15-20 months</option>
+              <option value="18-24 months">18-24 months</option>
+              <option value="Plant crop">Plant crop</option>
+              <option value="Ratoon crop">Ratoon crop</option>
+              <option value="custom">Custom...</option>
+            </select>
+            <div class="mt-2 planting-cycle-custom" style="display: none;">
+              <div class="input-group">
+                <input type="number" class="form-control planting-cycle-min" placeholder="Min months">
+                <span class="input-group-text">to</span>
+                <input type="number" class="form-control planting-cycle-max" placeholder="Max months">
+                <span class="input-group-text">months</span>
+              </div>
+            </div>
+            <input type="hidden" class="form-control full-planting-cycle" id="edit-fixed-planting">
+          </div>
+
+          <!-- Pineapple Variety Field with Dropdown -->
+          <div class="mb-3">
+            <label for="variety" class="form-label">Pineapple Variety</label>
+            <select class="form-select variety-select" id="variety-select">
+              <option value="">Select variety</option>
+              <option value="MD-2 Sweet Gold">MD-2 Sweet Gold</option>
+              <option value="Smooth Cayenne">Smooth Cayenne</option>
+              <option value="Queen">Queen</option>
+              <option value="Red Spanish">Red Spanish</option>
+              <option value="Abacaxi">Abacaxi</option>
+              <option value="Sugarloaf">Sugarloaf</option>
+              <option value="custom">Other (specify)</option>
+            </select>
+            <div class="mt-2 variety-custom" style="display: none;">
+              <input type="text" class="form-control variety-custom-input" placeholder="Enter variety name">
+            </div>
+            <input type="hidden" class="form-control full-variety" id="edit-fixed-variety">
+          </div>
+
+          <!-- Shelf Life Field with Options -->
+          <div class="mb-3">
+            <label for="shelf-life" class="form-label">Shelf Life</label>
+            <select class="form-select shelf-life-select" id="shelf-life-select">
+              <option value="">Select shelf life</option>
+              <option value="5-7 days at room temperature, 10-14 days refrigerated">5-7 days at room temperature, 10-14 days refrigerated</option>
+              <option value="3-5 days at room temperature">3-5 days at room temperature</option>
+              <option value="7-10 days at room temperature">7-10 days at room temperature</option>
+              <option value="10-14 days refrigerated">10-14 days refrigerated</option>
+              <option value="14-21 days refrigerated">14-21 days refrigerated</option>
+              <option value="custom">Custom...</option>
+            </select>
+            <div class="mt-2 shelf-life-custom" style="display: none;">
+              <div class="row">
+                <div class="col">
+                  <div class="input-group">
+                    <input type="number" class="form-control shelf-life-room-min" placeholder="Min days">
+                    <span class="input-group-text">to</span>
+                    <input type="number" class="form-control shelf-life-room-max" placeholder="Max days">
+                    <span class="input-group-text">days at room temp</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col">
+                  <div class="input-group">
+                    <input type="number" class="form-control shelf-life-refrig-min" placeholder="Min days">
+                    <span class="input-group-text">to</span>
+                    <input type="number" class="form-control shelf-life-refrig-max" placeholder="Max days">
+                    <span class="input-group-text">days refrigerated</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" class="form-control full-shelf-life" id="edit-fixed-shelf">
+          </div>
+
+          <div class="mb-3">
+            <label for="edit-fixed-notes" class="form-label">Notes</label>
+            <textarea class="form-control" id="edit-fixed-notes" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="update-fixed-supplier-btn">Update Supplier</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alternative Details Modal -->
+<div class="modal fade" id="alternativeDetailsModal" tabindex="-1" aria-labelledby="alternativeDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="alternativeDetailsModalLabel">Alternative Supplier Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6" id="alternative-main-details">
+            <!-- Main details will be inserted here -->
+          </div>
+          <div class="col-md-6" id="alternative-additional-details">
+            <!-- Additional details will be inserted here -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Loading Modal -->
+  <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-body py-5">
+          <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+          <div class="fw-bold fs-5">Processing...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-body py-5">
+          <div class="text-success mb-3">
+            <i class="bi bi-check-circle-fill" style="font-size: 3rem;"></i>
+          </div>
+          <div id="successModalMessage" class="fw-bold fs-5">Success!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-body py-5">
+          <div class="text-danger mb-3">
+            <i class="bi bi-x-circle-fill" style="font-size: 3rem;"></i>
+          </div>
+          <div id="errorModalMessage" class="fw-bold fs-5">An error occurred.</div>
+          <button type="button" class="btn btn-danger mt-4" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Loading Modal -->
+  <div class="modal fade" id="deleteLoadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-body py-5">
+          <div class="spinner-border text-danger mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+          <div class="fw-bold fs-5">Deleting Supplier...</div>
+          <div class="text-muted mt-2">Please wait while we process your request.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Success Modal -->
+  <div class="modal fade" id="deleteSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-body py-5">
+          <div class="text-success mb-3">
+            <i class="bi bi-check-circle-fill" style="font-size: 3rem;"></i>
+          </div>
+          <div class="fw-bold fs-5 mb-2">Supplier Deleted Successfully!</div>
+          <div class="text-muted">The supplier has been removed from the system.</div>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Error Modal -->
+  <div class="modal fade" id="deleteErrorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-body py-5">
+          <div class="text-danger mb-3">
+            <i class="bi bi-x-circle-fill" style="font-size: 3rem;"></i>
+          </div>
+          <div class="fw-bold fs-5 mb-2">Failed to Delete Supplier</div>
+          <div id="deleteErrorMessage" class="text-muted">An error occurred while deleting the supplier.</div>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Confirmation Modal -->
+  <div class="modal fade" id="simpleConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-body py-5">
+          <div class="text-warning mb-3">
+            <i class="bi bi-question-circle-fill" style="font-size: 3rem;"></i>
+          </div>
+          <div id="simpleConfirmMessage" class="fw-bold fs-5 mb-4">Are you sure?</div>
+          <div class="d-flex justify-content-center gap-3">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="simpleConfirmBtn">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script>
+// Redirect to login page if user accessed the site directly (no referrer)
+window.onload = function () {
+  const isLoggedIn = false; // Replace this with your actual login check logic
+
+  if (document.referrer === '' && !isLoggedIn) {
+    // Redirect only if not already on login page
+    if (!window.location.pathname.includes("index.html")) {
+      window.location.href = "index.html"; // Adjust this to your actual login page path
+    }
+  }
+};
+</script>
+
+
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Flatpickr for Date Picker -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- Modal Handlers JavaScript -->
+  <script src="modal-handlers.js"></script>
+  <!-- Custom JavaScript -->
+  <script src="script.js"></script>
+  <script src="suppliers.js"></script>
+  <!-- Modal Enhancements JavaScript -->
+  <script src="modal-enhancements.js"></script>
+  <script src="logout.js"></script>
+  <script src="pineapple-supplier-modals.js"></script>
+  <!-- Location Handler JavaScript -->
+<script src="location-handler.js"></script>
+</body>
+</html>

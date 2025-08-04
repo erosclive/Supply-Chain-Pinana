@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Status - Piñana Gourmet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" href="Retailer/mono-green.png">
+    <style>
+        .status-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .status-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .status-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .status-icon.pending {
+            color: #ffc107;
+        }
+        
+        .status-icon.rejected {
+            color: #dc3545;
+        }
+        
+        .status-icon.inactive {
+            color: #6c757d;
+        }
+        
+        .status-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .status-message {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .btn-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            color: white;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .contact-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .contact-info h6 {
+            color: #495057;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-info p {
+            margin-bottom: 0.5rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-container">
+        <div class="status-card">
+            <div id="pendingStatus" style="display: none;">
+                <div class="status-icon pending">
+                    <i class="bi bi-clock-fill"></i>
+                </div>
+                <h2 class="status-title">Account Pending Approval</h2>
+                <p class="status-message">
+                    Your retailer account registration has been received and is currently under review by our admin team. 
+                    You will be able to access your account once it has been approved.
+                </p>
+                <p class="status-message">
+                    <strong>What happens next?</strong><br>
+                    Our team will review your application within 1-3 business days. You will receive an email from us
+                    once your account has been approved or if we need additional information.
+                </p>
+            </div>
+            
+            <div id="rejectedStatus" style="display: none;">
+                <div class="status-icon rejected">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+                <h2 class="status-title">Account Rejected</h2>
+                <p class="status-message">
+                    Unfortunately, your retailer account application has been rejected by our admin team. 
+                    This could be due to incomplete information or not meeting our retailer requirements.
+                </p>
+                <p class="status-message">
+                    <strong>Need help?</strong><br>
+                    Please contact us on pinyanagfp.scm@gmail.com for more information about the rejection and how to reapply.
+                </p>
+            </div>
+            
+            <div id="inactiveStatus" style="display: none;">
+                <div class="status-icon inactive">
+                    <i class="bi bi-pause-circle-fill"></i>
+                </div>
+                <h2 class="status-title">Account Inactive</h2>
+                <p class="status-message">
+                    Your account has been temporarily deactivated. This may be due to policy violations 
+                    or administrative reasons.
+                </p>
+                <p class="status-message">
+                    <strong>Need assistance?</strong><br>
+                    Please contact us on pinyanagfp.scm@gmail.com to resolve this issue and reactivate your account.
+                </p>
+            </div>
+            
+            <div id="unknownStatus" style="display: none;">
+                <div class="status-icon inactive">
+                    <i class="bi bi-question-circle-fill"></i>
+                </div>
+                <h2 class="status-title">Account Status Unclear</h2>
+                <p class="status-message">
+                    We're unable to determine your account status at this time. This may be a temporary issue.
+                </p>
+                <p class="status-message">
+                    <strong>What to do?</strong><br>
+                    Please contact us on pinyanagfp.scm@gmail.com for immediate assistance with your account.
+                </p>
+            </div>
+            
+            <a href="index.html" class="btn-back">
+                <i class="bi bi-arrow-left me-2"></i>Back to Login
+            </a>
+            
+            <div class="contact-info">
+                <h6><i class="bi bi-headset me-2"></i>Need Support?</h6>
+                <p><i class="bi bi-envelope me-2"></i>Email:pinyanagfp.scm@gmail.com</p>
+                <p><i class="bi bi-telephone me-2"></i>Phone: +63 915 398 1708</p>
+                <p><i class="bi bi-facebook me-2"></i>Facebook: Piñana Gourmet / Piñana Calauan</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get status from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            
+            // Show appropriate status message
+            switch(status) {
+                case 'pending':
+                    document.getElementById('pendingStatus').style.display = 'block';
+                    break;
+                case 'rejected':
+                    document.getElementById('rejectedStatus').style.display = 'block';
+                    break;
+                case 'inactive':
+                    document.getElementById('inactiveStatus').style.display = 'block';
+                    break;
+                case 'unknown':
+                default:
+                    document.getElementById('unknownStatus').style.display = 'block';
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

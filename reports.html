@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Piñana Gourmet - Reports</title>
+  <title>Piñana Gourmet - POS & Retailer Reports</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
@@ -12,6 +12,595 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
   <!-- Custom CSS -->
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="Retailer/mono-green.png">
+
+  <style>
+    /* Enhanced Submenu styles */
+    .submenu {
+      padding-left: 2rem;
+      list-style: none;
+    }
+
+    .submenu .nav-item {
+      margin-bottom: 0.25rem;
+    }
+
+    .submenu .nav-link {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .submenu .nav-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .nav-link.dropdown-toggle::after {
+      display: inline-block;
+      margin-left: auto;
+      content: "";
+      border-top: 0.3em solid;
+      border-right: 0.3em solid transparent;
+      border-bottom: 0;
+      border-left: 0.3em solid transparent;
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    
+    .submenu-link {
+      padding-left: 3rem !important;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .submenu-link:hover {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .submenu-link.active {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    #inventorySubmenu {
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+    }
+    
+    .nav-link.dropdown-toggle[aria-expanded="true"]::after {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    /* Enhanced Tab Navigation Styles */
+    .tab-navigation {
+      margin-bottom: 2rem;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+    }
+
+    .tab-btn {
+      background: white;
+      border: none;
+      color: #6c757d;
+      padding: 16px 28px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin: 0 2px;
+    }
+
+    .tab-btn:hover {
+      background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+      color: #f57f17;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #edce6bff 0%, #e9c244ff 100%);
+      color: #000;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 3px;
+      background: linear-gradient(90deg, #32a817ff, #7dcd72ff);
+      border-radius: 2px;
+    }
+
+    .tab-btn i {
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .tab-btn:hover i {
+      transform: scale(1.1);
+    }
+
+    /* Original Page Title - No enhancements */
+    .page-title {
+      /* Keep original styling from styles.css */
+    }
+
+    /* Enhanced Card Styles */
+    .card {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #edce6bff 0%, #edce6bff 100%);
+      border: none;
+      padding: 1.5rem;
+      color: #000;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .card-body {
+      padding: 2rem;
+    }
+
+    /* Enhanced Metric Cards */
+    .metric-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 193, 7, 0.2);
+      border-color: rgba(255, 193, 7, 0.4);
+    }
+
+    .metric-title {
+      font-size: 0.9rem;
+      color: #6c757d;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0;
+      background: linear-gradient(135deg, #edce6bff 0%, #edce6bff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Enhanced Form Controls */
+    .form-control, .form-select {
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #ffc107;
+      box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+      background: #ffffff;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Enhanced Buttons */
+    .btn {
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 12px 24px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #edce6bff 0%, #edce6bff 100%);
+      border: none;
+      color: #000;
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #edce6bff 0%, #edce6bff 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+      color: #000;
+    }
+
+    .btn-outline-secondary {
+      border: 2px solid #6c757d;
+      color: #6c757d;
+      background: transparent;
+    }
+
+    .btn-outline-secondary:hover {
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+      border-color: #6c757d;
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    /* Enhanced Table Styles */
+    .table {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .table thead th {
+      background: linear-gradient(135deg, #edce6bff 0%, #edce6bff 100%);
+      color: #000;
+      font-weight: 600;
+      border: none;
+      padding: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.9rem;
+    }
+
+    .table tbody tr {
+      transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+      background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+      transform: scale(1.01);
+    }
+
+    .table tbody td {
+      padding: 1rem;
+      border: none;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: middle;
+    }
+
+    /* Enhanced Loading Indicator */
+    #loadingIndicator {
+      background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,249,250,0.9) 100%);
+      border-radius: 16px;
+      padding: 3rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      color: #ffc107;
+    }
+
+    /* Enhanced Analytics iframe styles */
+    .analytics-iframe {
+      width: 100%;
+      height: 800px;
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      background: #ffffff;
+    }
+
+    /* Enhanced Pagination styles */
+    #paginationContainer {
+      border-top: 2px solid #f0f0f0;
+      padding-top: 1.5rem;
+      margin-top: 1.5rem;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 0 0 16px 16px;
+      padding: 1.5rem;
+    }
+
+    #paginationContainer .btn-group .btn {
+      border-radius: 6px;
+      margin: 0 3px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    #paginationContainer .btn-group .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #paginationContainer .btn-group .btn:not(:disabled):hover {
+      background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+      border-color: #ffc107;
+      color: #000;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+
+    /* Enhanced Error Container */
+    #errorContainer {
+      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+      border: none;
+      border-radius: 12px;
+      border-left: 4px solid #f44336;
+      box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+    }
+
+    /* Enhanced Chart Container */
+    .chart-container {
+      position: relative;
+      height: 400px;
+      background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    /* Enhanced Content Wrapper */
+    .content-wrapper {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* Original Header - No enhancements */
+    .fixed-top-header {
+      /* Keep original styling from styles.css */
+    }
+
+    /* Original Sidebar - No enhancements */
+    .sidebar {
+      /* Keep original styling from styles.css */
+    }
+
+    /* Original User Profile Dropdown - No enhancements */
+    .user-profile-dropdown .dropdown-menu {
+      /* Keep original styling from styles.css */
+    }
+
+    .profile-circle {
+      /* Keep original styling from styles.css */
+    }
+
+    /* Original Notification Badge - No enhancements */
+    .notification-badge {
+      /* Keep original styling from styles.css */
+    }
+
+    /* Enhanced Responsive Design */
+    @media (max-width: 768px) {
+      .tab-buttons {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .tab-btn {
+        margin: 0;
+        border-radius: 8px;
+      }
+      
+      .metric-card {
+        margin-bottom: 1rem;
+      }
+      
+      .card-body {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Enhanced Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card, .metric-card {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Enhanced Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #ffb300 0%, #ff8f00 100%);
+    }
+
+    /* Enhanced Badge Styles */
+    .badge {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+    }
+
+    .badge.bg-success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    }
+
+    .badge.bg-info {
+      background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%) !important;
+    }
+
+    .badge.bg-primary {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    }
+
+    /* Enhanced Table Hover Effects */
+    .table-hover tbody tr:hover {
+      background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+      transform: scale(1.01);
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+    }
+
+    /* Enhanced Form Focus Effects */
+    .form-control:focus, .form-select:focus {
+      border-color: #ffc107;
+      box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+      background: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    /* Enhanced Button Hover Effects */
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    /* Enhanced Card Hover Effects */
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+    /* Enhanced Metric Card Animations */
+    .metric-card {
+      animation: fadeInUp 0.6s ease-out;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .metric-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 35px rgba(255, 193, 7, 0.3);
+    }
+
+    /* Enhanced Loading Animation */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    #loadingIndicator .spinner-border {
+      animation: pulse 2s infinite;
+    }
+
+    /* Enhanced Success/Error Messages */
+    .alert {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+      border-left: 4px solid #f44336;
+    }
+
+    /* Enhanced Responsive Design */
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 1.5rem;
+      }
+      
+      .metric-card {
+        margin-bottom: 1rem;
+      }
+      
+      .tab-buttons {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .card-body {
+        padding: 1.5rem;
+      }
+      
+      .btn {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Enhanced Dark Mode Support */
+    @media (prefers-color-scheme: dark) {
+      .card {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: #ffffff;
+      }
+      
+      .form-control, .form-select {
+        background: #34495e;
+        border-color: #495057;
+        color: #ffffff;
+      }
+      
+      .table {
+        color: #ffffff;
+      }
+      
+      .table thead th {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+        color: #000;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container-fluid">
@@ -20,16 +609,16 @@
       <div class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
         <div class="sidebar-inner">
             <div class="logo-container d-flex align-items-center mb-4 mt-3">
-                <img src="images/final-light.png" alt="Piñana Gourmet Logo" class="pineapple-logo">
+                <img src="images/final-light.png" class="pineapple-logo">
             </div>
           
-          <div class="sidebar-divider">
+          <div class="sidebar-divider" style="margin-top: -1.5rem;">
             <span>MAIN MENU</span>
           </div>
           
           <ul class="nav flex-column sidebar-nav">
             <li class="nav-item">
-              <a class="nav-link" href="dashboard.html" data-page="index">
+              <a class="nav-link" href="dashboard.html" data-page="dashboard">
                 <div class="nav-icon">
                   <i class="bi bi-grid"></i>
                 </div>
@@ -37,42 +626,63 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="inventory.html" data-page="inventory">
+              <a class="nav-link dropdown-toggle" href="#inventorySubmenu" data-bs-toggle="collapse" aria-expanded="false">
                 <div class="nav-icon">
                   <i class="bi bi-box"></i>
                 </div>
                 <span>Inventory</span>
               </a>
+              <ul class="collapse submenu" id="inventorySubmenu">
+                <li class="nav-item">
+                  <a class="nav-link" href="inventory.html" data-page="inventory">
+                    <div class="nav-icon">
+                      <i class="bi bi-box-seam"></i>
+                    </div>
+                    <span>Products</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="supplies.html" data-page="supplies">
+                    <div class="nav-icon">
+                      <i class="bi bi-tools"></i>
+                    </div>
+                    <span>Supplies</span>
+                  </a>
+                </li>
+              </ul>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="orders.html" data-page="orders">
-                <div class="nav-icon">
-                  <i class="bi bi-people"></i>
-                </div>
-                <span>Orders</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="delivery.html" data-page="delivery">
-                <div class="nav-icon">
-                  <i class="bi bi-truck"></i>
-                </div>
-                <span>Delivery</span>
-              </a>
-            </li>
-            
-            <div class="sidebar-divider">
-              <span>SALES</span>
+             <li class="nav-item">
+          <a class="nav-link" href="production.html" data-page="production">
+            <div class="nav-icon">
+              <i class="bi bi-layer-backward"></i>
             </div>
-            
+            <span>Production</span>
+          </a>
+        </li>
+       
+        
+        <div class="sidebar-divider">
+          <span>SALES</span>
+        </div>
+         <li class="nav-item">
+          <a class="nav-link" href="orders.html" data-page="orders">
+            <div class="nav-icon">
+              <i class="bi bi-basket2"></i>
+            </div>
+            <span>Orders</span>
+          </a>
+        </li>
+    
             <li class="nav-item">
-              <a class="nav-link" href="pos.html" data-page="pos">
+              <a class="nav-link " href="billing.html" data-page="billing">
                 <div class="nav-icon">
                   <i class="bi bi-credit-card"></i>
                 </div>
-                <span>POS</span>
+                <span>Billing</span>
               </a>
             </li>
+            
+            
             <li class="nav-item">
               <a class="nav-link active" href="reports.html" data-page="reports">
                 <div class="nav-icon">
@@ -81,261 +691,403 @@
                 <span>Reports</span>
               </a>
             </li>
-          </ul>
-          
-          <div class="sidebar-footer">
+    
             <div class="sidebar-divider">
-              <span>ACCOUNT</span>
+              <span>USER</span>
             </div>
-            <div class="user-info d-flex align-items-center">
-              <div class="user-avatar">
-                <i class="bi bi-person-circle"></i>
-              </div>
-              <div class="user-details">
-                <div class="user-name">Admin User</div>
-                <div class="user-role">Piñana Gourmet</div>
-              </div>
-            </div>
-          </div>
+    
+            <li class="nav-item">
+              <a class="nav-link" href="retailers.html" data-page="retailers">
+                <div class="nav-icon">
+                  <i class="bi bi-person-heart"></i>
+                </div>
+                <span>Retailers</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="suppliers.html" data-page="suppliers">
+                <div class="nav-icon">
+                  <i class="bi bi-person-fill-down"></i>
+                </div>
+                <span>Suppliers</span>
+              </a>
+            </li>
+    
+          </ul>
         </div>
       </div>
+      
       
       <!-- Main content -->
       <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
         <!-- Header -->
         <div class="fixed-top-header">
           <div class="d-flex justify-content-between align-items-center w-100">
-            <div class="d-flex align-items-center">
-              <button class="navbar-toggler d-md-none collapsed me-2" type="button" id="sidebarToggle">
-                <i class="bi bi-list"></i>
-              </button>
-              <h5 class="mb-0">Reports</h5>
+            <div class="d-flex justify-content-between align-items-center w-100">
+              <!-- Left: Button + Title -->
+              <div class="d-flex align-items-center">
+                <button class="navbar-toggler d-md-none collapsed me-2" type="button" id="sidebarToggle">
+                  <i class="bi bi-list"></i>
+                </button>
+                <h5 class="mb-0">Reports Management</h5>
+              </div>
+
+              <!-- Right: Current Date -->
+              <span id="current-date" class="text-muted small pe-3" style="white-space: nowrap;"></span>
             </div>
+
             <div class="d-flex align-items-center">
-              <div class="user-profile">
-                <div class="profile-circle">
+              <div class="dropdown user-profile-dropdown" >
+                <div class="profile-circle dropdown-toggle position-relative" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                   <i class="bi bi-person-fill"></i>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" id="notification-badge" style="display: none;">
+                    0
+                    <span class="visually-hidden">unread notifications</span>
+                  </span>
                 </div>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown" style="width: 350px;">
+                  <li class="dropdown-item-text">
+                    <div class="sidebar-divider">
+                      <span>NOTIFICATIONS</span>
+                      <div class="float-end">
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" id="mark-all-read">Mark all as read</button>
+                      </div>
+                    </div>
+                    <div id="notifications-container" class="notifications-container" style="max-height: 300px; overflow-y: auto;">
+                      <div class="text-center py-3 text-muted" id="no-notifications-message">No new notifications</div>
+                    </div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li class="dropdown-item-text">
+                    <div class="sidebar-divider">
+                      <span>ACCOUNT</span>
+                    </div>
+                    <div class="user-info d-flex align-items-center">
+                      <div class="user-avatar">
+                        <i class="bi bi-person-circle"></i>
+                      </div>
+                      <div class="user-details">
+                        <div class="user-name">Admin User</div>
+                        <div class="user-role">Piñana Gourmet</div>
+                      </div>
+                    </div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="#" id="logoutButton" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
+        
+        <!-- Content Wrapper -->
+        <div class="content-wrapper mt-2 pt-3"> 
 
-        <div class="main-content-inner">
+
+
+          <!-- Enhanced Tab Navigation -->
+          <div class="tab-navigation">
+            <div class="tab-buttons">
+              <button id="showReportsBtn" class="tab-btn active">
+                <i class="bi bi-bar-chart"></i>
+                POS & Retailer
+              </button>
+              <button id="showAnalyticsBtn" class="tab-btn">
+                <i class="bi bi-graph-up"></i>
+                E-Commerce
+              </button>
+              <button id="showSalesDistributionBtn" class="tab-btn">
+                <i class="bi bi-pie-chart"></i>
+                Sales Distribution
+              </button>
+            </div>
+          </div>
+
           <!-- Reports Content -->
-          <div class="reports-section">
-            <!-- Report Tabs -->
-            <div id="report-tabs" class="mb-4"></div>
+          <div id="reportsContent">
+            <!-- Error Container -->
+            <div id="errorContainer" class="alert alert-danger mb-4" style="display: none;"></div>
             
-            <!-- Report Filters -->
-            <div class="card mb-4">
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-3 mb-3 mb-md-0" style="display: none;">
-                    <label for="report-type" class="form-label">Report Type</label>
-                    <select class="form-select" id="report-type">
-                      <option value="sales" selected>Sales Report</option>
-                      <option value="products">Product Sales</option>
-                      <option value="inventory">Inventory</option>
-                      <option value="categories">Category Report</option>
-                      <option value="payment_methods">Payment Methods</option>
-                    </select>
+            <!-- Enhanced Filters Section -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-funnel-fill me-2"></i>
+                      <h5 class="card-title mb-0">Report Filters</h5>
+                    </div>
                   </div>
-                  <div class="col-md-3 mb-3 mb-md-0" id="period-filter-container">
-                    <label for="period-filter" class="form-label">Period</label>
-                    <select class="form-select" id="period-filter">
-                      <option value="day">Daily</option>
-                      <option value="week">Weekly</option>
-                      <option value="month" selected>Monthly</option>
-                      <option value="quarter">Quarterly</option>
-                      <option value="year">Yearly</option>
-                      <option value="custom">Custom</option>
-                    </select>
+                  <div class="card-body">
+                    <div class="row g-3">
+                      <div class="col-md-3">
+                        <label for="reportType" class="form-label">
+                          <i class="bi bi-file-earmark-text me-1"></i>
+                          Report Type
+                        </label>
+                        <select class="form-select" id="reportType">
+                          <option value="salesTrends">Sales Trends</option>
+                          <option value="salesByCategory">Sales by Category</option>
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <label for="channelFilter" class="form-label">
+                          <i class="bi bi-diagram-3 me-1"></i>
+                          Channel
+                        </label>
+                        <select class="form-select" id="channelFilter">
+                          <!-- Will be populated dynamically -->
+                        </select>
+                      </div>
+                      <div class="col-md-3" id="categoryFilterContainer">
+                        <label for="categoryFilter" class="form-label">
+                          <i class="bi bi-tags me-1"></i>
+                          Category
+                        </label>
+                        <select class="form-select" id="categoryFilter">
+                          <!-- Will be populated dynamically -->
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <label for="timePeriod" class="form-label">
+                          <i class="bi bi-calendar-range me-1"></i>
+                          Time Period
+                        </label>
+                        <select class="form-select" id="timePeriod">
+                          <option value="custom">Custom</option>
+                          <option value="weekly">Week</option>
+                          <option value="monthly">Month</option>
+                          <option value="quarterly">Quarter</option>
+                          <option value="yearly">Year</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label for="daterange" class="form-label">
+                          <i class="bi bi-calendar-event me-1"></i>
+                          Date Range
+                        </label>
+                        <input type="text" class="form-control" name="daterange" value="" />
+                      </div>
+                      <div class="col-md-6 d-flex align-items-end gap-2">
+                        <button id="applyFilters" class="btn btn-primary">
+                          <i class="bi bi-search me-1"></i>
+                          Apply Filters
+                        </button>
+                        <button id="exportReport" class="btn btn-outline-secondary">
+                          <i class="bi bi-download me-1"></i>
+                          Export
+                        </button>
+                        <button id="printReport" class="btn btn-outline-secondary">
+                          <i class="bi bi-printer me-1"></i>
+                          Print
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div class="col-md-4 mb-3 mb-md-0" id="date-range-container">
-                    <label for="date-range" class="form-label">Date Range</label>
-                    <input type="text" class="form-control" id="date-range" placeholder="Select date range">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Enhanced Loading Indicator -->
+            <div id="loadingIndicator" class="text-center py-5" style="display: none;">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex flex-column align-items-center">
+                    <div class="spinner-border text-warning mb-3" role="status" style="width: 3rem; height: 3rem;">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5 class="text-muted mb-2">Processing Report Data</h5>
+                    <p class="text-muted mb-0">
+                      <i class="bi bi-hourglass-split me-2"></i>
+                      Please wait while we gather your analytics...
+                    </p>
                   </div>
-                  <div class="col-md-4 mb-3 mb-md-0" id="year-month-container" style="display: none;">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Enhanced Report Summary -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-graph-up me-2"></i>
+                      <h5 class="card-title mb-0" id="reportTitle">Sales Trends Report</h5>
+                    </div>
+                  </div>
+                  <div class="card-body">
                     <div class="row">
-                      <div class="col-6">
-                        <label for="year-filter" class="form-label">Year</label>
-                        <select class="form-select" id="year-filter">
-                          <option value="2025" selected>2025</option>
-                          <option value="2024">2024</option>
-                          <option value="2023">2023</option>
-                        </select>
-                      </div>
-                      <div class="col-6">
-                        <label for="month-filter" class="form-label">Month</label>
-                        <select class="form-select" id="month-filter">
-                          <option value="1">January</option>
-                          <option value="2">February</option>
-                          <option value="3">March</option>
-                          <option value="4">April</option>
-                          <option value="5">May</option>
-                          <option value="6">June</option>
-                          <option value="7">July</option>
-                          <option value="8">August</option>
-                          <option value="9">September</option>
-                          <option value="10">October</option>
-                          <option value="11">November</option>
-                          <option value="12">December</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-3 mb-3 mb-md-0" id="category-filter-container">
-                    <label for="category-filter" class="form-label">Category</label>
-                    <select class="form-select" id="category-filter">
-                      <option value="" selected>All Categories</option>
-                      <!-- Categories will be populated dynamically -->
-                    </select>
-                  </div>
-                  <div class="col-md-2 d-flex align-items-end">
-                    <button class="btn btn-primary w-100" id="generate-report-btn">
-                      <i class="bi bi-filter me-1"></i> Generate
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Report Summary -->
-            <div class="card mb-4">
-              <div class="card-body">
-                <h5 class="card-title" id="report-title">Sales Report</h5>
-                <div class="row" id="report-summary">
-                  <!-- Summary cards will be populated dynamically based on report type -->
-                </div>
-              </div>
-            </div>
-            
-            <!-- Report Visualization -->
-            <div class="card mb-4">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h5 class="card-title mb-0" id="visualization-title">Sales Trend</h5>
-                  <div class="btn-group" role="group" aria-label="Chart type">
-                    <button type="button" class="btn btn-outline-secondary active" data-chart-type="bar">
-                      <i class="bi bi-bar-chart"></i>
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" data-chart-type="line">
-                      <i class="bi bi-graph-up"></i>
-                    </button>
-                  </div>
-                </div>
-                <div class="chart-container" style="position: relative; height: 300px;">
-                  <canvas id="report-chart"></canvas>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Report Data Table -->
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h5 class="card-title mb-0">Detailed Data</h5>
-                  <div class="d-flex flex-column flex-md-row">
-                    <div class="input-group me-md-2 mb-2 mb-md-0" style="width: 250px;">
-                      <input type="text" class="form-control" placeholder="Search..." id="table-search">
-                      <button class="btn btn-outline-secondary" type="button">
-                        <i class="bi bi-search"></i>
-                      </button>
-                    </div>
-                    <button class="btn btn-outline-primary" id="export-report-btn">
-                      <i class="bi bi-download me-1"></i> Export
-                    </button>
-                  </div>
-                </div>
-                <div class="table-responsive">
-                  <table class="table table-hover" id="report-table">
-                    <thead id="report-table-head">
-                      <!-- Table headers will be populated dynamically based on report type -->
-                    </thead>
-                    <tbody id="report-table-body">
-                      <tr>
-                        <td colspan="6" class="text-center py-3">
-                          <div class="spinner-border spinner-border-sm text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                      <div class="col-md-4">
+                        <div class="metric-card">
+                          <div class="metric-title">
+                            <i class="bi bi-currency-dollar me-1"></i>
+                            Total Sales
                           </div>
-                          <span class="ms-2">Loading data...</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3">
-                  <div class="showing-entries mb-2 mb-md-0">
-                    Showing <span id="showing-entries">0</span> of <span id="total-entries">0</span> entries
+                          <div class="metric-value" id="totalSales">₱0</div>
+                          <div class="text-success small mt-1" style="display: none;">
+                            <i class="bi bi-arrow-up me-1"></i>
+                            <span id="salesTrend">+0%</span> from last period
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="metric-card">
+                          <div class="metric-title">
+                            <i class="bi bi-piggy-bank me-1"></i>
+                            Total Profit
+                          </div>
+                          <div class="metric-value" id="totalProfit">₱0</div>
+                          <div class="text-success small mt-1" style="display: none;">
+                            <i class="bi bi-arrow-up me-1"></i>
+                            <span id="profitTrend">+0%</span> from last period
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="metric-card">
+                          <div class="metric-title">
+                            <i class="bi bi-percent me-1"></i>
+                            Profit Margin
+                          </div>
+                          <div class="metric-value" id="profitMargin">0%</div>
+                          <div class="text-info small mt-1" style="display: none;">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <span id="marginTrend">+0%</span> from last period
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <nav aria-label="Table navigation">
-                    <ul class="pagination pagination-sm mb-0" id="table-pagination">
-                      <!-- Pagination will be populated dynamically -->
-                    </ul>
-                  </nav>
                 </div>
               </div>
             </div>
+            
+            <!-- Enhanced Charts Section -->
+            <div class="row mb-4">
+              <div class="col-lg-8">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-graph-up-arrow me-2"></i>
+                      <h5 class="card-title mb-0">Primary Analytics</h5>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:400px;">
+                      <canvas id="mainChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-pie-chart me-2"></i>
+                      <h5 class="card-title mb-0">Secondary Analytics</h5>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:400px;">
+                      <canvas id="secondaryChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Enhanced Data Table -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-table me-2"></i>
+                        <h5 class="card-title mb-0">Detailed Data</h5>
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary">
+                          <i class="bi bi-info-circle me-1"></i>
+                          <span id="totalRecords">0</span> Records
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-hover" id="dataTable">
+                        <thead>
+                          <tr>
+                            <th>
+                              <i class="bi bi-calendar me-1"></i>
+                              Date
+                            </th>
+                            <th>
+                              <i class="bi bi-diagram-3 me-1"></i>
+                              Channel
+                            </th>
+                            <th>
+                              <i class="bi bi-tags me-1"></i>
+                              Category
+                            </th>
+                            <th>
+                              <i class="bi bi-currency-dollar me-1"></i>
+                              Sales
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                          <!-- Will be populated dynamically -->
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics Dashboard Content - NOW USING IFRAME -->
+          <div id="analyticsContent" style="display: none;">
+            <iframe 
+              id="analyticsIframe" 
+              class="analytics-iframe" 
+              src="analytics_dashboard.html"
+              title="E-Commerce Analytics Dashboard">
+            </iframe>
+          </div>
+
+          <!-- Sales Distribution Content -->
+          <div id="salesDistributionContent" style="display: none;">
+            <iframe 
+              id="salesDistributionIframe" 
+              class="analytics-iframe" 
+              src="SalesDistributionReports.html"
+              title="Sales Distribution Report">
+            </iframe>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Export Options Modal -->
-  <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+  <!-- Logout Confirmation Modal -->
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exportModalLabel">Export Report</h5>
+          <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="list-group">
-            <button type="button" class="list-group-item list-group-item-action" id="exportCSV">
-              <i class="bi bi-filetype-csv me-2"></i> Export as CSV
-            </button>
-            <button type="button" class="list-group-item list-group-item-action" id="exportExcel">
-              <i class="bi bi-file-earmark-excel me-2"></i> Export as Excel
-            </button>
-            <button type="button" class="list-group-item list-group-item-action" id="exportPDF">
-              <i class="bi bi-file-earmark-pdf me-2"></i> Export as PDF
-            </button>
-            <button type="button" class="list-group-item list-group-item-action" id="printReport">
-              <i class="bi bi-printer me-2"></i> Print Report
-            </button>
-          </div>
+          Are you sure you want to logout?
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast Notifications -->
-  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <!-- Loading Toast -->
-    <div id="loadingToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-header">
-        <div class="spinner-border spinner-border-sm me-2" role="status">
-          <span class="visually-hidden">Loading...</span>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmLogout">Logout</button>
         </div>
-        <strong class="me-auto">Exporting Report</strong>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">
-        Please wait while we prepare your export...
-      </div>
-    </div>
-    
-    <!-- Success Toast -->
-    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-header bg-success text-white">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        <strong class="me-auto">Success</strong>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body" id="successToastMessage">
-        Report exported successfully!
       </div>
     </div>
   </div>
@@ -351,8 +1103,76 @@
   <!-- DateRangePicker -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
   <!-- Custom JavaScript -->
-  <script src="scripts.js"></script>
+  <script src="script.js"></script>
   <script src="reports.js"></script>
+  <script src="logout.js"></script>
+
+  <script>
+    function updateCurrentDate() {
+      const now = new Date();
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      const formattedDate = now.toLocaleDateString(undefined, options);
+      document.getElementById('current-date').textContent = formattedDate;
+    }
+
+    // Initial call
+    updateCurrentDate();
+    // Optional: Update every minute if you want real-time freshness
+    setInterval(updateCurrentDate, 60000);
+
+    // SIMPLIFIED View Toggle Functionality - NO MORE INLINE ANALYTICS
+    document.addEventListener('DOMContentLoaded', function() {
+      const showReportsBtn = document.getElementById('showReportsBtn');
+      const showAnalyticsBtn = document.getElementById('showAnalyticsBtn');
+      const showSalesDistributionBtn = document.getElementById('showSalesDistributionBtn');
+      const reportsContent = document.getElementById('reportsContent');
+      const analyticsContent = document.getElementById('analyticsContent');
+      const salesDistributionContent = document.getElementById('salesDistributionContent');
+
+      showReportsBtn.addEventListener('click', function() {
+        // Show reports, hide others
+        reportsContent.style.display = 'block';
+        analyticsContent.style.display = 'none';
+        salesDistributionContent.style.display = 'none';
+            
+        // Update button states
+        showReportsBtn.classList.add('active');
+        showAnalyticsBtn.classList.remove('active');
+        showSalesDistributionBtn.classList.remove('active');
+      });
+
+      showAnalyticsBtn.addEventListener('click', function() {
+        // Show analytics iframe, hide others
+        reportsContent.style.display = 'none';
+        analyticsContent.style.display = 'block';
+        salesDistributionContent.style.display = 'none';
+            
+        // Update button states
+        showAnalyticsBtn.classList.add('active');
+        showReportsBtn.classList.remove('active');
+        showSalesDistributionBtn.classList.remove('active');
+        
+        // Refresh the iframe to ensure latest data
+        const iframe = document.getElementById('analyticsIframe');
+        iframe.src = iframe.src;
+      });
+
+      showSalesDistributionBtn.addEventListener('click', function() {
+        // Show sales distribution iframe, hide others
+        reportsContent.style.display = 'none';
+        analyticsContent.style.display = 'none';
+        salesDistributionContent.style.display = 'block';
+            
+        // Update button states
+        showSalesDistributionBtn.classList.add('active');
+        showReportsBtn.classList.remove('active');
+        showAnalyticsBtn.classList.remove('active');
+        
+        // Refresh the iframe to ensure latest data
+        const iframe = document.getElementById('salesDistributionIframe');
+        iframe.src = iframe.src;
+      });
+    });
+  </script>
 </body>
 </html>
-

@@ -541,6 +541,16 @@ function cancelOrder($conn, $user_id = null) {
         $history->bind_param("i", $order_id);
         $history->execute();
 
+        // Add notification for cancellation
+        $notifSql = "INSERT INTO notifications (notification_id, related_id, type, message, user_id) VALUES (?, ?, ?, ?, ?)";
+        $notifStmt = $conn->prepare($notifSql);
+        $notifId = uniqid('notif_');
+        $notifType = 'order_cancelled';
+        $notifMsg = "Order #$order_id has been cancelled by the reseller.";
+        $notifStmt->bind_param("ssssi", $notifId, $order_id, $notifType, $notifMsg, $user_id);
+        $notifStmt->execute();
+        $notifStmt->close();
+
         $conn->commit();
 
         $response['success'] = true;
@@ -598,6 +608,16 @@ function reorderCancelledOrder($conn, $user_id = null) {
         $history = $conn->prepare("INSERT INTO retailer_order_status_history (order_id, status, notes, created_at) VALUES (?, 'order', 'Order placed again from cancelled order', NOW())");
         $history->bind_param("i", $order_id);
         $history->execute();
+
+        // Add notification for reorder
+        $notifSql = "INSERT INTO notifications (notification_id, related_id, type, message, user_id) VALUES (?, ?, ?, ?, ?)";
+        $notifStmt = $conn->prepare($notifSql);
+        $notifId = uniqid('notif_');
+        $notifType = 'order_reordered';
+        $notifMsg = "Order #$order_id has been reordered by the reseller.";
+        $notifStmt->bind_param("ssssi", $notifId, $order_id, $notifType, $notifMsg, $user_id);
+        $notifStmt->execute();
+        $notifStmt->close();
 
         $conn->commit();
 

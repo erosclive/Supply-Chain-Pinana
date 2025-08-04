@@ -52,7 +52,19 @@ const statusMappings = {
     badge: "bg-success",
     icon: "bi-check2-all",
   },
+
+  completed: {
+    label: "Completed",
+    badge: "bg-secondary",
+    icon: "bi-check-all",
+  },
   
+  // Return request status
+  "return_requested": {
+    label: "Return Requested",
+    badge: "bg-warning text-dark",
+    icon: "bi-arrow-return-left",
+  },
 }
 
 // Add "picked up" (with space) to the status mappings

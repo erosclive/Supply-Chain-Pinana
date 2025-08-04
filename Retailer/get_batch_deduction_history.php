@@ -1,6 +1,6 @@
 <?php
-// get_batch_details.php
-// This file handles retrieving batch details for a product
+// get_batch_deduction_history.php
+// This file retrieves the history of batch deductions for a product
 
 // Include database connection
 require_once 'db_connection.php';
@@ -31,47 +31,43 @@ try {
     
     $product = $productResult->fetch_assoc();
     
-    // If batch tracking is not enabled, return empty batches
-    if ($product['batch_tracking'] != 1) {
+    // Check if batch tracking is enabled for this product
+    $batchTrackingEnabled = ($product['batch_tracking'] == 1);
+    
+    if (!$batchTrackingEnabled) {
         echo json_encode([
             'success' => true,
             'batch_tracking_enabled' => false,
-            'batches' => []
+            'logs' => []
         ]);
         exit;
     }
     
-    // Get batches for the product
-    $batchesQuery = "SELECT batch_id, product_id, batch_code, quantity, expiration_date, 
-                    manufacturing_date, created_at, updated_at
-                    FROM product_batches 
-                    WHERE product_id = ? AND quantity > 0
-                    ORDER BY expiration_date ASC, batch_id ASC";
-    $batchesStmt = $conn->prepare($batchesQuery);
-    $batchesStmt->bind_param('s', $productId);
-    $batchesStmt->execute();
-    $batchesResult = $batchesStmt->get_result();
+    // Get inventory logs with batch details for this product
+    $logQuery = "SELECT il.log_id, il.change_type, il.quantity, il.order_id, il.previous_stock, il.new_stock, 
+                il.batch_details, il.created_at, ro.po_number as order_number
+                FROM inventory_log il
+                LEFT JOIN retailer_orders ro ON il.order_id = ro.order_id
+                WHERE il.product_id = ? AND il.batch_details IS NOT NULL
+                ORDER BY il.created_at DESC";
     
-    $batches = [];
-    while ($batch = $batchesResult->fetch_assoc()) {
-        // Calculate days until expiry
-        $expiryDate = $batch['expiration_date'] ? new DateTime($batch['expiration_date']) : null;
-        $today = new DateTime();
-        $daysUntilExpiry = null;
-        
-        if ($expiryDate && $batch['expiration_date'] !== '0000-00-00') {
-            $interval = $today->diff($expiryDate);
-            $daysUntilExpiry = $interval->invert ? -$interval->days : $interval->days;
-        }
-        
-        $batch['days_until_expiry'] = $daysUntilExpiry;
-        $batches[] = $batch;
+    $logStmt = $conn->prepare($logQuery);
+    $logStmt->bind_param('s', $productId);
+    $logStmt->execute();
+    $logResult = $logStmt->get_result();
+    
+    $logs = [];
+    while ($log = $logResult->fetch_assoc()) {
+        // Parse batch details JSON
+        $log['batch_details_parsed'] = !empty($log['batch_details']) ? json_decode($log['batch_details'], true) : [];
+        $logs[] = $log;
     }
     
     echo json_encode([
         'success' => true,
         'batch_tracking_enabled' => true,
-        'batches' => $batches
+        'product_name' => $product['product_name'],
+        'logs' => $logs
     ]);
     
 } catch (Exception $e) {

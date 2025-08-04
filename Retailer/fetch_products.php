@@ -61,6 +61,7 @@ try {
                     p.status,
                     p.batch_tracking,
                     p.stocks as available_stock,
+                    p.product_photo, /* Added product_photo field */
                     ro.order_id as ro_order_id,
                     ro.po_number,
                     ro.retailer_name,

@@ -5,9 +5,10 @@ require_once 'db_connection.php';
 // Set headers
 header('Content-Type: application/json');
 
-// Get order ID
+// Get order ID from request
 $order_id = isset($_GET['order_id']) ? intval($_GET['order_id']) : 0;
 
+// Validate input
 if (!$order_id) {
     echo json_encode(['success' => false, 'message' => 'Order ID is required']);
     exit;
@@ -15,35 +16,30 @@ if (!$order_id) {
 
 try {
     // Get order details
-    $query = "SELECT 
-                ro.*, 
-                COALESCE(ro.pickup_status, ro.status) as effective_status
-              FROM 
-                retailer_orders ro
-              WHERE 
-                ro.order_id = ?";
-    
+    $query = "SELECT * FROM retailer_orders WHERE order_id = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param('i', $order_id);
     $stmt->execute();
     $result = $stmt->get_result();
     
     if ($result->num_rows === 0) {
-        throw new Exception('Order not found');
+        echo json_encode(['success' => false, 'message' => 'Order not found']);
+        exit;
     }
     
     $order = $result->fetch_assoc();
     
     // Get order items
     $itemsQuery = "SELECT 
-                    roi.*,
-                    p.product_name
-                  FROM 
-                    retailer_order_items roi
-                  LEFT JOIN 
-                    products p ON roi.product_id = p.product_id
-                  WHERE 
-                    roi.order_id = ?";
+                roi.*,
+                p.product_name,
+                (roi.quantity * roi.unit_price) as total_price
+              FROM 
+                retailer_order_items roi
+              LEFT JOIN 
+                products p ON roi.product_id = p.product_id
+              WHERE 
+                roi.order_id = ?";
     
     $stmt = $conn->prepare($itemsQuery);
     $stmt->bind_param('i', $order_id);
@@ -56,19 +52,15 @@ try {
     }
     
     // Get status history
-    $historyQuery = "SELECT 
-                      rosh.*,
-                      CASE 
-                        WHEN rosh.status = 'ready_for_pickup' THEN 'ready for pickup'
-                        WHEN rosh.status = 'picked_up' THEN 'picked up'
-                        ELSE rosh.status
-                      END as display_status
-                    FROM 
-                      retailer_order_status_history rosh
-                    WHERE 
-                      rosh.order_id = ?
-                    ORDER BY 
-                      rosh.created_at DESC";
+    $historyQuery = "
+        SELECT 
+            status,
+            notes,
+            created_at
+        FROM retailer_order_status_history
+        WHERE order_id = ?
+        ORDER BY created_at DESC
+    ";
     
     $stmt = $conn->prepare($historyQuery);
     $stmt->bind_param('i', $order_id);

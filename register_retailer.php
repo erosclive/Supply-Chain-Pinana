@@ -25,11 +25,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $businessName = isset($_POST['businessName']) ? trim($_POST['businessName']) : null;
     $businessType = isset($_POST['businessType']) ? trim($_POST['businessType']) : '';
     
-    $province = isset($_POST['province']) ? trim($_POST['province']) : '';
-    $city = isset($_POST['city']) ? trim($_POST['city']) : '';
-    $barangay = isset($_POST['barangay']) ? trim($_POST['barangay']) : '';
+    $province = isset($_POST['province_name']) ? trim($_POST['province_name']) : '';
+    $city = isset($_POST['city_name']) ? trim($_POST['city_name']) : '';
+    $barangay = isset($_POST['barangay_name']) ? trim($_POST['barangay_name']) : '';
+
     $houseNumber = isset($_POST['houseNumber']) ? trim($_POST['houseNumber']) : '';
     $addressNotes = isset($_POST['addressNotes']) ? trim($_POST['addressNotes']) : '';
+    
+    $govIdType = $_POST['govIdType_name'] ?? '';
+$businessDocType = $_POST['businessDocType_name'] ?? '';
+
+$govIdType = $_POST['govIdType_name'] ?? '';
+$businessDocType = $_POST['businessDocType_name'] ?? '';
+
+// Upload directories
+$uploadDir = 'uploads/documents/';
+if (!file_exists($uploadDir)) {
+    mkdir($uploadDir, 0777, true);
+}
+
+// Handle Government ID upload
+$govIdFilePath = '';
+if (isset($_FILES['govIdFile']) && $_FILES['govIdFile']['error'] === UPLOAD_ERR_OK) {
+    $govIdFileTmp = $_FILES['govIdFile']['tmp_name'];
+    $govIdFileName = basename($_FILES['govIdFile']['name']);
+    $govIdFilePath = $uploadDir . uniqid('govid_') . '_' . $govIdFileName;
+    move_uploaded_file($govIdFileTmp, $govIdFilePath);
+}
+
+// Handle Business Document upload (optional)
+$businessDocFilePath = '';
+if (isset($_FILES['businessDocFile']) && $_FILES['businessDocFile']['error'] === UPLOAD_ERR_OK) {
+    $businessDocTmp = $_FILES['businessDocFile']['tmp_name'];
+    $businessDocName = basename($_FILES['businessDocFile']['name']);
+    $businessDocFilePath = $uploadDir . uniqid('bizdoc_') . '_' . $businessDocName;
+    move_uploaded_file($businessDocTmp, $businessDocFilePath);
+}
+
     
     $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
@@ -63,10 +95,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($email)) $errors[] = "Email is required";
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Invalid email format";
     
-    // Check if email is Gmail
-    if (!preg_match('/@gmail\.com$/i', $email)) {
-        $errors[] = "Please use a Gmail address for registration";
-    }
+    // Email validation
+$allowedDomains = [
+  'gmail.com',
+  'yahoo.com',
+  'outlook.com',
+  'hotmail.com',
+  'yandex.com',
+  'icloud.com',
+  'proton.me',
+  'aol.com',
+  'protonmail.com',
+  'mail.com',
+  'zoho.com',
+  'srv1.mail-tester.com'
+];
+
+$email = $_POST['email'] ?? '';
+$emailDomain = strtolower(substr(strrchr($email, "@"), 1));
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors[] = "Invalid email format.";
+} elseif (!in_array($emailDomain, $allowedDomains)) {
+    $errors[] = "This email domain is not currently supported.";
+}
+
     
     if (empty($username)) $errors[] = "Username is required";
     if (empty($password)) $errors[] = "Password is required";
@@ -125,9 +178,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Set token expiration (24 hours from now)
         $tokenExpiration = date('Y-m-d H:i:s', strtotime('+24 hours'));
         
-        // Create user record
+        // Create user record with pending approval status
+        // Set email_verified = 0 and is_active = 0 for pending retailers
         $fullName = $firstName . ' ' . $lastName;
-        $insert_user_sql = "INSERT INTO users (username, password, email, full_name, role, email_verified, verification_token, verification_expires, created_at) VALUES (?, ?, ?, ?, 'retailer', 0, ?, ?, NOW())";
+        $insert_user_sql = "INSERT INTO users (username, password, email, full_name, role, email_verified, verification_token, verification_expires, approval_status, is_active, created_at) VALUES (?, ?, ?, ?, 'retailer', 0, ?, ?, 'pending', 0, NOW())";
         $insert_user_stmt = mysqli_prepare($conn, $insert_user_sql);
         
         if (!$insert_user_stmt) {
@@ -147,15 +201,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $businessAddress = "$houseNumber, Barangay $barangay, $city, $province";
         
         // Create retailer profile
-        $insert_profile_sql = "INSERT INTO retailer_profiles (user_id, first_name, last_name, birthday, age, business_name, business_type, province, city, barangay, house_number, address_notes, business_address, phone, facebook, instagram, tiktok) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $insert_profile_stmt = mysqli_prepare($conn, $insert_profile_sql);
+        $insert_profile_sql = "INSERT INTO retailer_profiles (
+    user_id, first_name, last_name, birthday, age, business_name, business_type,
+    province, city, barangay, house_number, address_notes, business_address,
+    phone, facebook, instagram, tiktok, gov_id_type, gov_id_file_path,
+    business_doc_type, business_doc_file_path, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+
+$insert_profile_stmt = mysqli_prepare($conn, $insert_profile_sql);
         
         if (!$insert_profile_stmt) {
             throw new Exception("Database error: " . mysqli_error($conn));
         }
         
-        mysqli_stmt_bind_param($insert_profile_stmt, "isssississsssssss", $userId, $firstName, $lastName, $birthday, $age, $businessName, $businessType, $province, $city, $barangay, $houseNumber, $addressNotes, $businessAddress, $phone, $facebook, $instagram, $tiktok);
-        
+        mysqli_stmt_bind_param($insert_profile_stmt, "isssissssssssssssssss", 
+    $userId, $firstName, $lastName, $birthday, $age, $businessName, $businessType,
+    $province, $city, $barangay, $houseNumber, $addressNotes, $businessAddress,
+    $phone, $facebook, $instagram, $tiktok,
+    $govIdType, $govIdFilePath, $businessDocType, $businessDocFilePath
+); 
         if (!mysqli_stmt_execute($insert_profile_stmt)) {
             throw new Exception("Error creating retailer profile: " . mysqli_stmt_error($insert_profile_stmt));
         }
@@ -163,7 +227,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_stmt_close($insert_profile_stmt);
         
         // Send verification email
-        $emailSent = sendVerificationEmail($email, $fullName, $verificationToken);
+        $emailSent = false;
+        if (function_exists('sendVerificationEmail')) {
+            $emailSent = sendVerificationEmail($email, $fullName, $verificationToken);
+        }
         
         if (!$emailSent) {
             // Log error but continue with registration
@@ -174,13 +241,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_commit($conn);
         
         // Log success
-        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Registration successful for: $firstName $lastName, Email: $email, User ID: $userId\n", FILE_APPEND);
+        file_put_contents($logFile, date('Y-m-d H:i:s') . " - Registration successful for: $firstName $lastName, Email: $email, User ID: $userId (Status: pending, Active: 0)\n", FILE_APPEND);
         
         // Return success response
         echo json_encode([
             'success' => true,
-            'message' => 'Registration successful',
+            'message' => 'Registration successful! Your account is pending admin approval. You will receive an email notification once your account is approved.',
             'requiresVerification' => true,
+            'requiresApproval' => true,
             'email' => $email
         ]);
         

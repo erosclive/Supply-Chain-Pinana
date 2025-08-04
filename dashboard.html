@@ -12,6 +12,88 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="Retailer/mono-green.png">
+  <style>
+  /* Submenu styles */
+.submenu {
+  padding-left: 2rem;
+  list-style: none;
+}
+
+.submenu .nav-item {
+  margin-bottom: 0.25rem;
+}
+
+.submenu .nav-link {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.submenu .nav-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.nav-link.dropdown-toggle::after {
+  display: inline-block;
+  margin-left: auto;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+  
+  .submenu-link {
+    padding-left: 3rem !important;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .submenu-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .submenu-link.active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  #inventorySubmenu {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+  
+  .nav-link.dropdown-toggle::after {
+    display: inline-block;
+    margin-left: auto;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .nav-link.dropdown-toggle[aria-expanded="true"]::after {
+    transform: translateY(-50%) rotate(180deg);
+  }
+
+  /* Top Products Filter Styles */
+  .top-products-filter {
+    min-width: 120px;
+  }
+</style>
+
 </head>
 <body>
   <div class="container-fluid">
@@ -23,7 +105,7 @@
                 <img src="images/final-light.png" class="pineapple-logo">
             </div>
           
-          <div class="sidebar-divider">
+          <div class="sidebar-divider" style="margin-top: -1.5rem;">
             <span>MAIN MENU</span>
           </div>
           
@@ -37,42 +119,63 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="inventory.html" data-page="inventory">
-                <div class="nav-icon">
-                  <i class="bi bi-box"></i>
-                </div>
-                <span>Inventory</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="orders.html" data-page="orders">
-                <div class="nav-icon">
-                  <i class="bi bi-people"></i>
-                </div>
-                <span>Orders</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="delivery.html" data-page="delivery">
-                <div class="nav-icon">
-                  <i class="bi bi-truck"></i>
-                </div>
-                <span>Delivery</span>
-              </a>
-            </li>
-            
-            <div class="sidebar-divider">
-              <span>SALES</span>
+  <a class="nav-link dropdown-toggle" href="#inventorySubmenu" data-bs-toggle="collapse" aria-expanded="false">
+    <div class="nav-icon">
+      <i class="bi bi-box"></i>
+    </div>
+    <span>Inventory</span>
+  </a>
+  <ul class="collapse submenu" id="inventorySubmenu">
+    <li class="nav-item">
+      <a class="nav-link" href="inventory.html" data-page="inventory">
+        <div class="nav-icon">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <span>Products</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="supplies.html" data-page="supplies">
+        <div class="nav-icon">
+          <i class="bi bi-tools"></i>
+        </div>
+        <span>Supplies</span>
+      </a>
+    </li>
+  </ul>
+</li>
+             <li class="nav-item">
+          <a class="nav-link" href="production.html" data-page="production">
+            <div class="nav-icon">
+              <i class="bi bi-layer-backward"></i>
             </div>
-            
+            <span>Production</span>
+          </a>
+        </li>
+       
+        
+        <div class="sidebar-divider">
+          <span>SALES</span>
+        </div>
+         <li class="nav-item">
+          <a class="nav-link" href="orders.html" data-page="orders">
+            <div class="nav-icon">
+              <i class="bi bi-basket2"></i>
+            </div>
+            <span>Orders</span>
+          </a>
+        </li>
+
             <li class="nav-item">
-              <a class="nav-link" href="pos.html" data-page="pos">
+              <a class="nav-link" href="billing.html" data-page="delivery">
                 <div class="nav-icon">
                   <i class="bi bi-credit-card"></i>
                 </div>
-                <span>POS</span>
+                <span>Billing</span>
               </a>
             </li>
+            
+            
             <li class="nav-item">
               <a class="nav-link" href="reports.html" data-page="reports">
                 <div class="nav-icon">
@@ -81,6 +184,28 @@
                 <span>Reports</span>
               </a>
             </li>
+
+            <div class="sidebar-divider">
+              <span>USER</span>
+            </div>
+
+            <li class="nav-item">
+              <a class="nav-link" href="retailers.html" data-page="retailers">
+                <div class="nav-icon">
+                  <i class="bi bi-person-heart"></i>
+                </div>
+                <span>Retailers</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="suppliers.html" data-page="suppliers">
+                <div class="nav-icon">
+                  <i class="bi bi-person-fill-down"></i>
+                </div>
+                <span>Suppliers</span>
+              </a>
+            </li>
+
           </ul>
         </div>
       </div>
@@ -94,19 +219,21 @@
               <button class="navbar-toggler d-md-none collapsed me-2" type="button" id="sidebarToggle">
                 <i class="bi bi-list"></i>
               </button>
-              <h5 class="mb-0">Dashboard</h5>
+               <h5 class="mb-0">Dashboard <small style="font-size: 0.6em; color: #cccccc;">POS & Retailers</small></h5>           
             </div>
             <div class="d-flex align-items-center">
               <!-- Period Filter -->
-              <div class="period-filter me-3">
-                <select class="form-select form-select-sm" id="period-select">
-                  <option value="today">Today</option>
-                  <option value="week">This Week</option>
-                  <option value="month" selected>This Month</option>
-                  <option value="quarter">This Quarter</option>
-                  <option value="year">This Year</option>
-                </select>
-              </div>
+            <div class="period-filter me-3 d-flex align-items-center">
+              <span id="current-date" class="text-muted small me-2" style="white-space: nowrap; min-width: 110px;"></span>
+              <select class="form-select form-select-sm" id="period-select" style="min-width: 130px;">
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month" selected>This Month</option>
+                <option value="quarter">This Quarter</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+
              
               <!-- User Profile Dropdown -->
               <div class="dropdown user-profile-dropdown" >
@@ -153,6 +280,8 @@
         </div>
 
         <div class="main-content-inner">
+
+          <h5 class="section-title"> </h5>
           <!-- Dashboard Content -->
           <div class="dashboard-section">
             <!-- KPI Cards Row -->
@@ -280,84 +409,98 @@
             
             
             <!-- Third Row -->
-            <div class="row mb-4">
-              <!-- Inventory Status -->
-              <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <h5 class="card-title">Inventory Status</h5>
-                    <div class="chart-container" style="position: relative; height: 200px;">
-                      <canvas id="inventory-status-chart"></canvas>
-                    </div>
-                    <div class="inventory-legend mt-3">
-                      <div class="d-flex justify-content-between">
-                        <div class="legend-item">
-                          <span class="legend-color bg-success"></span>
-                          <span class="legend-label">In Stock</span>
-                          <span class="legend-value" id="in-stock-count">0</span>
-                        </div>
-                        <div class="legend-item">
-                          <span class="legend-color bg-warning"></span>
-                          <span class="legend-label">Low Stock</span>
-                          <span class="legend-value" id="low-stock-count">0</span>
-                        </div>
-                        <div class="legend-item">
-                          <span class="legend-color bg-danger"></span>
-                          <span class="legend-label">Out of Stock</span>
-                          <span class="legend-value" id="out-of-stock-count">0</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            <div class="row">
+  <!-- Inventory Status -->
+<div class="col-md-6 col-lg-4 mb-4">
+  <div class="card h-100">
+    <!-- 🆕 Added d-flex flex-column justify-content-between -->
+    <div class="card-body d-flex flex-column justify-content-between">
+      <h5 class="card-title">Inventory Status</h5>
+      <div class="chart-container my-3" style="position: relative; height: 200px;">
+        <canvas id="inventory-status-chart"></canvas>
+      </div>
+      <div class="inventory-legend">
+        <div class="d-flex justify-content-between">
+          <div class="legend-item">
+            <span class="legend-color bg-success"></span>
+            <span class="legend-label">In Stock</span>
+            <span class="legend-value" id="in-stock-count">0</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color bg-warning"></span>
+            <span class="legend-label">Low Stock</span>
+            <span class="legend-value" id="low-stock-count">0</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color bg-danger"></span>
+            <span class="legend-label">Out of Stock</span>
+            <span class="legend-value" id="out-of-stock-count">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Methods -->
+<div class="col-md-6 col-lg-4 mb-4">
+  <div class="card h-100">
+    <!-- 🆕 Added d-flex flex-column justify-content-between -->
+    <div class="card-body d-flex flex-column justify-content-between">
+      <h5 class="card-title">Payment Methods</h5>
+      <div class="chart-container my-3" style="position: relative; height: 200px;">
+        <canvas id="payment-methods-chart"></canvas>
+      </div>
+      <div class="payment-methods-legend" id="payment-methods-legend">
+        <!-- Payment methods legend will be populated dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Top Products -->
+<div class="col-md-12 col-lg-4 mb-4">
+  <div class="card h-100">
+    <!-- 🆕 Added d-flex flex-column -->
+    <div class="card-body d-flex flex-column">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Top Products</h5>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Filter options">
+          <input type="radio" class="btn-check" name="productFilter" id="filterUnits" value="units" checked>
+          <label class="btn btn-outline-success" for="filterUnits">Units</label>
+
+          <input type="radio" class="btn-check" name="productFilter" id="filterRevenue" value="revenue">
+          <label class="btn btn-outline-success" for="filterRevenue">Revenue</label>
+        </div>
+      </div>
+      <!-- 🆕 Made table take available space while keeping layout consistent -->
+      <div class="table-responsive" style="flex-grow: 1; overflow-y: auto;">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th class="text-center">Units</th>
+              <th class="text-end">Revenue</th>
+            </tr>
+          </thead>
+          <tbody id="top-products-table">
+            <!-- Top products will be populated dynamically -->
+            <tr>
+              <td colspan="3" class="text-center py-3">
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
                 </div>
-              </div>
-              
-              <!-- Payment Methods -->
-              <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <h5 class="card-title">Payment Methods</h5>
-                    <div class="chart-container" style="position: relative; height: 200px;">
-                      <canvas id="payment-methods-chart"></canvas>
-                    </div>
-                    <div class="payment-methods-legend mt-3" id="payment-methods-legend">
-                      <!-- Payment methods legend will be populated dynamically -->
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Top Products -->
-              <div class="col-md-12 col-lg-4 mb-4">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <h5 class="card-title">Top Products</h5>
-                    <div class="table-responsive">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th>Product</th>
-                            <th class="text-center">Units</th>
-                            <th class="text-end">Revenue</th>
-                          </tr>
-                        </thead>
-                        <tbody id="top-products-table">
-                          <!-- Top products will be populated dynamically -->
-                          <tr>
-                            <td colspan="3" class="text-center py-3">
-                              <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                              </div>
-                              <span class="ms-2">Loading data...</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+                <span class="ms-2">Loading data...</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
             
             <!-- Recent Transactions -->
             <div class="row">
@@ -366,7 +509,7 @@
                   <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                       <h5 class="card-title mb-0">Recent Transactions</h5>
-                      <a href="transactions.html" class="btn btn-sm btn-outline-primary">View All</a>
+                      <a href="billing.html" class="btn btn-sm btn-outline-primary">View All</a>
                     </div>
                     <div class="table-responsive">
                       <table class="table table-hover">
@@ -450,9 +593,67 @@
   <!-- jQuery (needed for some functionality) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- Custom JavaScript -->
-  <script src="scripts.js"></script>
+  <script src="script.js"></script>
   <script src="dashboard.js"></script>
   <script src="logout.js"></script>
-  <script src="notifications.js"></script>
+  
+  
+  <script>
+  function updateCurrentDate() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = now.toLocaleDateString(undefined, options);
+    document.getElementById('current-date').textContent = formattedDate;
+  }
+
+  // Initial call
+  updateCurrentDate();
+
+  // Optional: Update every minute if you want real-time freshness
+  setInterval(updateCurrentDate, 60000);
+</script>
+
+
+  <script>
+  // Handle active state for submenu items
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get current page path
+    const currentPath = window.location.pathname;
+    const pageName = currentPath.split('/').pop();
+    
+    // Check if current page is inventory.html or supplies.html
+    if (pageName === 'inventory.html' || pageName === 'supplies.html') {
+      // Expand the inventory submenu
+      const inventorySubmenu = document.getElementById('inventorySubmenu');
+      if (inventorySubmenu) {
+        inventorySubmenu.classList.add('show');
+        const dropdownToggle = document.querySelector('a[href="#inventorySubmenu"]');
+        if (dropdownToggle) {
+          dropdownToggle.setAttribute('aria-expanded', 'true');
+        }
+      }
+      
+      // Set active class on the appropriate submenu item
+      const activeLink = document.querySelector(`a[href="${pageName}"]`);
+      if (activeLink) {
+        activeLink.classList.add('active');
+      }
+    }
+  });
+</script>
+
+  <script>
+// Redirect to login page if user accessed the site directly (no referrer)
+window.onload = function () {
+  const isLoggedIn = false; // Replace this with your actual login check logic
+
+  if (document.referrer === '' && !isLoggedIn) {
+    // Redirect only if not already on login page
+    if (!window.location.pathname.includes("index.html")) {
+      window.location.href = "index.html"; // Adjust this to your actual login page path
+    }
+  }
+};
+</script>
 </body>
 </html>

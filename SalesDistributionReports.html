@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Distribution Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        .header h1 {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        .controls-section {
+            background: white;
+            padding: 30px 40px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .filter-group label {
+            font-weight: 600;
+            color: #27ae60;
+            font-size: 1.1em;
+        }
+        .channel-select {
+            padding: 12px 20px;
+            border: 2px solid #f1c40f;
+            border-radius: 12px;
+            font-size: 1em;
+            background: transparent;
+            color: #27ae60;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+        .channel-select:focus {
+            outline: none;
+            border-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        .export-btn, .print-btn {
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+        .export-btn {
+            background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+        }
+        .print-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+        .export-btn:hover, .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        .export-btn:disabled, .print-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .main-content {
+            padding: 40px;
+            background: white;
+        }
+        .loading {
+            text-align: center;
+            padding: 80px;
+            font-size: 1.3em;
+            color: #6c757d;
+        }
+        .loading i {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #f1c40f;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 500;
+        }
+        .total-sales-card {
+            background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 35px rgba(241, 196, 15, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .total-sales-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+        .total-sales-card h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        .total-sales-amount {
+            font-size: 3.5em;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        .stat-card:nth-child(1) { border-left-color: #f1c40f; }
+        .stat-card:nth-child(2) { border-left-color: #27ae60; }
+        .stat-card:nth-child(3) { border-left-color: #2ecc71; }
+        .stat-card:nth-child(4) { border-left-color: #f39c12; }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, rgba(241, 196, 15, 0.1), transparent);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+        .stat-card h3 {
+            color: #27ae60;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        .stat-card .amount {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        .stat-card .percentage {
+            font-size: 1.3em;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        .stat-card:nth-child(1) .percentage { color: #f1c40f; }
+        .stat-card:nth-child(2) .percentage { color: #27ae60; }
+        .stat-card:nth-child(3) .percentage { color: #2ecc71; }
+        .stat-card:nth-child(4) .percentage { color: #f39c12; }
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 40px;
+        }
+        .chart-wrapper {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            height: 350px;
+        }
+        .chart-wrapper:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        .chart-title {
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #27ae60;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1c40f;
+        }
+        .chart-canvas {
+            height: 250px !important;
+        }
+        .no-data {
+            text-align: center;
+            padding: 60px;
+            color: #6c757d;
+            font-size: 1.2em;
+        }
+        .no-data i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        .no-data-message {
+            text-align: center;
+            padding: 80px 40px;
+            color: #6c757d;
+            font-size: 1.3em;
+        }
+        .no-data-message i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+            display: block;
+        }
+        /* Print styles */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+            .container {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+            .controls-section {
+                display: none !important;
+            }
+            .chart-wrapper {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            .action-buttons {
+                display: none !important;
+            }
+        }
+        @media (max-width: 1024px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-group {
+                justify-content: center;
+            }
+            .action-buttons {
+                justify-content: center;
+            }
+        }
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2em;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .total-sales-amount {
+                font-size: 2.5em;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            .export-btn, .print-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chart-pie"></i> Sales Distribution Report</h1>
+        </div>
+        <div class="controls-section">
+            <div class="filter-group" style="display: none;">
+                <label for="channelSelect"><i class="fas fa-filter"></i> Channel:</label>
+                <select id="channelSelect" class="channel-select" onchange="updateReport()">
+                    <option value="all" selected>All Channels</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button onclick="printReport()" id="printBtn" class="print-btn">
+                    <i class="fas fa-print"></i>
+                    Print Report
+                </button>
+                <button onclick="exportReport()" id="exportBtn" class="export-btn">
+                    <i class="fas fa-download"></i>
+                    Export Report
+                </button>
+            </div>
+        </div>
+        <div class="main-content">
+            <div id="loading" class="loading">
+                <i class="fas fa-spinner"></i>
+                <div>Loading sales data...</div>
+            </div>
+            <div id="error" class="error" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                Error loading data. Please try again.
+            </div>
+            <div id="content" style="display: none;">
+                <div class="total-sales-card">
+                    <h2><i class="fas fa-money-bill-wave"></i> Total Sales</h2>
+                    <div class="total-sales-amount" id="totalSales">₱0.00</div>
+                </div>
+                <div class="stats-grid" id="statsGrid">
+                    <!-- Stats cards will be populated here -->
+                </div>
+                <div class="charts-container">
+                    <div class="chart-wrapper">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-pie"></i> Distribution Overview
+                        </div>
+                        <canvas id="pieChart" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-bar"></i> Performance Comparison
+                        </div>
+                        <canvas id="barChart" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let pieChart, barChart;
+        let currentData = null;
+        
+        // Yellow-White-Green color schemes
+        const colorSchemes = {
+            all: [
+                'rgba(241, 196, 15, 0.8)',   // Yellow
+                'rgba(39, 174, 96, 0.8)',    // Green
+                'rgba(46, 204, 113, 0.8)',   // Light Green
+                'rgba(243, 156, 18, 0.8)'    // Orange-Yellow
+            ],
+            pos: ['rgba(241, 196, 15, 0.8)'],
+            retailer: ['rgba(39, 174, 96, 0.8)'],
+            ecommerce: ['rgba(46, 204, 113, 0.8)']
+        };
+        
+        const borderColors = {
+            all: [
+                'rgba(241, 196, 15, 1)',
+                'rgba(39, 174, 96, 1)',
+                'rgba(46, 204, 113, 1)',
+                'rgba(243, 156, 18, 1)'
+            ],
+            pos: ['rgba(241, 196, 15, 1)'],
+            retailer: ['rgba(39, 174, 96, 1)'],
+            ecommerce: ['rgba(46, 204, 113, 1)']
+        };
+
+        // Fetch sales data from PHP API
+        async function fetchSalesData(channel) {
+            try {
+                // Simple relative path - adjust this based on your file structure
+                const apiUrl = `fetch_sales_data.php?channel=${encodeURIComponent(channel)}`;
+                
+                console.log('Fetching data from:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Received data:', data);
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to fetch data');
+                }
+                
+                return data.data;
+            } catch (error) {
+                console.error('Error fetching sales data:', error);
+                throw error;
+            }
+        }
+
+        // Update the report with new data
+        async function updateReport() {
+            const channel = document.getElementById('channelSelect').value;
+            const exportBtn = document.getElementById('exportBtn');
+            const printBtn = document.getElementById('printBtn');
+            
+            // Show loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            exportBtn.disabled = true;
+            printBtn.disabled = true;
+
+            try {
+                const data = await fetchSalesData(channel);
+                currentData = data;
+                displayData(data);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Error: ${error.message}
+                `;
+            } finally {
+                exportBtn.disabled = false;
+                printBtn.disabled = false;
+            }
+        }
+
+        // Display the fetched data
+        function displayData(data) {
+            // Update total sales
+            document.getElementById('totalSales').textContent = 
+                `₱${parseFloat(data.totalSales || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+            // Update stats cards
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = '';
+            
+            if (!data.salesData || Object.keys(data.salesData).length === 0) {
+                statsGrid.innerHTML = `
+                    <div class="no-data-message" style="grid-column: 1 / -1;">
+                        <i class="fas fa-chart-line"></i>
+                        <div>No sales data available</div>
+                        <div style="font-size: 0.9em; margin-top: 10px; opacity: 0.7;">Connect your data source to view sales distribution</div>
+                    </div>
+                `;
+                
+                // Clear charts
+                clearCharts();
+                return;
+            }
+
+            Object.entries(data.salesData).forEach(([channel, channelData]) => {
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <h3><i class="fas fa-store"></i> ${channel}</h3>
+                    <div class="amount">₱${parseFloat(channelData.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</div>
+                    <div class="percentage">${parseFloat(channelData.percentage || 0).toFixed(2)}%</div>
+                `;
+                statsGrid.appendChild(card);
+            });
+
+            // Update charts
+            updateCharts(data.salesData, data.channel);
+        }
+
+        // Clear charts when no data
+        function clearCharts() {
+            if (pieChart) {
+                pieChart.destroy();
+                pieChart = null;
+            }
+            if (barChart) {
+                barChart.destroy();
+                barChart = null;
+            }
+            
+            // Show no data message in chart areas
+            const pieCtx = document.getElementById('pieChart');
+            const barCtx = document.getElementById('barChart');
+            
+            pieCtx.style.display = 'none';
+            barCtx.style.display = 'none';
+            
+            // Add no data message to chart wrappers
+            const chartWrappers = document.querySelectorAll('.chart-wrapper');
+            chartWrappers.forEach(wrapper => {
+                let noDataDiv = wrapper.querySelector('.chart-no-data');
+                if (!noDataDiv) {
+                    noDataDiv = document.createElement('div');
+                    noDataDiv.className = 'chart-no-data no-data';
+                    noDataDiv.innerHTML = `
+                        <i class="fas fa-chart-line"></i>
+                        <div>No data to display</div>
+                    `;
+                    wrapper.appendChild(noDataDiv);
+                }
+                noDataDiv.style.display = 'block';
+            });
+        }
+
+        // Update both charts with new data
+        function updateCharts(salesData, channel) {
+            const labels = Object.keys(salesData);
+            const amounts = labels.map(label => parseFloat(salesData[label].amount || 0));
+            const percentages = labels.map(label => parseFloat(salesData[label].percentage || 0));
+
+            // Hide no data messages and show canvases
+            document.getElementById('pieChart').style.display = 'block';
+            document.getElementById('barChart').style.display = 'block';
+            
+            const noDataDivs = document.querySelectorAll('.chart-no-data');
+            noDataDivs.forEach(div => div.style.display = 'none');
+
+            // Get colors based on channel
+            const colors = colorSchemes[channel] || colorSchemes.all;
+            const borders = borderColors[channel] || borderColors.all;
+
+            // Destroy existing charts
+            if (pieChart) pieChart.destroy();
+            if (barChart) barChart.destroy();
+
+            // Create pie chart
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: percentages,
+                        backgroundColor: colors,
+                        borderColor: borders,
+                        borderWidth: 3,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 11,
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(39, 174, 96, 0.9)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(241, 196, 15, 0.8)',
+                            borderWidth: 2,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const amount = amounts[context.dataIndex];
+                                    return `${label}: ${value.toFixed(2)}% (₱${amount.toLocaleString()})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Create bar chart
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Sales Amount',
+                        data: amounts,
+                        backgroundColor: colors,
+                        borderColor: borders,
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(39, 174, 96, 0.9)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(241, 196, 15, 0.8)',
+                            borderWidth: 2,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const percentage = percentages[context.dataIndex];
+                                    return `₱${value.toLocaleString()} (${percentage.toFixed(2)}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(241, 196, 15, 0.2)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '₱' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Print functionality
+        function printReport() {
+            if (!currentData || !currentData.salesData || Object.keys(currentData.salesData).length === 0) {
+                alert('No data to print');
+                return;
+            }
+            
+            // Hide controls before printing
+            const controls = document.querySelector('.controls-section');
+            const originalDisplay = controls.style.display;
+            controls.style.display = 'none';
+            
+            // Print the page
+            window.print();
+            
+            // Restore controls after printing
+            setTimeout(() => {
+                controls.style.display = originalDisplay;
+            }, 1000);
+        }
+
+        // Export functionality
+function exportReport() {
+    if (!currentData || !currentData.salesData || Object.keys(currentData.salesData).length === 0) {
+        alert('No data to export');
+        return;
+    }
+
+    const channel = document.getElementById('channelSelect').value;
+    const channelName = channel === 'all' ? 'All Channels' :
+                      channel.charAt(0).toUpperCase() + channel.slice(1);
+
+    // Create CSV content with proper formatting
+    let csvContent = "Sales Distribution Report\n";
+    csvContent += `Channel Filter: ${channelName}\n`;
+    csvContent += "Channel,Amount,Percentage\n";
+    
+    Object.entries(currentData.salesData).forEach(([channel, data]) => {
+        const amount = parseFloat(data.amount || 0);
+        const percentage = parseFloat(data.percentage || 0).toFixed(2);
+        csvContent += `${channel},"₱${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}",${percentage}%\n`;
+    });
+
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sales-distribution-report-${channelName.toLowerCase().replace(' ', '-')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateReport();
+        });
+    </script>
+</body>
+</html>

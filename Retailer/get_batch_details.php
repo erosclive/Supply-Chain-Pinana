@@ -1,7 +1,4 @@
 <?php
-// get_batch_details.php
-// This file handles retrieving batch details for a product
-
 // Include database connection
 require_once 'db_connection.php';
 
@@ -31,8 +28,10 @@ try {
     
     $product = $productResult->fetch_assoc();
     
-    // If batch tracking is not enabled, return empty batches
-    if ($product['batch_tracking'] != 1) {
+    // Check if batch tracking is enabled for this product
+    $batchTrackingEnabled = ($product['batch_tracking'] == 1);
+    
+    if (!$batchTrackingEnabled) {
         echo json_encode([
             'success' => true,
             'batch_tracking_enabled' => false,
@@ -41,30 +40,22 @@ try {
         exit;
     }
     
-    // Get batches for the product
-    $batchesQuery = "SELECT batch_id, product_id, batch_code, quantity, expiration_date, 
-                    manufacturing_date, created_at, updated_at
-                    FROM product_batches 
-                    WHERE product_id = ? AND quantity > 0
-                    ORDER BY expiration_date ASC, batch_id ASC";
-    $batchesStmt = $conn->prepare($batchesQuery);
-    $batchesStmt->bind_param('s', $productId);
-    $batchesStmt->execute();
-    $batchesResult = $batchesStmt->get_result();
+    // Get active batches for this product
+    $batchQuery = "SELECT pb.batch_id, pb.batch_code, pb.quantity, pb.expiration_date, pb.manufacturing_date 
+                  FROM product_batches pb
+                  WHERE pb.product_id = ? AND pb.quantity > 0
+                  ORDER BY 
+                    CASE WHEN pb.expiration_date = '0000-00-00' THEN 1 ELSE 0 END,
+                    pb.expiration_date ASC,
+                    pb.batch_id ASC";
+    
+    $batchStmt = $conn->prepare($batchQuery);
+    $batchStmt->bind_param('s', $productId);
+    $batchStmt->execute();
+    $batchResult = $batchStmt->get_result();
     
     $batches = [];
-    while ($batch = $batchesResult->fetch_assoc()) {
-        // Calculate days until expiry
-        $expiryDate = $batch['expiration_date'] ? new DateTime($batch['expiration_date']) : null;
-        $today = new DateTime();
-        $daysUntilExpiry = null;
-        
-        if ($expiryDate && $batch['expiration_date'] !== '0000-00-00') {
-            $interval = $today->diff($expiryDate);
-            $daysUntilExpiry = $interval->invert ? -$interval->days : $interval->days;
-        }
-        
-        $batch['days_until_expiry'] = $daysUntilExpiry;
+    while ($batch = $batchResult->fetch_assoc()) {
         $batches[] = $batch;
     }
     

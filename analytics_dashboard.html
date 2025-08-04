@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #2d3436;
+            padding: 1rem;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 184, 148, 0.3);
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .buttons {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        button:first-child {
+            background: linear-gradient(135deg, #fdcb6e 0%, #f39c12 100%);
+            color: #2d3436;
+        }
+        button:first-child:hover {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+        }
+        button:last-child {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+        }
+        button:last-child:hover {
+            background: linear-gradient(135deg, #00a085 0%, #008f7a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+        }
+        .dashboard-grid {
+            display: grid;
+            gap: 1rem;
+        }
+        @media (min-width: 1200px) {
+            .summary-cards {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        @media (max-width: 480px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 184, 148, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #fdcb6e 0%, #00b894 100%);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 184, 148, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #fdcb6e 0%, #00b894 100%);
+        }
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+        .summary-card h2 {
+            font-size: 1.8rem;
+            color: #00b894;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        .summary-card .label {
+            font-size: 0.9rem;
+            color: #636e72;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #fdcb6e;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: #00b894;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        th {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s ease;
+        }
+        tr:hover td {
+            background-color: rgba(253, 203, 110, 0.1);
+        }
+        tr:nth-child(even) td {
+            background-color: rgba(248, 249, 250, 0.5);
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00b894;
+        }
+        .metric-label {
+            font-size: 0.9rem;
+            color: #636e72;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.5rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1.5rem;
+        }
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (min-width: 992px) {
+            .chart-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .tab-container {
+            margin-bottom: 1rem;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .tab-button {
+            padding: 0.5rem 1rem;
+            background: #f1f1f1;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: none;
+            text-transform: none;
+        }
+        .tab-button.active {
+            background: #00b894;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            table {
+                font-size: 0.9rem;
+            }
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+        @media print {
+            .buttons {
+                display: none !important;
+            }
+            .header {
+                display: none !important;
+            }
+            .tab-buttons {
+                display: none !important;
+            }
+            .tab-content {
+                display: block !important;
+            }
+            .chart-container {
+                display: none !important;
+            }
+            .chart-row {
+                display: block !important;
+            }
+            .card::before {
+                display: none !important;
+            }
+            .summary-cards {
+                display: grid !important;
+                grid-template-columns: repeat(6, 1fr) !important;
+                gap: 10px !important;
+                margin-bottom: 20px !important;
+                page-break-inside: avoid;
+            }
+            .summary-card {
+                box-shadow: none !important;
+                border: 1px solid #000 !important;
+                padding: 10px !important;
+                background: white !important;
+            }
+            .summary-card::before {
+                display: none !important;
+            }
+            .metric-value {
+                font-size: 16px !important;
+                color: #000 !important;
+            }
+            .metric-label {
+                font-size: 10px !important;
+                color: #000 !important;
+            }
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .container {
+                max-width: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                margin-bottom: 20px !important;
+                page-break-inside: avoid;
+                background: white !important;
+            }
+            .card:has(#revenueDistributionChart) {
+                display: none !important;
+            }
+            .revenue-distribution-card {
+                display: none !important;
+            }
+            .section-title {
+                color: #000 !important;
+                border-bottom: 2px solid #000 !important;
+                margin-bottom: 10px !important;
+                font-size: 16px !important;
+            }
+            .section-title::after {
+                display: none !important;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+            th {
+                background: #f5f5f5 !important;
+                color: #000 !important;
+                border: 1px solid #000 !important;
+                padding: 8px !important;
+                font-size: 12px !important;
+            }
+            td {
+                border: 1px solid #000 !important;
+                padding: 8px !important;
+                font-size: 11px !important;
+                background: white !important;
+            }
+            tr:nth-child(even) td {
+                background: #f9f9f9 !important;
+            }
+            tr:hover td {
+                background: inherit !important;
+            }
+            .chart-row .card {
+                width: 48% !important;
+                display: inline-block !important;
+                vertical-align: top !important;
+                margin-right: 2% !important;
+            }
+            .chart-row .card:nth-child(2n) {
+                margin-right: 0 !important;
+            }
+            body::before {
+                content: "Piñana Gourmet - E-Commerce Reports";
+                display: block;
+                text-align: center;
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #000;
+            }
+            body::after {
+                content: "Generated on: " attr(data-print-date);
+                display: block;
+                text-align: right;
+                font-size: 10px;
+                margin-top: 20px;
+                position: fixed;
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #636e72;
+        }
+        .error {
+            background: #ff7675;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Piñana Gourmet - E-Commerce Analytics</h1>
+        </div>
+        <div class="buttons">
+            <button onclick="exportToExcel()">📊 Export to Excel</button>
+            <button onclick="printReport()">🖨️ Print Report</button>
+        </div>
+        <div id="dashboard" class="dashboard-grid">
+            <div class="loading">
+                <h3>Loading analytics data...</h3>
+            </div>
+        </div>
+    </div>
+    <script>
+        let analyticsData = {}; // Global variable for export
+        let charts = {}; // Store chart instances
+
+        function printReport() {
+            const currentDate = new Date().toLocaleDateString();
+            document.body.setAttribute('data-print-date', currentDate);
+            window.print();
+        }
+
+        async function loadAnalytics() {
+            try {
+                const res = await fetch('https://pinyana-gourmet.com/api/fetchOrderAnalytics.php');
+                const data = await res.json();
+                analyticsData = data; // store for export
+                const dashboard = document.getElementById('dashboard');
+                
+                if (data.error) {
+                    dashboard.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                    return;
+                }
+
+                // Summary cards with the exact data from PHP
+                dashboard.innerHTML = `
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <div class="metric-value">${data.totalOrders}</div>
+                            <div class="metric-label">Total Orders</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="metric-value">₱${data.totalRevenue.toLocaleString()}</div>
+                            <div class="metric-label">Total Revenue</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="metric-value">₱${data.averageOrderValue.toLocaleString(undefined, {maximumFractionDigits:2})}</div>
+                            <div class="metric-label">Average Order Value</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="metric-value">${data.totalUnitsSold}</div>
+                            <div class="metric-label">Total Units Sold</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="metric-value">₱${data.totalDiscount.toLocaleString()}</div>
+                            <div class="metric-label">Total Discounts</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="metric-value">${data.bestSellingCategory}</div>
+                            <div class="metric-label">Best Category</div>
+                        </div>
+                    </div>
+                `;
+
+                // Additional KPIs section
+                dashboard.innerHTML += `
+                    <div class="card">
+                        <div class="section-title">Key Performance Indicators</div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                                <div class="metric-value" style="font-size: 1.5rem;">₱${data.highestOrderValue.toLocaleString()}</div>
+                                <div class="metric-label">Highest Order</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                                <div class="metric-value" style="font-size: 1.5rem;">₱${data.lowestOrderValue.toLocaleString()}</div>
+                                <div class="metric-label">Lowest Order</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                                <div class="metric-value" style="font-size: 1.5rem;">${data.averageUnitsPerTransaction.toFixed(1)}</div>
+                                <div class="metric-label">Avg Units/Order</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                                <div class="metric-value" style="font-size: 1.5rem;">${data.percentageOrdersWithDiscount.toFixed(1)}%</div>
+                                <div class="metric-label">Orders with Discount</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Revenue Overview Chart (Line chart)
+                dashboard.innerHTML += `
+                    <div class="card">
+                        <div class="section-title">Revenue Overview</div>
+                        <div class="tab-container">
+                            <div class="tab-buttons">
+                                <button class="tab-button active" onclick="switchTab('revenue-chart', 'revenue-table')">Chart</button>
+                                <button class="tab-button" onclick="switchTab('revenue-table', 'revenue-chart')">Table</button>
+                            </div>
+                            <div id="revenue-chart" class="tab-content active">
+                                <div class="chart-container">
+                                    <canvas id="salesChart"></canvas>
+                                </div>
+                            </div>
+                            <div id="revenue-table" class="tab-content">
+                                <table id="salesByDateTable">
+                                    <tr><th>Date</th><th>Total Sales</th></tr>
+                                    ${Object.entries(data.salesByDate).map(([date, amount]) =>
+                                        `<tr><td>${date}</td><td>₱${amount.toLocaleString()}</td></tr>`
+                                    ).join('')}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Chart Row with Top Products and Category Distribution
+                dashboard.innerHTML += `
+                    <div class="chart-row">
+                        <div class="card">
+                            <div class="section-title">Top Products</div>
+                            <div class="tab-container">
+                                <div class="tab-buttons">
+                                    <button class="tab-button active" onclick="switchTab('products-chart', 'products-table')">Chart</button>
+                                    <button class="tab-button" onclick="switchTab('products-table', 'products-chart')">Table</button>
+                                </div>
+                                <div id="products-chart" class="tab-content active">
+                                    <div class="chart-container">
+                                        <canvas id="productsChart"></canvas>
+                                    </div>
+                                </div>
+                                <div id="products-table" class="tab-content">
+                                    <table id="topProductsTable">
+                                        <tr><th>Product</th><th>Quantity Sold</th></tr>
+                                        ${data.topProducts.map(p =>
+                                            `<tr><td>${p.name}</td><td>${p.quantity}</td></tr>`
+                                        ).join('')}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="section-title">Sales By Category</div>
+                            <div class="tab-container">
+                                <div class="tab-buttons">
+                                    <button class="tab-button active" onclick="switchTab('category-chart', 'category-table')">Chart</button>
+                                    <button class="tab-button" onclick="switchTab('category-table', 'category-chart')">Table</button>
+                                </div>
+                                <div id="category-chart" class="tab-content active">
+                                    <div class="chart-container">
+                                        <canvas id="categoryChart"></canvas>
+                                    </div>
+                                </div>
+                                <div id="category-table" class="tab-content">
+                                    <table id="categorySalesTable">
+                                        <tr><th>Category</th><th>Total Sales</th></tr>
+                                        ${Object.entries(data.categorySales).map(([cat, amount]) =>
+                                            `<tr><td>${cat}</td><td>₱${amount.toLocaleString(undefined, {maximumFractionDigits:2})}</td></tr>`
+                                        ).join('')}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Regional Sales
+                dashboard.innerHTML += `
+                    <div class="card">
+                        <div class="section-title">Sales By Province</div>
+                        <div class="tab-container">
+                            <div class="tab-buttons">
+                                <button class="tab-button active" onclick="switchTab('region-chart', 'region-table')">Chart</button>
+                                <button class="tab-button" onclick="switchTab('region-table', 'region-chart')">Table</button>
+                            </div>
+                            <div id="region-chart" class="tab-content active">
+                                <div class="chart-container">
+                                    <canvas id="regionChart"></canvas>
+                                </div>
+                            </div>
+                            <div id="region-table" class="tab-content">
+                                <table id="regionalSalesTable">
+                                    <tr><th>Province</th><th>Total Sales</th></tr>
+                                    ${Object.entries(data.regionalSales).map(([prov, amount]) =>
+                                        `<tr><td>${prov}</td><td>₱${amount.toLocaleString()}</td></tr>`
+                                    ).join('')}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Revenue Distribution Chart
+                dashboard.innerHTML += `
+                    <div class="card revenue-distribution-card">
+                        <div class="section-title">Revenue vs Discounts</div>
+                        <div class="chart-container">
+                            <canvas id="revenueDistributionChart"></canvas>
+                        </div>
+                    </div>
+                `;
+
+                // Initialize all charts
+                initializeCharts(data);
+            } catch (error) {
+                document.getElementById('dashboard').innerHTML = `<div class="error">Error loading data: ${error.message}</div>`;
+            }
+        }
+
+        function switchTab(showId, hideId) {
+            document.getElementById(showId).classList.add('active');
+            document.getElementById(hideId).classList.remove('active');
+            
+            // Find and update button states
+            const buttons = document.getElementById(showId).parentElement.querySelector('.tab-buttons').children;
+            for (let i = 0; i < buttons.length; i++) {
+                if (buttons[i].onclick.toString().includes(showId)) {
+                    buttons[i].classList.add('active');
+                } else {
+                    buttons[i].classList.remove('active');
+                }
+            }
+        }
+
+        function initializeCharts(data) {
+            // Sales Over Time Chart (Line chart)
+            const salesDates = Object.keys(data.salesByDate).sort();
+            const salesValues = salesDates.map(date => data.salesByDate[date]);
+            
+            charts.salesChart = new Chart(document.getElementById('salesChart'), {
+                type: 'line',
+                data: {
+                    labels: salesDates,
+                    datasets: [{
+                        label: 'Daily Sales (₱)',
+                        data: salesValues,
+                        borderColor: '#00b894',
+                        backgroundColor: 'rgba(0, 184, 148, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#00b894',
+                        pointRadius: 4,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '₱' + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₱' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Top Products Chart (Horizontal Bar chart)
+            const topProducts = data.topProducts.slice(0, 7); // Show top 7 for better visibility
+            
+            charts.productsChart = new Chart(document.getElementById('productsChart'), {
+                type: 'bar',
+                data: {
+                    labels: topProducts.map(p => p.name),
+                    datasets: [{
+                        label: 'Units Sold',
+                        data: topProducts.map(p => p.quantity),
+                        backgroundColor: [
+                            'rgba(0, 184, 148, 0.7)',
+                            'rgba(253, 203, 110, 0.7)',
+                            'rgba(9, 132, 227, 0.7)',
+                            'rgba(108, 92, 231, 0.7)',
+                            'rgba(225, 112, 85, 0.7)',
+                            'rgba(0, 206, 201, 0.7)',
+                            'rgba(178, 190, 195, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 184, 148, 1)',
+                            'rgba(253, 203, 110, 1)',
+                            'rgba(9, 132, 227, 1)',
+                            'rgba(108, 92, 231, 1)',
+                            'rgba(225, 112, 85, 1)',
+                            'rgba(0, 206, 201, 1)',
+                            'rgba(178, 190, 195, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Category Sales Chart (Doughnut chart)
+            const categories = Object.keys(data.categorySales).slice(0, 6); // Top 6 categories
+            const categorySales = categories.map(cat => data.categorySales[cat]);
+            
+            charts.categoryChart = new Chart(document.getElementById('categoryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: categorySales,
+                        backgroundColor: [
+                            'rgba(0, 184, 148, 0.7)',
+                            'rgba(253, 203, 110, 0.7)',
+                            'rgba(9, 132, 227, 0.7)',
+                            'rgba(108, 92, 231, 0.7)',
+                            'rgba(225, 112, 85, 0.7)',
+                            'rgba(0, 206, 201, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 184, 148, 1)',
+                            'rgba(253, 203, 110, 1)',
+                            'rgba(9, 132, 227, 1)',
+                            'rgba(108, 92, 231, 1)',
+                            'rgba(225, 112, 85, 1)',
+                            'rgba(0, 206, 201, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ₱${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Regional Sales Chart (Bar chart)
+            const provinces = Object.keys(data.regionalSales);
+            const provinceSales = provinces.map(prov => data.regionalSales[prov]);
+            
+            charts.regionChart = new Chart(document.getElementById('regionChart'), {
+                type: 'bar',
+                data: {
+                    labels: provinces,
+                    datasets: [{
+                        label: 'Sales by Province (₱)',
+                        data: provinceSales,
+                        backgroundColor: 'rgba(0, 184, 148, 0.7)',
+                        borderColor: 'rgba(0, 184, 148, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '₱' + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₱' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Revenue Distribution Chart (Pie chart)
+            const netRevenue = data.totalRevenue - data.totalDiscount;
+            
+            charts.revenueDistributionChart = new Chart(document.getElementById('revenueDistributionChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Net Revenue', 'Discounts Given'],
+                    datasets: [{
+                        data: [netRevenue, data.totalDiscount],
+                        backgroundColor: [
+                            'rgba(0, 184, 148, 0.7)',
+                            'rgba(253, 203, 110, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 184, 148, 1)',
+                            'rgba(253, 203, 110, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ₱${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+            
+            // Summary sheet
+            const summaryData = [
+                ['Metric', 'Value'],
+                ['Total Orders', analyticsData.totalOrders],
+                ['Total Revenue', analyticsData.totalRevenue],
+                ['Average Order Value', analyticsData.averageOrderValue],
+                ['Total Units Sold', analyticsData.totalUnitsSold],
+                ['Average Units Per Transaction', analyticsData.averageUnitsPerTransaction],
+                ['Total Discounts', analyticsData.totalDiscount],
+                ['Average Discount Per Order', analyticsData.averageDiscountPerOrder],
+                ['Highest Order Value', analyticsData.highestOrderValue],
+                ['Lowest Order Value', analyticsData.lowestOrderValue],
+                ['Percentage Orders with Discount', analyticsData.percentageOrdersWithDiscount + '%'],
+                ['Best Selling Category', analyticsData.bestSellingCategory],
+            ];
+            const summaryWS = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, summaryWS, 'Summary');
+            
+            // Sales by Date sheet
+            const salesByDateData = [['Date', 'Total Sales']];
+            for (const [date, amount] of Object.entries(analyticsData.salesByDate)) {
+                salesByDateData.push([date, amount]);
+            }
+            const salesByDateWS = XLSX.utils.aoa_to_sheet(salesByDateData);
+            XLSX.utils.book_append_sheet(wb, salesByDateWS, 'Sales By Date');
+            
+            // Top Products sheet
+            const topProductsData = [['Product', 'Quantity Sold']];
+            for (const p of analyticsData.topProducts) {
+                topProductsData.push([p.name, p.quantity]);
+            }
+            const topProductsWS = XLSX.utils.aoa_to_sheet(topProductsData);
+            XLSX.utils.book_append_sheet(wb, topProductsWS, 'Top Products');
+            
+            // Category Sales sheet
+            const categorySalesData = [['Category', 'Total Sales']];
+            for (const [cat, amount] of Object.entries(analyticsData.categorySales)) {
+                categorySalesData.push([cat, amount]);
+            }
+            const categorySalesWS = XLSX.utils.aoa_to_sheet(categorySalesData);
+            XLSX.utils.book_append_sheet(wb, categorySalesWS, 'Category Sales');
+            
+            // Regional Sales sheet
+            const regionalSalesData = [['Province', 'Total Sales']];
+            for (const [prov, amount] of Object.entries(analyticsData.regionalSales)) {
+                regionalSalesData.push([prov, amount]);
+            }
+            const regionalSalesWS = XLSX.utils.aoa_to_sheet(regionalSalesData);
+            XLSX.utils.book_append_sheet(wb, regionalSalesWS, 'Regional Sales');
+            
+            // Add current date to filename
+            const today = new Date();
+            const formattedDate = today.toISOString().slice(0,10); // YYYY-MM-DD
+            const filename = `PinanaGourmet_Analytics_${formattedDate}.xlsx`;
+            
+            XLSX.writeFile(wb, filename);
+        }
+        
+        // Load analytics on page load
+        loadAnalytics();
+    </script>
+</body>
+</html>

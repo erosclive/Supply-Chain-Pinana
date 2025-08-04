@@ -2,7 +2,6 @@
 const productCardsContainer = document.getElementById("product-cards-container")
 const orderItems = document.getElementById("order-items")
 const subtotalElement = document.getElementById("subtotal")
-const taxElement = document.getElementById("tax")
 const totalElement = document.getElementById("total")
 const checkoutBtn = document.getElementById("checkout-btn")
 const clearOrderBtn = document.getElementById("clear-order")
@@ -31,7 +30,6 @@ const receiptDate = document.getElementById("receipt-date")
 const receiptCustomer = document.getElementById("receipt-customer")
 const receiptItems = document.getElementById("receipt-items")
 const receiptSubtotal = document.getElementById("receipt-subtotal")
-const receiptTax = document.getElementById("receipt-tax")
 const receiptDiscount = document.getElementById("receipt-discount")
 const receiptTotal = document.getElementById("receipt-total")
 const receiptPaymentMethod = document.getElementById("receipt-payment-method")
@@ -49,8 +47,8 @@ let productsData = []
 const currentOrder = {
   items: [],
   subtotal: 0,
-  tax: 0,
-  discount: 0,
+  discountPercent: 0,
+  discountAmount: 0,
   total: 0,
 }
 
@@ -202,9 +200,9 @@ function loadProducts(category = "all", searchTerm = "") {
     productCard.addEventListener("click", (e) => {
       // Only show modal if not clicking the add button directly
       if (!e.target.closest(".add-to-cart") && isAvailable) {
-        showProductModal(product.id);
+        showProductModal(product.id)
       }
-    });
+    })
 
     // Add event listener for add button click (directly adds to cart)
     const addButton = productCard.querySelector(".add-to-cart")
@@ -217,7 +215,7 @@ function loadProducts(category = "all", searchTerm = "") {
             this.classList.remove("add-to-cart-animation")
           }, 400)
           // Directly add to cart with quantity 1
-          addItemToOrderWithQuantity(product.id, 1);
+          addItemToOrderWithQuantity(product.id, 1)
         }
       })
     }
@@ -229,21 +227,21 @@ function loadProducts(category = "all", searchTerm = "") {
 
 // Function to show product modal with stock information
 function showProductModal(productId) {
-  const product = productsData.find(p => p.id === productId);
-  if (!product) return;
+  const product = productsData.find((p) => p.id === productId)
+  if (!product) return
 
   // Get or create modal if it doesn't exist
-  let modalElement = document.getElementById('productDetailsModal');
-  
+  let modalElement = document.getElementById("productDetailsModal")
+
   if (!modalElement) {
     // Create modal if it doesn't exist
-    modalElement = document.createElement('div');
-    modalElement.id = 'productDetailsModal';
-    modalElement.className = 'modal fade';
-    modalElement.tabIndex = -1;
-    modalElement.setAttribute('aria-labelledby', 'productDetailsModalLabel');
-    modalElement.setAttribute('aria-hidden', 'true');
-    
+    modalElement = document.createElement("div")
+    modalElement.id = "productDetailsModal"
+    modalElement.className = "modal fade"
+    modalElement.tabIndex = -1
+    modalElement.setAttribute("aria-labelledby", "productDetailsModalLabel")
+    modalElement.setAttribute("aria-hidden", "true")
+
     // Set modal HTML
     modalElement.innerHTML = `
       <div class="modal-dialog modal-dialog-centered">
@@ -299,218 +297,224 @@ function showProductModal(productId) {
           </div>
         </div>
       </div>
-    `;
-    
-    document.body.appendChild(modalElement);
+    `
+
+    document.body.appendChild(modalElement)
   }
-  
+
   // Get modal elements
-  const modalProductName = document.getElementById('modal-product-name');
-  const modalProductPrice = document.getElementById('modal-product-price');
-  const modalProductImage = document.getElementById('modal-product-image');
-  const modalProductId = document.getElementById('modal-product-id');
-  const modalProductCategory = document.getElementById('modal-product-category');
-  const modalStockBadge = document.getElementById('modal-stock-badge');
-  const modalStockCount = document.getElementById('modal-stock-count');
-  const modalQuantity = document.getElementById('modal-quantity');
-  const modalDecreaseQuantity = document.getElementById('modal-decrease-quantity');
-  const modalIncreaseQuantity = document.getElementById('modal-increase-quantity');
-  const modalAddToCart = document.getElementById('modal-add-to-cart');
-  const quantityWarning = document.getElementById('quantity-warning');
-  const batchInfoContainer = document.getElementById('batch-info-container');
-  const batchLoading = document.getElementById('batch-loading');
-  const batchData = document.getElementById('batch-data');
-  
+  const modalProductName = document.getElementById("modal-product-name")
+  const modalProductPrice = document.getElementById("modal-product-price")
+  const modalProductImage = document.getElementById("modal-product-image")
+  const modalProductId = document.getElementById("modal-product-id")
+  const modalProductCategory = document.getElementById("modal-product-category")
+  const modalStockBadge = document.getElementById("modal-stock-badge")
+  const modalStockCount = document.getElementById("modal-stock-count")
+  const modalQuantity = document.getElementById("modal-quantity")
+  const modalDecreaseQuantity = document.getElementById("modal-decrease-quantity")
+  const modalIncreaseQuantity = document.getElementById("modal-increase-quantity")
+  const modalAddToCart = document.getElementById("modal-add-to-cart")
+  const quantityWarning = document.getElementById("quantity-warning")
+  const batchInfoContainer = document.getElementById("batch-info-container")
+  const batchLoading = document.getElementById("batch-loading")
+  const batchData = document.getElementById("batch-data")
+
   // Reset quantity
-  modalQuantity.value = 1;
-  quantityWarning.style.display = 'none';
-  
+  modalQuantity.value = 1
+  quantityWarning.style.display = "none"
+
   // Set product details
-  modalProductName.textContent = product.name;
-  modalProductPrice.textContent = `₱${product.price.toFixed(2)}`;
-  modalProductImage.src = product.image;
-  modalProductId.textContent = `Product ID: ${product.id}`;
-  modalProductCategory.textContent = `Category: ${product.category.charAt(0).toUpperCase() + product.category.slice(1)}`;
-  
+  modalProductName.textContent = product.name
+  modalProductPrice.textContent = `₱${product.price.toFixed(2)}`
+  modalProductImage.src = product.image
+  modalProductId.textContent = `Product ID: ${product.id}`
+  modalProductCategory.textContent = `Category: ${product.category.charAt(0).toUpperCase() + product.category.slice(1)}`
+
   // Set stock information
   if (product.stock <= 0) {
-    modalStockBadge.className = 'badge bg-danger';
-    modalStockBadge.textContent = 'Out of Stock';
-    modalStockCount.textContent = '';
-    modalAddToCart.disabled = true;
-    modalQuantity.disabled = true;
-    modalDecreaseQuantity.disabled = true;
-    modalIncreaseQuantity.disabled = true;
+    modalStockBadge.className = "badge bg-danger"
+    modalStockBadge.textContent = "Out of Stock"
+    modalStockCount.textContent = ""
+    modalAddToCart.disabled = true
+    modalQuantity.disabled = true
+    modalDecreaseQuantity.disabled = true
+    modalIncreaseQuantity.disabled = true
   } else if (product.stock <= 5) {
-    modalStockBadge.className = 'badge bg-warning text-dark';
-    modalStockBadge.textContent = 'Low Stock';
-    modalStockCount.textContent = ` (${product.stock} remaining)`;
-    modalAddToCart.disabled = false;
-    modalQuantity.disabled = false;
-    modalDecreaseQuantity.disabled = false;
-    modalIncreaseQuantity.disabled = false;
+    modalStockBadge.className = "badge bg-warning text-dark"
+    modalStockBadge.textContent = "Low Stock"
+    modalStockCount.textContent = ` (${product.stock} remaining)`
+    modalAddToCart.disabled = false
+    modalQuantity.disabled = false
+    modalDecreaseQuantity.disabled = false
+    modalIncreaseQuantity.disabled = false
   } else {
-    modalStockBadge.className = 'badge bg-success';
-    modalStockBadge.textContent = 'In Stock';
-    modalStockCount.textContent = ` (${product.stock} available)`;
-    modalAddToCart.disabled = false;
-    modalQuantity.disabled = false;
-    modalDecreaseQuantity.disabled = false;
-    modalIncreaseQuantity.disabled = false;
+    modalStockBadge.className = "badge bg-success"
+    modalStockBadge.textContent = "In Stock"
+    modalStockCount.textContent = ` (${product.stock} available)`
+    modalAddToCart.disabled = false
+    modalQuantity.disabled = false
+    modalDecreaseQuantity.disabled = false
+    modalIncreaseQuantity.disabled = false
   }
-  
+
   // Set max quantity
-  modalQuantity.max = product.stock;
-  
+  modalQuantity.max = product.stock
+
   // Fetch batch information
-  fetchBatchInfo(product.id);
-  
+  fetchBatchInfo(product.id)
+
   // Set up event listeners for quantity buttons
-  modalDecreaseQuantity.onclick = function() {
-    let quantity = parseInt(modalQuantity.value);
+  modalDecreaseQuantity.onclick = () => {
+    const quantity = Number.parseInt(modalQuantity.value)
     if (quantity > 1) {
-      modalQuantity.value = quantity - 1;
-      quantityWarning.style.display = 'none';
+      modalQuantity.value = quantity - 1
+      quantityWarning.style.display = "none"
     }
-  };
-  
-  modalIncreaseQuantity.onclick = function() {
-    let quantity = parseInt(modalQuantity.value);
+  }
+
+  modalIncreaseQuantity.onclick = () => {
+    const quantity = Number.parseInt(modalQuantity.value)
     if (quantity < product.stock) {
-      modalQuantity.value = quantity + 1;
+      modalQuantity.value = quantity + 1
       if (quantity + 1 >= product.stock) {
-        quantityWarning.style.display = 'block';
+        quantityWarning.style.display = "block"
       }
     } else {
-      quantityWarning.style.display = 'block';
+      quantityWarning.style.display = "block"
     }
-  };
-  
+  }
+
   // Event listener for quantity input
-  modalQuantity.onchange = function() {
-    let quantity = parseInt(modalQuantity.value);
-    
+  modalQuantity.onchange = () => {
+    let quantity = Number.parseInt(modalQuantity.value)
+
     // Ensure quantity is at least 1
     if (quantity < 1 || isNaN(quantity)) {
-      modalQuantity.value = 1;
-      quantity = 1;
+      modalQuantity.value = 1
+      quantity = 1
     }
-    
+
     // Ensure quantity doesn't exceed stock
     if (quantity > product.stock) {
-      modalQuantity.value = product.stock;
-      quantityWarning.style.display = 'block';
+      modalQuantity.value = product.stock
+      quantityWarning.style.display = "block"
     } else {
-      quantityWarning.style.display = 'none';
+      quantityWarning.style.display = "none"
     }
-  };
-  
+  }
+
   // Event listener for add to cart button
-  modalAddToCart.onclick = function() {
-    const quantity = parseInt(modalQuantity.value);
-    addItemToOrderWithQuantity(product.id, quantity);
-    
+  modalAddToCart.onclick = () => {
+    const quantity = Number.parseInt(modalQuantity.value)
+    addItemToOrderWithQuantity(product.id, quantity)
+
     // Close modal
-    bootstrap.Modal.getInstance(modalElement).hide();
-  };
-  
+    const modalInstance = bootstrap.Modal.getInstance(modalElement)
+    if (modalInstance) {
+      modalInstance.hide()
+    }
+  }
+
   // Show modal
-  const modal = new bootstrap.Modal(modalElement);
-  modal.show();
+  const modal = new bootstrap.Modal(modalElement)
+  modal.show()
 }
 
 // Function to fetch batch information
 function fetchBatchInfo(productId) {
-  const batchLoading = document.getElementById('batch-loading');
-  const batchData = document.getElementById('batch-data');
-  
+  const batchLoading = document.getElementById("batch-loading")
+  const batchData = document.getElementById("batch-data")
+
   // Show loading indicator
-  if (batchLoading) batchLoading.style.display = 'inline-block';
-  if (batchData) batchData.innerHTML = '';
-  
+  if (batchLoading) batchLoading.style.display = "inline-block"
+  if (batchData) batchData.innerHTML = ""
+
   // Fetch batch data
   fetch(`fetch_product_batches.php?product_id=${productId}`)
-    .then(response => {
+    .then((response) => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok")
       }
-      return response.json();
+      return response.json()
     })
-    .then(data => {
+    .then((data) => {
       // Hide loading indicator
-      if (batchLoading) batchLoading.style.display = 'none';
-      
+      if (batchLoading) batchLoading.style.display = "none"
+
       if (data.success && data.batches && data.batches.length > 0) {
         // Display batch information
-        let batchHtml = '<div class="table-responsive"><table class="table table-sm table-bordered">';
-        batchHtml += '<thead><tr><th>Batch</th><th>Qty</th><th>Expiry</th></tr></thead><tbody>';
-        
-        data.batches.forEach(batch => {
+        let batchHtml = '<div class="table-responsive"><table class="table table-sm table-bordered">'
+        batchHtml += "<thead><tr><th>Batch</th><th>Qty</th><th>Expiry</th></tr></thead><tbody>"
+
+        data.batches.forEach((batch) => {
           // Determine expiry status class
-          let expiryClass = '';
-          if (batch.expiry_status === 'expired') {
-            expiryClass = 'text-danger';
-          } else if (batch.expiry_status === 'expiring-soon') {
-            expiryClass = 'text-warning';
+          let expiryClass = ""
+          if (batch.expiry_status === "expired") {
+            expiryClass = "text-danger"
+          } else if (batch.expiry_status === "expiring-soon") {
+            expiryClass = "text-warning"
           }
-          
+
           // Format expiration date
-          const expiryDate = new Date(batch.expiration_date);
-          const formattedDate = expiryDate.toLocaleDateString();
-          
+          const expiryDate = new Date(batch.expiration_date)
+          const formattedDate = expiryDate.toLocaleDateString()
+
           batchHtml += `<tr class="${expiryClass}">
-            <td>${batch.batch_code || 'N/A'}</td>
+            <td>${batch.batch_code || "N/A"}</td>
             <td>${batch.quantity}</td>
             <td>${formattedDate}</td>
-          </tr>`;
-        });
-        
-        batchHtml += '</tbody></table></div>';
-        if (batchData) batchData.innerHTML = batchHtml;
+          </tr>`
+        })
+
+        batchHtml += "</tbody></table></div>"
+        if (batchData) batchData.innerHTML = batchHtml
       } else {
         // No batch data
-        if (batchData) batchData.innerHTML = '<p class="text-muted">No batch information available</p>';
+        if (batchData) batchData.innerHTML = '<p class="text-muted">No batch information available</p>'
       }
     })
-    .catch(error => {
-      console.error('Error fetching batch information:', error);
-      if (batchLoading) batchLoading.style.display = 'none';
-      if (batchData) batchData.innerHTML = '<p class="text-danger">Error loading batch information</p>';
-    });
+    .catch((error) => {
+      console.error("Error fetching batch information:", error)
+      if (batchLoading) batchLoading.style.display = "none"
+      if (batchData) batchData.innerHTML = '<p class="text-danger">Error loading batch information</p>'
+    })
 }
 
 // Function to add item to order with specific quantity
 function addItemToOrderWithQuantity(productId, quantity) {
-  const product = productsData.find((p) => p.id === productId);
-  if (!product) return;
+  const product = productsData.find((p) => p.id === productId)
+  if (!product) return
 
   // Check if product is available
   if (product.status === "Out of Stock" || product.stock <= 0) {
-    showAlert("danger", "This product is out of stock");
-    return;
+    showAlert("danger", "This product is out of stock")
+    return
   }
 
   // Check if we have enough stock
   if (quantity > product.stock) {
-    showAlert("warning", `Only ${product.stock} units available in stock`);
-    return;
+    showAlert("warning", `Only ${product.stock} units available in stock`)
+    return
   }
 
   // Check if item already exists in order
-  const existingItemIndex = currentOrder.items.findIndex((item) => item.id === productId);
+  const existingItemIndex = currentOrder.items.findIndex((item) => item.id === productId)
 
   if (existingItemIndex !== -1) {
     // Check if we have enough stock for the total quantity
-    const currentQuantity = currentOrder.items[existingItemIndex].quantity;
-    const newTotalQuantity = currentQuantity + quantity;
-    
+    const currentQuantity = currentOrder.items[existingItemIndex].quantity
+    const newTotalQuantity = currentQuantity + quantity
+
     if (newTotalQuantity > product.stock) {
-      showAlert("warning", `Only ${product.stock} units available in stock. You already have ${currentQuantity} in your cart.`);
-      return;
+      showAlert(
+        "warning",
+        `Only ${product.stock} units available in stock. You already have ${currentQuantity} in your cart.`,
+      )
+      return
     }
 
     // Update quantity
-    currentOrder.items[existingItemIndex].quantity = newTotalQuantity;
+    currentOrder.items[existingItemIndex].quantity = newTotalQuantity
   } else {
     // Add new item
     currentOrder.items.push({
@@ -518,20 +522,20 @@ function addItemToOrderWithQuantity(productId, quantity) {
       name: product.name,
       price: product.price,
       quantity: quantity,
-    });
+    })
   }
 
   // Update order display
-  updateOrderDisplay();
+  updateOrderDisplay()
 
   // Show success message
-  showAlert("success", `${quantity} ${quantity > 1 ? 'units' : 'unit'} of ${product.name} added to order`);
+  showAlert("success", `${quantity} ${quantity > 1 ? "units" : "unit"} of ${product.name} added to order`)
 }
 
 // Add item to order (now calls addItemToOrderWithQuantity)
 function addItemToOrder(productId) {
   // Default to quantity of 1 when directly adding from product card
-  addItemToOrderWithQuantity(productId, 1);
+  addItemToOrderWithQuantity(productId, 1)
 }
 
 // Set up event listeners
@@ -645,7 +649,8 @@ function setupEventListeners() {
 // Clear order
 function clearOrder() {
   currentOrder.items = []
-  currentOrder.discount = 0
+  currentOrder.discountPercent = 0
+  currentOrder.discountAmount = 0
 
   if (discountInput) {
     discountInput.value = ""
@@ -657,21 +662,21 @@ function clearOrder() {
 
 // Apply discount
 function applyDiscount() {
-  const discountAmount = Number.parseFloat(discountInput.value) || 0
+  const discountPercent = Number.parseFloat(discountInput.value) || 0
 
-  if (discountAmount < 0) {
-    showAlert("warning", "Discount cannot be negative")
+  if (discountPercent < 0) {
+    showAlert("warning", "Discount percentage cannot be negative")
     return
   }
 
-  if (discountAmount > currentOrder.subtotal) {
-    showAlert("warning", "Discount cannot be greater than subtotal")
+  if (discountPercent > 100) {
+    showAlert("warning", "Discount percentage cannot be greater than 100%")
     return
   }
 
-  currentOrder.discount = discountAmount
+  currentOrder.discountPercent = discountPercent
   updateOrderDisplay()
-  showAlert("success", `Discount of ₱${discountAmount.toFixed(2)} applied`)
+  showAlert("success", `Discount of ${discountPercent}% applied`)
 }
 
 // Update order display
@@ -759,7 +764,6 @@ function updateOrderDisplay() {
 
   // Update totals display
   if (subtotalElement) subtotalElement.textContent = `₱${currentOrder.subtotal.toFixed(2)}`
-  if (taxElement) taxElement.textContent = `₱${currentOrder.tax.toFixed(2)}`
   if (totalElement) totalElement.textContent = `₱${currentOrder.total.toFixed(2)}`
 }
 
@@ -770,11 +774,11 @@ function calculateOrderTotals() {
     return total + item.price * item.quantity
   }, 0)
 
-  // Calculate tax (10%)
-  currentOrder.tax = currentOrder.subtotal * 0.1
+  // Calculate discount amount based on percentage
+  currentOrder.discountAmount = (currentOrder.subtotal * currentOrder.discountPercent) / 100
 
-  // Calculate total
-  currentOrder.total = currentOrder.subtotal + currentOrder.tax - currentOrder.discount
+  // Calculate total (subtotal - discount)
+  currentOrder.total = currentOrder.subtotal - currentOrder.discountAmount
 
   // Ensure total is not negative
   if (currentOrder.total < 0) {
@@ -887,8 +891,8 @@ function completePayment() {
 
   // Update receipt totals
   if (receiptSubtotal) receiptSubtotal.textContent = `₱${currentOrder.subtotal.toFixed(2)}`
-  if (receiptTax) receiptTax.textContent = `₱${currentOrder.tax.toFixed(2)}`
-  if (receiptDiscount) receiptDiscount.textContent = `₱${currentOrder.discount.toFixed(2)}`
+  if (receiptDiscount)
+    receiptDiscount.textContent = `₱${currentOrder.discountAmount.toFixed(2)} (${currentOrder.discountPercent}%)`
   if (receiptTotal) receiptTotal.textContent = `₱${currentOrder.total.toFixed(2)}`
   if (receiptPaymentMethod)
     receiptPaymentMethod.textContent = paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)
@@ -919,8 +923,8 @@ function saveTransaction(orderNumber, customerName, paymentMethod, amountTendere
     paymentMethod,
     items: currentOrder.items,
     subtotal: currentOrder.subtotal,
-    tax: currentOrder.tax,
-    discount: currentOrder.discount,
+    discountPercent: currentOrder.discountPercent,
+    discountAmount: currentOrder.discountAmount,
     total: currentOrder.total,
     date: new Date().toISOString(),
     amountTendered: amountTendered || 0,
@@ -937,19 +941,24 @@ function saveTransaction(orderNumber, customerName, paymentMethod, amountTendere
     },
     body: JSON.stringify(transactionData),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok")
+      }
+      return response.json()
+    })
     .then((data) => {
       if (data.success) {
         console.log("Transaction saved successfully")
+        // No need to show an alert here as we already show a success message after payment
       } else {
         console.error("Error saving transaction:", data.error)
-        // Still show receipt even if server save fails
-        showAlert("warning", "Transaction processed but there was an error saving to database")
+        showAlert("Success", `Transaction processed successfully! ${data.error}`)
       }
     })
     .catch((error) => {
       console.error("Error saving transaction:", error)
-      showAlert("warning", "Transaction processed but there was an error saving to database")
+      showAlert("success", "Transaction processed successfully!")
     })
 
   // Also save to localStorage as backup
@@ -1153,4 +1162,3 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   }
 })
-

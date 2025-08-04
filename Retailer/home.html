@@ -1,0 +1,449 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piñana Gourmet Retailer</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <!-- Flatpickr for date picking -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="Retailer/mono-green.png">
+
+  <style>
+    /* Additional styles for dashboard */
+    .main-content {
+      padding-top: 50px;
+    }
+    
+    .card {
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
+    }
+    .card-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+      padding: 15px 20px;
+    }
+    .table th {
+      font-weight: 600;
+      color: #495057;
+    }
+    .btn-outline-primary {
+      border-color: #6c757d;
+      color: #6c757d;
+    }
+    .btn-outline-primary:hover {
+      background-color: #6c757d;
+      border-color: #6c757d;
+      color: white;
+    }
+    /* Dashboard cards */
+.dashboard-card {
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    border: none;
+    overflow: hidden;
+  }
+  
+  .dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+  }
+  
+  .dashboard-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+  
+  .dashboard-icon i {
+    font-size: 1.5rem;
+  }
+  
+  /* Order cards */
+  .order-card {
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1rem;
+    border: none;
+  }
+  
+  .order-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--hover-shadow);
+  }
+  
+  .order-card .card-body {
+    padding: 1.25rem;
+  }
+  
+  .order-number {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .order-date {
+    color: var(--secondary-color);
+    font-size: 0.85rem;
+  }
+  
+  .order-amount {
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  /* Status badges */
+  .status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-block;
+    margin-top: 0.5rem;
+  }
+  
+  .status-order {
+    background-color: #e0f7fa;
+    color: #006064;
+  }
+  .status-confirmed {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+  }
+  .status-shipped {
+    background-color: #ede7f6;
+    color: #4527a0;
+  }
+  .status-delivered {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+  }
+  .status-ready-to-pickup {
+    background-color: #fff8e1;
+    color: #ff6f00;
+  }
+  .status-picked-up {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+  }
+  .status-completed {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+  }
+  .payment-pending {
+    background-color: #ffebee;
+    color: #b71c1c;
+  }
+  .payment-partial {
+    background-color: #fff8e1;
+    color: #ff6f00;
+  }
+  .payment-paid {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+  }
+  
+  /* Card headers */
+  .card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .card-header h5 {
+    margin-bottom: 0;
+    font-weight: 600;
+  }
+  
+  /* Tables */
+  .table {
+    margin-bottom: 0;
+  }
+  
+  .table th {
+    font-weight: 600;
+    color: #495057;
+    border-top: none;
+    padding: 1rem;
+  }
+  
+  .table td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+  
+  .img-thumbnail {
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 991.98px) {
+    .sidebar {
+      transform: translateX(-100%);
+    }
+  
+    .sidebar.show {
+      transform: translateX(0);
+    }
+  
+    .main-wrapper {
+      margin-left: 0;
+    }
+  
+    .main-header {
+      left: 0;
+    }
+  }
+  
+  @media (max-width: 767.98px) {
+    .main-content {
+      padding: calc(var(--header-height) + 1rem) 1rem 1rem;
+    }
+  
+    .dashboard-content .row > [class*="col-"] {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  
+    .user-profile-dropdown .dropdown-menu {
+      width: 280px;
+    }
+  }
+  
+  @media (max-width: 575.98px) {
+    .order-card .card-body {
+      padding: 1rem;
+    }
+  
+    .user-profile-dropdown .dropdown-menu {
+      width: 260px;
+      right: -70px;
+    }
+  
+    .dashboard-icon {
+      width: 40px;
+      height: 40px;
+    }
+  
+    .dashboard-icon i {
+      font-size: 1.25rem;
+    }
+  }
+
+  /* Welcome Container Styles */
+.welcome-container {
+    width: 100%;
+    padding-top: 10px; /* Additional padding to prevent overlap with fixed header */
+  }
+  
+  .bg-success {
+    background-color: #2e8b57 !important; /* Adjusted to match the image */
+  }
+  
+  .text-white-75 {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .z-1 {
+    z-index: 1;
+  }
+  
+  .opacity-15 {
+    opacity: 0.15;
+  }
+  
+  .btn-light {
+    background-color: white;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-light:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .rounded-pill {
+    border-radius: 50rem !important;
+  }
+  
+  /* Adjust for fixed header */
+  @media (max-width: 567.98px) {
+    .welcome-container {
+      margin-top: 0px; /* Adjust based on your header height on mobile */
+    }
+  }
+
+  
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+        <div class="sidebar-inner">
+            <div class="logo-container d-flex align-items-center mb-4 mt-3">
+                <img src="fin-green.png" class="pineapple-logo" alt="Piñana Gourmet Logo">
+            </div>
+          
+          <div class="sidebar-divider">
+            <span>MAIN MENU</span>
+          </div>
+          
+          <ul class="nav flex-column sidebar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" href="home.html" data-page="home">
+                <div class="nav-icon">
+                  <i class="bi bi-grid"></i>
+                </div>
+                <span>Home</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="inventory.html" data-page="inventory">
+                <div class="nav-icon">
+                  <i class="bi bi-box"></i>
+                </div>
+                <span>Inventory</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="orders.html" data-page="orders">
+                <div class="nav-icon">
+                  <i class="bi bi-cart"></i>
+                </div>
+                <span>Orders</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="billing.html" data-page="billing">
+                <div class="nav-icon">
+                  <i class="bi bi-credit-card"></i>
+                </div>
+                <span>Billing</span>
+              </a>
+            </li>
+          
+           
+          </ul>
+          
+        </div>
+      </div>
+      
+      <!-- Main content -->
+      <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+        <!-- Header -->
+        <div class="fixed-top-header">
+          <div class="d-flex justify-content-between align-items-center w-100">
+            <div class="d-flex align-items-center">
+              <button class="navbar-toggler d-md-none collapsed me-2" type="button" id="sidebarToggle">
+                <i class="bi bi-list"></i>
+              </button>
+              <h5 class="mb-0" id="pageTitle">HOME</h5>
+            </div>
+            <div class="d-flex align-items-center">
+              <!-- User Profile Dropdown -->
+              <div class="dropdown user-profile-dropdown" >
+                <div class="profile-circle dropdown-toggle position-relative" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: green;">
+                  <i class="bi bi-person-fill"></i>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" id="notification-badge" style="display: none;">
+                    0
+                    <span class="visually-hidden">unread notifications</span>
+                  </span>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown" style="width: 350px;">
+                  <li class="dropdown-item-text">
+                    <div class="sidebar-divider">
+                      <span>NOTIFICATIONS</span>
+                      <div class="float-end">
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" id="mark-all-read">Mark all as read</button>
+                      </div>
+                    </div>
+                    <div id="notifications-container" class="notifications-container" style="max-height: 300px; overflow-y: auto;">
+                      <div class="text-center py-3 text-muted" id="no-notifications-message">No new notifications</div>
+                    </div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li class="dropdown-item-text" >
+                    <div class="sidebar-divider">
+                      <span>ACCOUNT</span>
+                    </div>
+                    <div class="user-info d-flex align-items-center" >
+                      <div class="user-avatar" >
+                        <i class="bi bi-person-circle"></i>
+                      </div>
+                      <div class="user-details">
+                        <div class="user-name">Retailer</div>
+                        <div class="user-role">Piñana Gourmet</div>
+                      </div>
+                    </div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="#" id="logoutButton"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+<!-- Welcome Container -->
+<div class="welcome-container mt-2 pt-3 mb-4">
+    <div class="card bg-success border-0 rounded-3 shadow">
+      <div class="card-body p-4 position-relative">
+        <div class="row">
+          <div class="col-lg-8 position-relative z-1">
+            <h1 class="text-white fw-bold mb-3">Welcome to Piñana Gourmet!</h1>
+            <p class="text-white-75 mb-4">
+              House of Pineapple Delicacies. Your premium supplier of high-quality pineapple products. 
+            </p>
+            <div class="mt-4">
+              <a href="orders.html" class="btn btn-light px-4 py-2 fw-semibold text-success rounded-pill">
+                Order Now <i class="bi bi-arrow-right ms-2"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="position-absolute end-0 top-50 translate-middle-y d-none d-lg-block pe-5">
+          <i class="bi bi-box text-white opacity-15" style="font-size: 180px;"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+        <!-- Dashboard Content -->        
+    
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Flatpickr JS -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- jQuery (needed for some functionality) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Custom JavaScript -->
+  <script src="scripts.js"></script>
+  <script src="home.js"></script>
+  <script src="user-profile.js"></script>
+  <script src="logout.js"></script>
+<script src="sidebar-toggle.js"></script>
+</body>
+</html>

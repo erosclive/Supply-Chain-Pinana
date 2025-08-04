@@ -8,13 +8,21 @@ let currentPage = 1
 let selectedOrderId = null
 const orderItems = []
 const editOrderItems = []
-const originalOrderStatus = ""
+let originalOrderStatus = ""
 const selectedProduct = null
 const editSelectedProduct = null
 let currentUser = null
 
 // Add a variable to track if the current order is in pickup mode
 let currentOrderIsPickup = false
+
+// At the top of the file, add a new variable to track tab counts
+const tabCounts = {
+  all: 0,
+  delivered: 0,
+  cancelled: 0,
+  return_requested: 0,
+}
 
 // Add event listeners for the new tabs
 document.querySelectorAll(".order-tab").forEach((tab) => {
@@ -30,7 +38,13 @@ document.querySelectorAll(".order-tab").forEach((tab) => {
     // Set current tab and fetch orders
     currentTab = this.getAttribute("data-status")
     currentPage = 1
-    fetchOrders()
+
+    // Check if this is the return_requested tab
+    if (currentTab === "return_requested") {
+      fetchReturnRequestedOrders()
+    } else {
+      fetchOrders()
+    }
   })
 })
 
@@ -55,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Fetch orders with initial settings
     console.log("Fetching initial orders")
     fetchOrders()
+    initializeTabBadges()
   }, 100)
 })
 
@@ -80,20 +95,32 @@ function fetchCurrentUser() {
     })
 }
 
-// Initialize date pickers
+// Find the initDatePickers function and replace it with this updated version
 function initDatePickers() {
-  // Set today's date as default for order date
+  // Get today's date
+  const today = new Date()
+  const todayFormatted = today.toISOString().split("T")[0] // Format as YYYY-MM-DD
+
+  // Set today's date as default for order date and set min attribute to today
   const orderDateInput = document.getElementById("order-date")
   if (orderDateInput) {
-    orderDateInput.valueAsDate = new Date()
+    orderDateInput.valueAsDate = today
+    orderDateInput.setAttribute("min", todayFormatted) // Disable past dates
   }
 
-  // Set date 7 days from today as default for expected delivery
+  // Set date 3 days from today as default for expected delivery and set min attribute to today
   const expectedDeliveryInput = document.getElementById("expected-delivery")
   if (expectedDeliveryInput) {
     const deliveryDate = new Date()
-    deliveryDate.setDate(deliveryDate.getDate() + 7)
+    deliveryDate.setDate(deliveryDate.getDate() + 3)
     expectedDeliveryInput.valueAsDate = deliveryDate
+    expectedDeliveryInput.setAttribute("min", todayFormatted) // Disable past dates
+  }
+
+  // Set min attribute for pickup date as well
+  const pickupDateInput = document.getElementById("pickup-date")
+  if (pickupDateInput) {
+    pickupDateInput.setAttribute("min", todayFormatted) // Disable past dates
   }
 
   // Initialize flatpickr for date inputs if needed
@@ -101,6 +128,7 @@ function initDatePickers() {
     flatpickr(".datepicker", {
       dateFormat: "Y-m-d",
       allowInput: true,
+      minDate: "today", // Disable past dates in flatpickr
     })
   }
 }
@@ -197,23 +225,62 @@ function setupEventListeners() {
     })
   }
 
-  // Review order button in create order modal
-  const reviewOrderBtn = document.getElementById("review-order-btn")
-  if (reviewOrderBtn) {
-    console.log("Review order button found")
-    reviewOrderBtn.addEventListener("click", () => {
-      console.log("Review order button clicked")
-      // Validate form before showing confirmation
-      if (validateOrderForm()) {
-        console.log("Form validated, showing confirmation")
-        showOrderConfirmation(false)
-      } else {
-        console.log("Form validation failed")
+const reviewOrderBtn = document.getElementById("review-order-btn")
+if (reviewOrderBtn) {
+  console.log("Review order button found")
+  reviewOrderBtn.addEventListener("click", () => {
+    console.log("Review order button clicked")
+
+    // Adjust this selector based on your actual product select input class or name
+    const itemSelects = document.querySelectorAll('.product-select') // <-- Update if needed
+    const selectedItems = Array.from(itemSelects)
+      .map(select => select.value.trim())
+      .filter(val => val !== "")
+
+    console.log("Selected items:", selectedItems)
+
+    // Check if at least one valid item is selected
+    if (selectedItems.length === 0) {
+      alert("You must add at least one item to proceed.")
+      return
+    }
+
+    // Check for duplicates
+    const duplicates = selectedItems.some((item, index) => selectedItems.indexOf(item) !== index)
+    if (duplicates) {
+      alert("Duplicate items detected. Please ensure each item is unique.")
+      return
+    }
+
+    // Check quantity restrictions
+    const deliveryMode = document.querySelector('input[name="delivery_mode"]:checked')?.value || "delivery"
+    const minQty = deliveryMode === "pickup" ? 20 : 30
+    const qtyInputs = document.querySelectorAll(".qty-input")
+    let invalidQty = false
+
+    qtyInputs.forEach((input, index) => {
+      const qty = parseInt(input.value) || 0
+      if (qty < minQty) {
+        alert(`Item #${index + 1} has quantity below minimum (${minQty}) for ${deliveryMode}.`)
+        input.focus()
+        invalidQty = true
       }
     })
-  } else {
-    console.log("Review order button not found")
-  }
+
+    if (invalidQty) return
+
+    // Proceed if form is valid
+    if (validateOrderForm()) {
+      console.log("Form validated, showing confirmation")
+      showOrderConfirmation(false)
+    } else {
+      console.log("Form validation failed")
+    }
+  })
+} else {
+  console.log("Review order button not found")
+}
+
 
   // Back to edit button in confirmation modal
   const backToEditBtn = document.getElementById("back-to-edit-btn")
@@ -312,6 +379,7 @@ function setupEventListeners() {
     deliveryModeRadios.forEach((radio) => {
       radio.addEventListener("change", function () {
         toggleDeliveryFields(this.value)
+        updateDefaultQuantities(false) // Update default quantities for new rows
       })
     })
   }
@@ -322,9 +390,65 @@ function setupEventListeners() {
     editDeliveryModeRadios.forEach((radio) => {
       radio.addEventListener("change", function () {
         toggleEditDeliveryFields(this.value)
+        updateDefaultQuantities(true) // Update default quantities for new rows
       })
     })
   }
+}
+
+// Add this new function after the setupEventListeners() function
+// Function to initialize tab badges with loading spinners
+function initializeTabBadges() {
+  const tabs = document.querySelectorAll(".order-tab")
+
+  tabs.forEach((tab) => {
+    const status = tab.getAttribute("data-status")
+
+    // Create badge if it doesn't exist
+    let badge = tab.querySelector(".badge")
+    if (!badge) {
+      badge = document.createElement("span")
+      badge.className = "badge rounded-pill ms-2"
+
+      // Set appropriate badge color based on status
+      if (status === "delivered") {
+        badge.classList.add("bg-success")
+      } else if (status === "cancelled") {
+        badge.classList.add("bg-danger")
+      } else if (status === "return_requested") {
+        badge.classList.add("bg-warning", "text-dark")
+      } else {
+        badge.classList.add("bg-primary")
+      }
+
+      tab.appendChild(badge)
+    }
+
+    // Show loading spinner in badge
+    badge.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>'
+  })
+}
+
+// Add this new function after the initializeTabBadges() function
+// Function to update tab badges with counts
+function updateTabBadges() {
+  const tabs = document.querySelectorAll(".order-tab")
+
+  tabs.forEach((tab) => {
+    const status = tab.getAttribute("data-status")
+    const badge = tab.querySelector(".badge")
+
+    if (badge) {
+      badge.textContent = tabCounts[status] || 0
+
+      // Hide badge if count is 0
+      if (tabCounts[status] === 0) {
+        badge.style.display = "none"
+      } else {
+        badge.style.display = "inline-block"
+      }
+    }
+  })
 }
 
 // Toggle delivery/pickup specific fields in create order modal
@@ -387,6 +511,10 @@ function addOrderItemRow() {
     noItemsRow.style.display = "none"
   }
 
+  // Get current delivery mode to determine default quantity
+  const deliveryMode = document.querySelector('input[name="delivery_mode"]:checked')?.value || "delivery"
+  const defaultQuantity = deliveryMode === "pickup" ? "20" : "30" // Corrected: delivery=30, pickup=20
+
   // Create new row
   const row = document.createElement("tr")
   row.className = "order-item-row"
@@ -404,7 +532,7 @@ function addOrderItemRow() {
         <button class="btn btn-outline-secondary decrease-qty" type="button">
           <i class="bi bi-dash"></i>
         </button>
-        <input type="text" class="form-control text-center qty-input" value="1" min="1">
+        <input type="text" class="form-control text-center qty-input" value="${defaultQuantity}" min="1">
         <button class="btn btn-outline-secondary increase-qty" type="button">
           <i class="bi bi-plus"></i>
         </button>
@@ -414,7 +542,7 @@ function addOrderItemRow() {
       <div class="input-group">
         <input type="text" class="form-control text-end price-input" value="0.00" readonly>
         <button class="btn btn-outline-secondary price-edit" type="button">
-          <i class="bi bi-pencil"></i>
+          
         </button>
       </div>
     </td>
@@ -422,7 +550,7 @@ function addOrderItemRow() {
       <div class="input-group">
         <input type="text" class="form-control text-end total-input" value="0.00" readonly>
         <button class="btn btn-outline-secondary" type="button" disabled>
-          <i class="bi bi-pencil"></i>
+      
         </button>
       </div>
     </td>
@@ -451,6 +579,10 @@ function addEditOrderItemRow() {
     noItemsRow.style.display = "none"
   }
 
+  // Get current delivery mode to determine default quantity
+  const deliveryMode = document.querySelector('input[name="edit_delivery_mode"]:checked')?.value || "delivery"
+  const defaultQuantity = deliveryMode === "pickup" ? "20" : "30" // Corrected: delivery=30, pickup=20
+
   // Create new row
   const row = document.createElement("tr")
   row.className = "order-item-row"
@@ -468,7 +600,7 @@ function addEditOrderItemRow() {
         <button class="btn btn-outline-secondary decrease-qty" type="button">
           <i class="bi bi-dash"></i>
         </button>
-        <input type="text" class="form-control text-center qty-input" value="1" min="1">
+        <input type="text" class="form-control text-center qty-input" value="${defaultQuantity}" min="1">
         <button class="btn btn-outline-secondary increase-qty" type="button">
           <i class="bi bi-plus"></i>
         </button>
@@ -505,6 +637,37 @@ function addEditOrderItemRow() {
 
   // Update order total
   updateEditOrderTotal()
+}
+
+// Function to update default quantities when delivery mode changes
+function updateDefaultQuantities(isEdit = false) {
+  const prefix = isEdit ? "edit-" : ""
+  const deliveryMode = document.querySelector(`input[name="${prefix}delivery_mode"]:checked`)?.value || "delivery"
+  const defaultQuantity = deliveryMode === "pickup" ? "20" : "30" // Corrected: delivery=30, pickup=20
+
+  const tableId = isEdit ? "edit-order-items-body" : "order-items-body"
+  const orderItemsBody = document.getElementById(tableId)
+
+  if (orderItemsBody) {
+    const rows = orderItemsBody.querySelectorAll(".order-item-row")
+    rows.forEach((row) => {
+      const qtyInput = row.querySelector(".qty-input")
+      const productSelect = row.querySelector(".product-select")
+
+      // Only update if no product is selected (empty row)
+      if (qtyInput && (!productSelect || !productSelect.value)) {
+        qtyInput.value = defaultQuantity
+        updateRowTotal(row)
+      }
+    })
+
+    // Update order total
+    if (isEdit) {
+      updateEditOrderTotal()
+    } else {
+      updateOrderTotal()
+    }
+  }
 }
 
 // Set up event listeners for a row
@@ -596,36 +759,7 @@ function setupRowEventListeners(row) {
     })
   }
 
-  // Price edit button
-  const priceEditBtn = row.querySelector(".price-edit")
-  if (priceEditBtn) {
-    priceEditBtn.addEventListener("click", () => {
-      const priceInput = row.querySelector(".price-input")
-      if (priceInput) {
-        // Toggle readonly attribute
-        priceInput.readOnly = !priceInput.readOnly
-
-        if (!priceInput.readOnly) {
-          // Focus the input if it's now editable
-          priceInput.focus()
-          priceInput.select()
-        } else {
-          // Update row total when done editing
-          updateRowTotal(row)
-
-          // Update order total
-          const isEditModal = row.closest("#edit-order-items-body") !== null
-          if (isEditModal) {
-            updateEditOrderTotal()
-          } else {
-            updateOrderTotal()
-          }
-        }
-      }
-    })
-  }
-
-  // Price input change
+  // Keep the Price input change event listener to handle cases where the price might be set programmatically
   const priceInput = row.querySelector(".price-input")
   if (priceInput) {
     priceInput.addEventListener("change", function () {
@@ -890,7 +1024,7 @@ function resetCreateOrderForm() {
     const expectedDeliveryInput = document.getElementById("expected-delivery")
     if (expectedDeliveryInput) {
       const deliveryDate = new Date()
-      deliveryDate.setDate(deliveryDate.getDate() + 7)
+      deliveryDate.setDate(deliveryDate.getDate() + 3)
       expectedDeliveryInput.valueAsDate = deliveryDate
     }
 
@@ -910,9 +1044,27 @@ function resetCreateOrderForm() {
   }
 }
 
-// Find the saveOrder function and update it to properly close all modals
-// Replace the existing saveOrder function with this updated version that properly closes all modals
+// Utility functions for modal management
+function showModal(modalId) {
+  const modal = new bootstrap.Modal(document.getElementById(modalId))
+  modal.show()
+  return modal
+}
+function hideModal(modalId) {
+  const modalInstance = bootstrap.Modal.getInstance(document.getElementById(modalId))
+  if (modalInstance) modalInstance.hide()
+}
+function cleanupModals() {
+  // Remove any lingering modal backdrops
+  const modalBackdrops = document.querySelectorAll('.modal-backdrop')
+  modalBackdrops.forEach((backdrop) => backdrop.remove())
+  // Remove modal-open class from body
+  document.body.classList.remove('modal-open')
+  document.body.style.overflow = ''
+  document.body.style.paddingRight = ''
+}
 
+// Refactored saveOrder
 function saveOrder() {
   console.log("saveOrder function called")
 
@@ -987,6 +1139,12 @@ function saveOrder() {
 
   console.log("Sending order data:", orderData)
 
+  // First, properly close all modals
+  closeAllModals()
+
+  // Show loading modal
+  showModal('loadingModal')
+
   // Send order data to server
   fetch("save_retailer_order.php", {
     method: "POST",
@@ -1004,33 +1162,35 @@ function saveOrder() {
     })
     .then((data) => {
       console.log("Server response:", data)
-      if (data.success) {
-        // First, properly close all modals and remove backdrops
-        closeAllModals()
 
-        // Remove any lingering modal backdrops
-        const modalBackdrops = document.querySelectorAll(".modal-backdrop")
-        modalBackdrops.forEach((backdrop) => {
-          backdrop.remove()
-        })
+      // Set a timeout to hide loading modal and show success modal
+      setTimeout(() => {
+        hideModal('loadingModal')
+        if (data.success) {
+          // Set success message
+          document.getElementById("success-message").textContent = data.message || "Order created successfully"
 
-        // Remove modal-open class from body
-        document.body.classList.remove("modal-open")
-        document.body.style.overflow = ""
-        document.body.style.paddingRight = ""
+          // Show success modal
+          showModal('successModal')
 
-        // Show success message
-        showResponseMessage("success", data.message || "Order created successfully")
-
-        // Refresh orders
-        fetchOrders()
-      } else {
-        showResponseMessage("danger", data.message || "Failed to create order")
-      }
+          // Auto-hide success modal after 3 seconds
+          setTimeout(() => {
+            hideModal('successModal')
+            cleanupModals()
+            fetchOrders()
+          }, 2000)
+        } else {
+          showResponseMessage("danger", data.message || "Failed to create order")
+        }
+      }, 2000)
     })
     .catch((error) => {
-      console.error("Error creating order:", error)
-      showResponseMessage("danger", "Error connecting to the server. Please try again.")
+      // Hide loading modal in case of error
+      setTimeout(() => {
+        hideModal('loadingModal')
+        console.error("Error creating order:", error)
+        showResponseMessage("danger", "Error connecting to the server. Please try again.")
+      }, 1000)
     })
 }
 
@@ -1077,6 +1237,30 @@ function closeAllModals() {
   }, 300)
 }
 
+// Function to properly clean up modal backdrop when clicking the X button
+document.addEventListener("DOMContentLoaded", () => {
+  // Get all close buttons in modals
+  const modalCloseButtons = document.querySelectorAll(".modal .btn-close")
+
+  modalCloseButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      // Add a small delay to ensure the modal is fully closed
+      setTimeout(() => {
+        // Remove any lingering modal backdrops
+        const modalBackdrops = document.querySelectorAll(".modal-backdrop")
+        modalBackdrops.forEach((backdrop) => {
+          backdrop.remove()
+        })
+
+        // Remove modal-open class from body
+        document.body.classList.remove("modal-open")
+        document.body.style.overflow = ""
+        document.body.style.paddingRight = ""
+      }, 300)
+    })
+  })
+})
+
 // Fix the collectOrderItems function to ensure it properly collects all data
 function collectOrderItems(isEdit = false) {
   const tableId = isEdit ? "edit-order-items-body" : "order-items-body"
@@ -1116,7 +1300,7 @@ function collectOrderItems(isEdit = false) {
   return items
 }
 
-// Update order
+// Find the updateOrder function and replace it with this updated version
 function updateOrder() {
   // Validate form
   if (!validateOrderForm(true)) {
@@ -1178,8 +1362,14 @@ function updateOrder() {
     pickup_date: pickupDate,
   }
 
+  // First, properly close all modals
+  closeAllModals()
+
+  // Show loading modal
+  showModal('loadingModal')
+
   // Send order data to server
-  fetch("save_retailer_order.php", {
+  fetch("update_retailer_order.php", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -1193,35 +1383,64 @@ function updateOrder() {
       return response.json()
     })
     .then((data) => {
-      if (data.success) {
-        // Close modal
-        if (typeof bootstrap !== "undefined") {
-          const editOrderModal = bootstrap.Modal.getInstance(document.getElementById("editOrderModal"))
-          editOrderModal.hide()
+      // Set a timeout to hide loading modal and show success modal
+      setTimeout(() => {
+        hideModal('loadingModal')
+        if (data.success) {
+          // Set success message
+          document.getElementById("success-message").textContent = data.message || "Order updated successfully"
+
+          // Show success modal
+          showModal('successModal')
+
+          // Auto-hide success modal after 3 seconds
+          setTimeout(() => {
+            hideModal('successModal')
+            cleanupModals()
+            fetchOrders()
+          }, 2000)
+        } else {
+          showResponseMessage("danger", data.message || "Failed to update order")
         }
-
-        // Show success message
-        showResponseMessage("success", data.message || "Order updated successfully")
-
-        // Refresh orders
-        fetchOrders()
-      } else {
-        showResponseMessage("danger", data.message || "Failed to update order")
-      }
+      }, 2000)
     })
     .catch((error) => {
-      console.error("Error updating order:", error)
-      showResponseMessage("danger", "Error connecting to the server. Please try again.")
+      // Hide loading modal in case of error
+      setTimeout(() => {
+        hideModal('loadingModal')
+        console.error("Error updating order:", error)
+        showResponseMessage("danger", "Error connecting to the server. Please try again.")
+      }, 1000)
     })
 }
+
+// Add an event listener for the view-orders-btn in the success modal
+document.addEventListener("DOMContentLoaded", () => {
+  const viewOrdersBtn = document.getElementById("view-orders-btn")
+  if (viewOrdersBtn) {
+    viewOrdersBtn.addEventListener("click", () => {
+      // Hide the success modal
+      const successModal = bootstrap.Modal.getInstance(document.getElementById("successModal"))
+      if (successModal) {
+        successModal.hide()
+      }
+
+      // Refresh orders
+      fetchOrders()
+    })
+  }
+})
 
 // Validate order form
 function validateOrderForm(isEdit = false) {
   const prefix = isEdit ? "edit-" : ""
 
   // Required fields
-  const retailerName = document.getElementById(`${prefix}retailer-name`).value
-  const retailerEmail = document.getElementById(`${prefix}retailer-email`).value
+  let retailerName, retailerEmail
+  if (isEdit) {
+    retailerName = document.getElementById(`${prefix}retailer-name`).value
+    retailerEmail = document.getElementById(`${prefix}retailer-email`).value
+  }
   const orderDate = document.getElementById(`${prefix}order-date`).value
 
   // Get delivery mode
@@ -1257,16 +1476,22 @@ function validateOrderForm(isEdit = false) {
     }
   }
 
-  if (!retailerName || !retailerEmail || !orderDate) {
-    showResponseMessage("danger", "Please fill in all required fields")
-    return false
-  }
-
-  // Validate email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(retailerEmail)) {
-    showResponseMessage("danger", "Please enter a valid email address")
-    return false
+  if (isEdit) {
+    if (!retailerName || !retailerEmail || !orderDate) {
+      showResponseMessage("danger", "Please fill in all required fields")
+      return false
+    }
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(retailerEmail)) {
+      showResponseMessage("danger", "Please enter a valid email address")
+      return false
+    }
+  } else {
+    if (!orderDate) {
+      showResponseMessage("danger", "Please fill in all required fields")
+      return false
+    }
   }
 
   return true
@@ -1310,6 +1535,19 @@ function fetchOrders() {
         allOrders = data.orders || []
         console.log("Number of orders:", allOrders.length)
 
+        // Update tab counts
+        tabCounts.all = allOrders.length
+
+        // Count orders by status
+        tabCounts.delivered = allOrders.filter(
+          (order) => order.status === "delivered" || (order.status === "picked up" && order.delivery_mode === "pickup"),
+        ).length
+
+        tabCounts.cancelled = allOrders.filter((order) => order.status === "cancelled").length
+
+        // Update badges
+        updateTabBadges()
+
         // Render orders
         renderOrders(allOrders)
       } else {
@@ -1324,6 +1562,73 @@ function fetchOrders() {
             <i class="bi bi-exclamation-triangle-fill fs-1"></i>
             <div class="mt-3">Error loading orders: ${error.message}</div>
             <button class="btn btn-outline-primary mt-3" onclick="fetchOrders()">
+              <i class="bi bi-arrow-clockwise me-1"></i> Try Again
+            </button>
+          </div>
+        </div>
+      `
+    })
+}
+
+// Function to fetch orders with return_requested status
+function fetchReturnRequestedOrders() {
+  const ordersContainer = document.getElementById("orders-card-container")
+  if (!ordersContainer) {
+    console.error("Orders container not found")
+    return
+  }
+
+  // Show loading indicator
+  ordersContainer.innerHTML = `
+    <div class="col-12 text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="mt-3">Loading return requested orders...</div>
+    </div>
+  `
+
+  // Build query parameters
+  const params = `?action=get_orders&status=return_requested`
+
+  console.log("Fetching return requested orders with params:", params)
+
+  // Fetch orders from server
+  fetch(`retailer_order_handler.php${params}`)
+    .then((response) => {
+      console.log("Response status:", response.status)
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      console.log("Return requested orders data received:", data)
+      if (data.success) {
+        // Store orders
+        allOrders = data.orders || []
+        console.log("Number of return requested orders:", allOrders.length)
+
+        // Update return_requested tab count
+        tabCounts.return_requested = allOrders.length
+
+        // Update badges
+        updateTabBadges()
+
+        // Render orders
+        renderOrders(allOrders)
+      } else {
+        throw new Error(data.message || "Failed to fetch return requested orders")
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching return requested orders:", error)
+      ordersContainer.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <div class="text-danger">
+            <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+            <div class="mt-3">Error loading return requested orders: ${error.message}</div>
+            <button class="btn btn-outline-primary mt-3" onclick="fetchReturnRequestedOrders()">
               <i class="bi bi-arrow-clockwise me-1"></i> Try Again
             </button>
           </div>
@@ -1481,13 +1786,35 @@ function renderOrders(orders) {
 function formatStatus(status) {
   if (!status) return "Unknown"
 
+  // Special case for "delivered" status when the order  {
+  if (!status) return "Unknown"
+
   // Special case for "delivered" status when the order is in pickup mode
   if (status === "delivered" && currentOrderIsPickup) {
     return "Picked Up"
   }
 
-  // Convert to title case and replace underscores with spaces
-  return status.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+  // Handle specific statuses
+  switch (status.toLowerCase()) {
+    case "completed":
+      return "Completed"
+    case "returned":
+      return "Returned"
+    case "return_requested":
+      return "Return Requested"
+    case "confirmed":
+      return "Confirmed"
+    case "ready-to-pickup":
+      return "Ready for Pickup"
+    case "picked up":
+      return "Picked Up"
+    case "order":
+    case "order placed":
+      return "Order Placed"
+    default:
+      // Convert to title case and replace underscores with spaces
+      return status.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
+  }
 }
 
 // Helper function to get status class for styling
@@ -1558,21 +1885,12 @@ function setupActionButtons() {
   // Cancel order
   const cancelButtons = document.querySelectorAll(".action-btn-cancel")
   cancelButtons.forEach((button) => {
-    selectedOrderId = this.getAttribute("data-id")
-
-    const cancelModal = new bootstrap.Modal(document.getElementById("cancelConfirmationModal"))
-    cancelModal.show()
-  })
-}
-
-// Set up action buttons
-function setupActionButtons() {
-  // View buttons
-  const viewButtons = document.querySelectorAll(".action-btn-view")
-  viewButtons.forEach((button) => {
     button.addEventListener("click", function () {
       const orderId = this.getAttribute("data-id")
-      viewOrderDetails(orderId)
+      selectedOrderId = orderId
+
+      const cancelModal = new bootstrap.Modal(document.getElementById("cancelConfirmationModal"))
+      cancelModal.show()
     })
   })
 
@@ -1585,15 +1903,6 @@ function setupActionButtons() {
     })
   })
 
-  // Delete buttons
-  const deleteButtons = document.querySelectorAll(".action-btn-delete")
-  deleteButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const orderId = this.getAttribute("data-id")
-      showDeleteConfirmation(orderId)
-    })
-  })
-
   // Update status buttons
   const updateStatusButtons = document.querySelectorAll(".update-status")
   updateStatusButtons.forEach((button) => {
@@ -1601,24 +1910,6 @@ function setupActionButtons() {
       e.preventDefault()
       const status = this.getAttribute("data-status")
       showUpdateStatusModal(selectedOrderId, status)
-    })
-  })
-
-  // Complete order buttons
-  const completeButtons = document.querySelectorAll(".action-btn-complete")
-  completeButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const orderId = this.getAttribute("data-id")
-      showCompleteOrderModal(orderId)
-    })
-  })
-
-  // Return order buttons
-  const returnButtons = document.querySelectorAll(".action-btn-return")
-  returnButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const orderId = this.getAttribute("data-id")
-      showReturnOrderModal(orderId)
     })
   })
 
@@ -1639,25 +1930,12 @@ function setupActionButtons() {
     })
   }
 
-  // In retail_orders.js, add this code to the setupActionButtons function:
-  // Cancel order
-  const cancelButtons = document.querySelectorAll(".action-btn-cancel")
-  cancelButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const orderId = this.getAttribute("data-id")
-      selectedOrderId = orderId
-
-      const cancelModal = new bootstrap.Modal(document.getElementById("cancelConfirmationModal"))
-      cancelModal.show()
-    })
-  })
-
   // Reorder
-  const reorderButtons = document.querySelectorAll(".action-btn-reorder")
+  const reorderButtons = document.querySelectorAll('.action-btn-reorder')
   reorderButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const orderId = this.getAttribute("data-id")
-      reorderCancelledOrder(orderId)
+    button.addEventListener('click', function () {
+      reorderOrderId = this.getAttribute('data-id')
+      showModal('reorderConfirmationModal')
     })
   })
 
@@ -1888,57 +2166,116 @@ function completeOrder() {
     })
 }
 
+// Update the function to cancel an order with proper modals and timing
 function updateOrderStatusToCancelled(orderId) {
-  fetch("retailer_order_handler.php", {
+  console.log("Cancelling order:", orderId)
+
+  // Show cancel loading modal
+  showModal('cancelLoadingModal')
+
+  fetch("retailer_order_handler.php?action=cancel_order", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      action: "cancel_order",
       order_id: orderId,
     }),
   })
     .then((res) => res.json())
     .then((data) => {
+      console.log("Response data:", data)
+
       if (data.success) {
-        showResponseMessage("success", "Order cancelled successfully.")
-        fetchOrders()
+        // Close the cancel confirmation modal
+        hideModal('cancelConfirmationModal')
+        setTimeout(() => {
+          hideModal('cancelLoadingModal')
+          // Set success message
+          document.getElementById("cancel-success-message").textContent = data.message || "Order cancelled successfully"
+
+          // Show cancel success modal after loading modal is hidden
+          showModal('cancelSuccessModal')
+          setTimeout(() => {
+            hideModal('cancelSuccessModal')
+            cleanupModals()
+            fetchOrders()
+          }, 2000)
+        }, 2000)
       } else {
+        // Hide cancel loading modal immediately on error
+        hideModal('cancelLoadingModal')
         showResponseMessage("danger", data.message || "Failed to cancel order.")
       }
     })
     .catch((err) => {
-      console.error(err)
+      // Hide cancel loading modal in case of error
+      hideModal('cancelLoadingModal')
+      console.error("Error:", err)
       showResponseMessage("danger", "Server error while cancelling order.")
     })
 }
 
-function reorderCancelledOrder(orderId) {
-  fetch("retailer_order_handler.php?action=reorder_cancelled_order", {
-    // Add ?action=reorder_cancelled_order here
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      order_id: orderId,
-    }),
+// Add event listener for the view-orders-btn in the cancel success modal
+document.addEventListener("DOMContentLoaded", () => {
+  // Existing event listeners...
+
+  const viewOrdersAfterCancelBtn = document.getElementById("view-orders-after-cancel-btn")
+  if (viewOrdersAfterCancelBtn) {
+    viewOrdersAfterCancelBtn.addEventListener("click", () => {
+      // Hide the cancel success modal
+      const cancelSuccessModal = bootstrap.Modal.getInstance(document.getElementById("cancelSuccessModal"))
+      if (cancelSuccessModal) {
+        cancelSuccessModal.hide()
+      }
+
+      // Refresh orders
+      fetchOrders()
+    })
+  }
+})
+
+// Handle reorder confirmation
+function handleReorderConfirmation() {
+  if (!reorderOrderId) return
+  hideModal('reorderConfirmationModal')
+  showModal('reorderLoadingModal')
+  fetch('retailer_order_handler.php?action=reorder_cancelled_order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order_id: reorderOrderId }),
   })
     .then((res) => res.json())
     .then((data) => {
-      if (data.success) {
-        showResponseMessage("success", "Order has been placed again.")
-        fetchOrders()
-      } else {
-        showResponseMessage("danger", data.message || "Failed to reorder.")
-      }
+      setTimeout(() => {
+        hideModal('reorderLoadingModal')
+        if (data.success) {
+          document.getElementById('reorder-success-message').textContent = data.message || 'Your reorder has been placed and is now being processed.'
+          showModal('reorderSuccessModal')
+          setTimeout(() => {
+            hideModal('reorderSuccessModal')
+            cleanupModals()
+            fetchOrders()
+          }, 2000)
+        } else {
+          showResponseMessage('danger', data.message || 'Failed to reorder.')
+        }
+      }, 1500)
     })
     .catch((err) => {
-      console.error(err)
-      showResponseMessage("danger", "Server error while reordering.")
+      hideModal('reorderLoadingModal')
+      showResponseMessage('danger', 'Server error while reordering.')
     })
 }
+// Event listeners for reorder confirmation and success modals
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Confirm reorder button
+  const confirmReorderBtn = document.getElementById('confirm-reorder-btn')
+  if (confirmReorderBtn) {
+    confirmReorderBtn.addEventListener('click', handleReorderConfirmation)
+  }
+})
 
 // Submit return request function
 function submitReturnRequest() {
@@ -2306,49 +2643,42 @@ function showDeleteConfirmation(orderId) {
   }
 }
 
-// Delete order
+// Refactored deleteOrder
 function deleteOrder() {
-  const orderId = document.getElementById("delete-order-id").value
-
-  // Create delete data
-  const deleteData = {
-    order_id: orderId,
-  }
-
-  // Send delete request to server
-  fetch("delete_order.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+  const orderId = document.getElementById('delete-order-id').value
+  const deleteData = { order_id: orderId }
+  showModal('deleteLoadingModal')
+  fetch('retailer_order_handler.php?action=delete_order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(deleteData),
   })
     .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok")
-      }
+      if (!response.ok) throw new Error('Network response was not ok')
       return response.json()
     })
     .then((data) => {
       if (data.success) {
-        // Close modal
-        if (typeof bootstrap !== "undefined") {
-          const deleteOrderModal = bootstrap.Modal.getInstance(document.getElementById("deleteOrderModal"))
-          deleteOrderModal.hide()
-        }
-
-        // Show success message
-        showResponseMessage("success", data.message || "Order deleted successfully")
-
-        // Refresh orders
-        fetchOrders()
+        hideModal('deleteOrderModal')
+        setTimeout(() => {
+          hideModal('deleteLoadingModal')
+          document.getElementById('delete-success-message').textContent = data.message || 'Order deleted successfully'
+          showModal('deleteSuccessModal')
+          setTimeout(() => {
+            hideModal('deleteSuccessModal')
+            cleanupModals()
+            fetchOrders()
+          }, 2000)
+        }, 2000)
       } else {
-        showResponseMessage("danger", data.message || "Failed to delete order: " + data.message)
+        hideModal('deleteLoadingModal')
+        showResponseMessage('danger', data.message || 'Failed to delete order')
       }
     })
     .catch((error) => {
-      console.error("Error deleting order:", error)
-      showResponseMessage("danger", "Error connecting to the server. Please try again.")
+      hideModal('deleteLoadingModal')
+      console.error('Error deleting order:', error)
+      showResponseMessage('danger', 'Error connecting to the server. Please try again.')
     })
 }
 
@@ -2370,38 +2700,6 @@ function updateOrderStats(orders) {
     return total + Number.parseFloat(order.total_amount)
   }, 0)
   document.getElementById("total-spent").textContent = `₱${totalSpent.toFixed(2)}`
-}
-
-// Update the formatStatus function to properly handle completed and returned statuses
-function formatStatus(status) {
-  if (!status) return "Unknown";
-
-  // Special case for "delivered" status when the order is in pickup mode
-  if (status === "delivered" && currentOrderIsPickup) {
-    return "Picked Up"
-  }
-
-  // Handle specific statuses
-  switch (status.toLowerCase()) {
-    case "completed":
-      return "Completed"
-    case "returned":
-      return "Returned"
-    case "return_requested":
-      return "Return Requested"
-    case "confirmed":
-      return "Confirmed"
-    case "ready-to-pickup":
-      return "Ready for Pickup"
-    case "picked up":
-      return "Picked Up"
-    case "order":
-    case "order placed":
-      return "Order Placed"
-    default:
-      // Convert to title case and replace underscores with spaces
-      return status.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
-  }
 }
 
 // Update the getStatusBgClass function to include background colors for completed and returned
@@ -2482,9 +2780,31 @@ function debounce(func, wait) {
 function showOrderConfirmation(isEdit = false) {
   // Get form data from the appropriate form
   const prefix = isEdit ? "edit-" : ""
-  const retailerName = document.getElementById(`${prefix}retailer-name`).value
-  const retailerEmail = document.getElementById(`${prefix}retailer-email`).value
-  const retailerContact = document.getElementById(`${prefix}retailer-contact`).value || "N/A"
+  let retailerName, retailerEmail, retailerContact
+  if (isEdit) {
+    retailerName = document.getElementById(`${prefix}retailer-name`).value
+    retailerEmail = document.getElementById(`${prefix}retailer-email`).value
+    retailerContact = document.getElementById(`${prefix}retailer-contact`).value || "N/A"
+  } else {
+    // Use currentUser for customer info
+    if (currentUser) {
+      if (currentUser.first_name && currentUser.last_name) {
+        retailerName = `${currentUser.first_name} ${currentUser.last_name}`
+      } else if (currentUser.full_name) {
+        retailerName = currentUser.full_name
+      } else if (currentUser.business_name) {
+        retailerName = currentUser.business_name
+      } else {
+        retailerName = "N/A"
+      }
+      retailerEmail = currentUser.email || "N/A"
+      retailerContact = currentUser.phone || "N/A"
+    } else {
+      retailerName = "N/A"
+      retailerEmail = "N/A"
+      retailerContact = "N/A"
+    }
+  }
   const orderDate = document.getElementById(`${prefix}order-date`).value
   const consignmentTerm = document.getElementById(`${prefix}consignment-term`).value
   const notes = document.getElementById(`${prefix}order-notes`).value || "No notes provided."
@@ -2541,652 +2861,217 @@ function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString(undefined, options)
 }
 
-// Add these event listeners to your setupEventListeners function in retail_orders.js
+// Declare missing variables
+let currentFilter = ""
+const bootstrap = window.bootstrap
 
-// Review order button in create order modal
-const reviewOrderBtn = document.getElementById("review-order-btn")
-if (reviewOrderBtn) {
-  reviewOrderBtn.addEventListener("click", () => {
-    // Validate form before showing confirmation
-    if (validateOrderForm()) {
-      showOrderConfirmation(false)
-    }
-  })
+function showOrderDetailsModal(orderId) {
+  viewOrderDetails(orderId)
 }
 
-// Review changes button in edit order modal
-const reviewEditOrderBtn = document.getElementById("review-edit-order-btn")
-if (reviewEditOrderBtn) {
-  reviewEditOrderBtn.addEventListener("click", () => {
-    // Validate form before showing confirmation
-    if (validateOrderForm(true)) {
-      showOrderConfirmation(true)
-    }
-  })
-}
+function showEditOrderModal(orderId) {
+  // Find the order in allOrders
+  const order = allOrders.find((o) => o.order_id == orderId)
 
-// Back to edit button in confirmation modal
-const backToEditBtn = document.getElementById("back-to-edit-btn")
-if (backToEditBtn) {
-  backToEditBtn.addEventListener("click", () => {
-    // Hide confirmation modal
-    const confirmationModal = bootstrap.Modal.getInstance(document.getElementById("orderConfirmationModal"))
-    confirmationModal.hide()
-  })
-}
-
-// Save order button in confirmation modal
-const saveOrderBtn = document.getElementById("save-order-btn")
-if (saveOrderBtn) {
-  saveOrderBtn.addEventListener("click", () => {
-    // Submit the form based on whether we're editing or creating
-    const isEditModal = document.getElementById("edit-order-id").value !== ""
-    if (isEditModal) {
-      updateOrder()
-    } else {
-      saveOrder()
-    }
-
-    // Hide confirmation modal
-    const confirmationModal = bootstrap.Modal.getInstance(document.getElementById("orderConfirmationModal"))
-    confirmationModal.hide()
-  })
-}
-
-// Modal Enhancements for Retailer Order Management
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Apply enhanced styles to all modals
-  enhanceModals()
-
-  // Set up event listeners for modal events
-  setupModalEventListeners()
-})
-
-// Function to enhance all modals with modern styling and animations
-function enhanceModals() {
-  // Add animation classes to modals
-  const modals = document.querySelectorAll(".modal")
-  modals.forEach((modal) => {
-    // Add fade-in animation when modal opens
-    modal.addEventListener("show.bs.modal", function () {
-      setTimeout(() => {
-        this.classList.add("animate-in")
-      }, 50)
-    })
-
-    // Remove animation class when modal closes
-    modal.addEventListener("hide.bs.modal", function () {
-      this.classList.remove("animate-in")
-    })
-  })
-
-  // Enhance status badges
-  enhanceStatusBadges()
-
-  // Enhance timeline visualization
-  enhanceTimeline()
-
-  // Add hover effects to action buttons
-  enhanceActionButtons()
-
-  // Improve form controls
-  enhanceFormControls()
-}
-
-// Function to enhance status badges with appropriate colors
-function enhanceStatusBadges() {
-  const statusBadges = document.querySelectorAll(".status-badge")
-  statusBadges.forEach((badge) => {
-    // Add pulse animation to "processing" status
-    if (badge.classList.contains("status-processing")) {
-      badge.innerHTML = `<span class="pulse-dot"></span>${badge.textContent}`
-    }
-
-    // Add checkmark icon to "delivered" status
-    if (badge.classList.contains("status-delivered")) {
-      badge.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i>${badge.textContent}`
-    }
-
-    // Add warning icon to "cancelled" status
-    if (badge.classList.contains("status-cancelled")) {
-      badge.innerHTML = `<i class="bi bi-x-circle-fill me-1"></i>${badge.textContent}`
-    }
-  })
-}
-
-// Function to enhance timeline visualization
-function enhanceTimeline() {
-  const timeline = document.querySelector(".status-timeline")
-  if (!timeline) return
-
-  const timelineItems = timeline.querySelectorAll(".status-timeline-item")
-
-  // Add animation delay to each timeline item
-  timelineItems.forEach((item, index) => {
-    item.style.animationDelay = `${index * 0.15}s`
-    item.classList.add("fade-in-up")
-
-    // Add appropriate status color to timeline dots
-    const dot = item.querySelector(".status-timeline-dot")
-    if (dot) {
-      const statusText = item.querySelector(".status-timeline-title").textContent.toLowerCase()
-
-      if (statusText.includes("delivered")) {
-        dot.style.borderColor = "#198754"
-        dot.style.backgroundColor = "#d1e7dd"
-      } else if (statusText.includes("shipped")) {
-        dot.style.borderColor = "#0d6efd"
-        dot.style.backgroundColor = "#cfe2ff"
-      } else if (statusText.includes("processing")) {
-        dot.style.borderColor = "#ffc107"
-        dot.style.backgroundColor = "#fff3cd"
-      } else if (statusText.includes("cancelled")) {
-        dot.style.borderColor = "#dc3545"
-        dot.style.backgroundColor = "#f8d7da"
-      } else {
-        dot.style.borderColor = "#f5cc39"
-        dot.backgroundColor = "#fff8dd"
-      }
-    }
-  })
-}
-
-// Function to enhance action buttons
-function enhanceActionButtons() {
-  const actionButtons = document.querySelectorAll(".action-btn")
-  actionButtons.forEach((button) => {
-    // Add tooltip if not already present
-    if (!button.getAttribute("data-bs-toggle")) {
-      const title = button.getAttribute("title")
-      if (title) {
-        button.setAttribute("data-bs-toggle", "tooltip")
-        button.setAttribute("data-bs-placement", "top")
-      }
-    }
-
-    // Initialize tooltips
-    if (typeof bootstrap !== "undefined") {
-      const tooltip = new bootstrap.Tooltip(button)
-    }
-  })
-}
-
-// Function to enhance form controls
-function enhanceFormControls() {
-  // Add floating labels to form controls
-  const formControls = document.querySelectorAll(".modal .form-control, .modal .form-select")
-  formControls.forEach((control) => {
-    control.addEventListener("focus", function () {
-      this.parentElement.classList.add("focused")
-    })
-
-    control.addEventListener("blur", function () {
-      this.parentElement.classList.remove("focused")
-    })
-
-    // Check if control already has a value
-    if (control.value) {
-      control.parentElement.classList.add("has-value")
-    }
-
-    control.addEventListener("input", function () {
-      if (this.value) {
-        this.parentElement.classList.add("has-value")
-      } else {
-        this.parentElement.classList.remove("has-value")
-      }
-    })
-  })
-}
-
-// Function to set up event listeners for modal events
-function setupModalEventListeners() {
-  // View Order Modal
-  const viewOrderModal = document.getElementById("viewOrderModal")
-  if (viewOrderModal) {
-    viewOrderModal.addEventListener("show.bs.modal", () => {
-      // Enhance the status timeline when the modal is shown
-      setTimeout(() => {
-        enhanceTimeline()
-      }, 300)
-    })
+  if (!order) {
+    showResponseMessage("danger", "Order not found")
+    return
   }
 
-  // Order Confirmation Modal
-  const orderConfirmationModal = document.getElementById("orderConfirmationModal")
-  if (orderConfirmationModal) {
-    orderConfirmationModal.addEventListener("show.bs.modal", function () {
-      // Add animation to order items
-      const orderItems = this.querySelectorAll("#confirm-order-items tr")
-      orderItems.forEach((item, index) => {
-        item.style.animationDelay = `${index * 0.1}s`
-        item.classList.add("fade-in-up")
-      })
-    })
+  // Set the order ID in the edit form
+  document.getElementById("edit-order-id").value = order.order_id
+
+  // Populate the retailer information
+  document.getElementById("edit-retailer-name").value = order.retailer_name
+  document.getElementById("edit-retailer-email").value = order.retailer_email
+  document.getElementById("edit-retailer-contact").value = order.retailer_contact
+  document.getElementById("edit-retailer-address").value = order.retailer_address
+
+  // Populate the order date
+  document.getElementById("edit-order-date").value = order.order_date
+
+  // Populate the consignment term
+  document.getElementById("edit-consignment-term").value = order.consignment_term
+
+  // Populate the notes
+  document.getElementById("edit-order-notes").value = order.notes
+
+  // Populate the discount
+  document.getElementById("edit-discount").value = order.discount
+
+  // Populate delivery mode
+  const deliveryModeRadios = document.querySelectorAll('input[name="edit_delivery_mode"]')
+  deliveryModeRadios.forEach((radio) => {
+    radio.checked = radio.value === order.delivery_mode
+  })
+
+  // Show/hide delivery fields
+  toggleEditDeliveryFields(order.delivery_mode)
+
+  // Populate delivery/pickup specific fields
+  if (order.delivery_mode === "delivery") {
+    document.getElementById("edit-expected-delivery").value = order.expected_delivery
+  } else if (order.delivery_mode === "pickup") {
+    document.getElementById("edit-pickup-location").value = order.pickup_location
+    document.getElementById("edit-pickup-date").value = order.pickup_date
   }
 
-  // Delete Order Modal
-  const deleteOrderModal = document.getElementById("deleteOrderModal")
-  if (deleteOrderModal) {
-    deleteOrderModal.addEventListener("show.bs.modal", function () {
-      // Add shake animation to warning icon
-      const warningIcon = this.querySelector(".bi-exclamation-triangle-fill")
-      if (warningIcon) {
-        warningIcon.classList.add("shake-animation")
-      }
+  // Initialize the edit order items table
+  initEditOrderItemsTable(order.items)
+
+  // Store the original order status
+  originalOrderStatus = order.status
+
+  // Show the edit order modal
+  const editOrderModal = new bootstrap.Modal(document.getElementById("editOrderModal"))
+  editOrderModal.show()
+}
+
+// Initialize edit order items table
+function initEditOrderItemsTable(items) {
+  const orderItemsBody = document.getElementById("edit-order-items-body")
+  if (!orderItemsBody) return
+
+  // Clear existing items
+  orderItemsBody.innerHTML = ""
+
+  if (items && items.length > 0) {
+    items.forEach((item) => {
+      addExistingEditOrderItemRow(item)
     })
-  }
-
-  // Update Status Modal
-  const updateStatusModal = document.getElementById("updateStatusModal")
-  if (updateStatusModal) {
-    updateStatusModal.addEventListener("show.bs.modal", function () {
-      // Highlight the current status
-      const currentStatus = document.getElementById("update-status").value
-      const statusOptions = this.querySelectorAll(".status-option")
-
-      statusOptions.forEach((option) => {
-        if (option.getAttribute("data-status") === currentStatus) {
-          option.classList.add("active")
-        } else {
-          option.classList.remove("active")
-        }
-      })
-    })
-  }
-}
-
-// Function to format currency
-function formatCurrency(amount) {
-  return (
-    "₱" +
-    Number.parseFloat(amount)
-      .toFixed(2)
-      .replace(/\d(?=(\d{3})+\.)/g, "$&,")
-  )
-}
-
-// Function to format date
-function formatDate(dateString) {
-  const options = { year: "numeric", month: "long", day: "numeric" }
-  return new Date(dateString).toLocaleDateString(undefined, options)
-}
-
-// Add these functions to the window object to make them available globally
-window.enhanceModals = enhanceModals
-window.enhanceStatusBadges = enhanceStatusBadges
-window.enhanceTimeline = enhanceTimeline
-
-// Function to enhance the view order modal display
-function enhanceViewOrderModal() {
-  // Add event listener to update the modal when it's shown
-  $("#viewOrderModal").on("show.bs.modal", () => {
-    // Apply custom styling to status badges
-    styleStatusBadges()
-
-    // Enhance the status timeline
-    enhanceStatusTimeline()
-
-    // Make order items table more readable
-    enhanceOrderItemsTable()
-  })
-}
-
-// Function to style status badges
-function styleStatusBadges() {
-  // Get the status badge element
-  const statusBadge = document.getElementById("view-order-status")
-  if (!statusBadge) return
-
-  // Get the status text
-  const statusText = statusBadge.textContent.trim()
-
-  // Create a large badge for the header
-  const statusClass = statusBadge.querySelector(".status-badge").className
-  const headerStatus = document.createElement("span")
-  headerStatus.className = statusClass + " status-badge-lg"
-  headerStatus.textContent = statusText
-
-  // Replace the original badge with the enhanced one
-  statusBadge.innerHTML = ""
-  statusBadge.appendChild(headerStatus)
-}
-
-// Function to enhance the status timeline
-function enhanceStatusTimeline() {
-  const timelineContainer = document.getElementById("status-timeline")
-  if (!timelineContainer) return
-
-  // Get all timeline items
-  const timelineItems = timelineContainer.querySelectorAll(".status-timeline-item")
-
-  // Add animation delay to each item
-  timelineItems.forEach((item, index) => {
-    item.style.animationDelay = `${index * 0.1}s`
-    item.classList.add("fade-in")
-
-    // Add pulse animation to the most recent status dot
-    if (index === 0) {
-      const dot = item.querySelector(".status-timeline-dot")
-      if (dot) {
-        dot.classList.add("pulse")
-      }
-    }
-  })
-}
-
-// Function to enhance the order items table
-function enhanceOrderItemsTable() {
-  const orderItemsTable = document.querySelector(".order-items-table")
-  if (!orderItemsTable) return
-
-  // Add hover effect to table rows
-  const tableRows = orderItemsTable.querySelectorAll("tbody tr")
-  tableRows.forEach((row) => {
-    row.classList.add("hover-highlight")
-  })
-
-  // Format currency values
-  const currencyElements = orderItemsTable.querySelectorAll("td:nth-child(2), td:nth-child(4)")
-  currencyElements.forEach((element) => {
-    const value = element.textContent.trim()
-    if (value.startsWith("₱")) {
-      const numericValue = Number.parseFloat(value.substring(1))
-      element.textContent = "₱" + numericValue.toFixed(2)
-    }
-  })
-}
-
-// Initialize enhancements when document is ready
-document.addEventListener("DOMContentLoaded", () => {
-  // Set up event listeners for the view order modal
-  setupViewOrderModal()
-})
-
-// Function to set up the view order modal
-function setupViewOrderModal() {
-  const viewOrderModal = document.getElementById("viewOrderModal")
-  if (!viewOrderModal) return
-
-  viewOrderModal.addEventListener("show.bs.modal", (event) => {
-    // Get the button that triggered the modal
-    const button = event.relatedTarget
-
-    // Extract order ID from the button
-    const orderId = button.getAttribute("data-id")
-
-    // Enhance the modal content after it's shown
-    setTimeout(() => {
-      enhanceViewOrderContent(orderId)
-    }, 300)
-  })
-}
-
-// Function to enhance the view order modal content
-function enhanceViewOrderContent(orderId) {
-  // Enhance status badge
-  const statusBadge = document.querySelector("#view-order-status .status-badge")
-  if (statusBadge) {
-    addStatusIcon(statusBadge)
-  }
-
-  // Enhance timeline
-  enhanceOrderTimeline()
-
-  // Add hover effects to order items
-  const orderItems = document.querySelectorAll("#view-order-items tr")
-  orderItems.forEach((item) => {
-    item.classList.add("hover-highlight")
-  })
-
-  // Format currency values
-  formatCurrencyValues()
-
-  // Add print button if not already present
-  addPrintButton()
-}
-
-// Function to add appropriate icon to status badge
-function addStatusIcon(badge) {
-  let icon = ""
-
-  if (badge.classList.contains("status-order")) {
-    icon = '<i class="bi bi-receipt me-1"></i>'
-  } else if (badge.classList.contains("status-processing")) {
-    icon = '<i class="bi bi-gear-fill me-1"></i>'
-  } else if (badge.classList.contains("status-shipped")) {
-    icon = '<i class="bi bi-truck me-1"></i>'
-  } else if (badge.classList.contains("status-delivered")) {
-    icon = '<i class="bi bi-check-circle-fill me-1"></i>'
-  } else if (badge.classList.contains("status-cancelled")) {
-    icon = '<i class="bi bi-x-circle-fill me-1"></i>'
-  }
-
-  if (icon && !badge.innerHTML.includes("<i class")) {
-    badge.innerHTML = icon + badge.innerHTML
-  }
-}
-
-// Function to enhance the order timeline
-function enhanceOrderTimeline() {
-  const timeline = document.getElementById("status-timeline")
-  if (!timeline) return
-
-  // Add animation class to timeline container
-  timeline.classList.add("animated-timeline")
-
-  // Get all timeline items
-  const timelineItems = timeline.querySelectorAll(".status-timeline-item")
-
-  // Add animation delay to each item
-  timelineItems.forEach((item, index) => {
-    item.style.animationDelay = `${index * 0.15}s`
-    item.classList.add("fade-in-up")
-
-    // Add appropriate status color to timeline dots
-    const dot = item.querySelector(".status-timeline-dot")
-    if (dot) {
-      const statusTitle = item.querySelector(".status-timeline-title")
-      if (statusTitle) {
-        const statusText = statusTitle.textContent.toLowerCase()
-
-        if (statusText.includes("delivered")) {
-          dot.style.borderColor = "#198754"
-          item.querySelector(".status-timeline-content").style.borderLeftColor = "#198754"
-        } else if (statusText.includes("shipped")) {
-          dot.style.borderColor = "#0d6efd"
-          item.querySelector(".status-timeline-content").style.borderLeftColor = "#0d6efd"
-        } else if (statusText.includes("processing")) {
-          dot.style.borderColor = "#ffc107"
-          item.querySelector(".status-timeline-content").style.borderLeftColor = "#ffc107"
-        } else if (statusText.includes("cancelled")) {
-          dot.style.borderColor = "#dc3545"
-          item.querySelector(".status-timeline-content").style.borderLeftColor = "#dc3545"
-        } else {
-          dot.style.borderColor = "#f5cc39"
-          item.querySelector(".status-timeline-content").style.borderLeftColor = "#f5cc39"
-        }
-      }
-    }
-  })
-}
-
-function updateOrderStatusToCancelled(orderId) {
-  console.log("Cancelling order:", orderId)
-
-  fetch("retailer_order_handler.php?action=cancel_order", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      order_id: orderId,
-    }),
-  })
-    .then((res) => {
-      console.log("Response status:", res.status)
-      return res.json()
-    })
-    .then((data) => {
-      console.log("Response data:", data)
-      if (data.success) {
-        showResponseMessage("success", "Order cancelled successfully.")
-        fetchOrders()
-      } else {
-        showResponseMessage("danger", data.message || "Failed to cancel order.")
-      }
-    })
-    .catch((err) => {
-      console.error("Error:", err)
-      showResponseMessage("danger", "Server error while cancelling order.")
-    })
-}
-
-// Function to format currency values
-function formatCurrencyValues() {
-  const currencyElements = document.querySelectorAll("#view-subtotal, #view-discount, #view-total-amount")
-  currencyElements.forEach((element) => {
-    const value = Number.parseFloat(element.textContent)
-    if (!isNaN(value)) {
-      element.textContent = value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")
-    }
-  })
-}
-
-// Function to add print button
-function addPrintButton() {
-  const modalFooter = document.querySelector("#viewOrderModal .modal-footer")
-  if (!modalFooter || modalFooter.querySelector(".print-btn")) return
-
-  const printBtn = document.createElement("button")
-  printBtn.type = "button"
-  printBtn.className = "btn btn-outline-secondary print-btn"
-  printBtn.innerHTML = '<i class="bi bi-printer me-1"></i> Print'
-  printBtn.addEventListener("click", printOrderDetails)
-
-  // Insert after close button
-  const closeBtn = modalFooter.querySelector('button[data-bs-dismiss="modal"]')
-  if (closeBtn) {
-    closeBtn.after(printBtn)
   } else {
-    modalFooter.prepend(printBtn)
+    // Show no items row if it exists
+    const noItemsRow = document.getElementById("edit-no-items-row")
+    if (noItemsRow) {
+      noItemsRow.style.display = "table-row"
+    }
   }
+
+  // Update order total
+  updateEditOrderTotal()
 }
 
-// Function to print order details
-function printOrderDetails() {
-  const orderNumber = document.getElementById("view-order-number").textContent
-  const printWindow = window.open("", "_blank")
+// Add an existing order item row to the edit order modal
+function addExistingEditOrderItemRow(item) {
+  const orderItemsBody = document.getElementById("edit-order-items-body")
+  if (!orderItemsBody) return
 
-  // Get content to print
-  const orderInfo = document.querySelector("#viewOrderModal .col-md-6:first-child").cloneNode(true)
-  const orderItems = document.querySelector("#viewOrderModal .table-responsive").cloneNode(true)
-
-  // Create print document
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Order #${orderNumber}</title>
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-      <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .print-header { text-align: center; margin-bottom: 20px; }
-        .print-title { font-size: 24px; font-weight: bold; }
-        .print-subtitle { color: #6c757d; }
-        .card { margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; }
-        .card-header { background-color: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #ddd; font-weight: bold; }
-        .card-body { padding: 15px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 8px; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; text-align: left; }
-        .text-end { text-align: right; }
-        .fw-bold { font-weight: bold; }
-        @media print {
-          body { padding: 0; }
-          .card { border: none; }
-          .card-header { background-color: transparent; border-bottom: 1px solid #000; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="print-header">
-        <div class="print-title">Order #${orderNumber}</div>
-        <div class="print-subtitle">Piñana Gourmet</div>
-      </div>
-      <div class="row">
-        <div class="col-12">
-          ${orderInfo.outerHTML}
-        </div>
-        <div class="col-12">
-          ${orderItems.outerHTML}
-        </div>
-      </div>
-      <div class="text-center mt-4">
-        <p>Thank you for your order!</p>
-      </div>
-    </body>
-    </html>
-  `)
-
-  printWindow.document.close()
-
-  // Print after resources are loaded
-  printWindow.onload = () => {
-    printWindow.print()
-    // printWindow.close();
+  // Hide no items row if it exists
+  const noItemsRow = document.getElementById("edit-no-items-row")
+  if (noItemsRow) {
+    noItemsRow.style.display = "none"
   }
+
+  // Create new row
+  const row = document.createElement("tr")
+  row.className = "order-item-row"
+
+  // Create row content
+  row.innerHTML = `
+    <td>
+      <select class="form-select product-select">
+        <option value="">Select Product</option>
+        ${allProducts.map((product) => `<option value="${product.product_id}" data-price="${product.retail_price}" ${product.product_id == item.product_id ? "selected" : ""}>${product.product_name}</option>`).join("")}
+      </select>
+    </td>
+    <td>
+      <div class="input-group">
+        <button class="btn btn-outline-secondary decrease-qty" type="button">
+          <i class="bi bi-dash"></i>
+        </button>
+        <input type="text" class="form-control text-center qty-input" value="${item.quantity}" min="1">
+        <button class="btn btn-outline-secondary increase-qty" type="button">
+          <i class="bi bi-plus"></i>
+        </button>
+      </div>
+    </td>
+    <td>
+      <div class="input-group">
+        <input type="text" class="form-control text-end price-input" value="${item.unit_price}" readonly>
+        <button class="btn btn-outline-secondary price-edit" type="button">
+          <i class="bi bi-pencil"></i>
+        </button>
+      </div>
+    </td>
+    <td>
+      <div class="input-group">
+        <input type="text" class="form-control text-end total-input" value="${item.unit_price * item.quantity}" readonly>
+        <button class="btn btn-outline-secondary" type="button" disabled>
+          <i class="bi bi-pencil"></i>
+        </button>
+      </div>
+    </td>
+    <td class="text-center">
+      <button type="button" class="btn btn-outline-danger btn-sm delete-item">
+        <i class="bi bi-trash"></i>
+      </button>
+    </td>
+  `
+
+  // Add row to table
+  orderItemsBody.appendChild(row)
+
+  // Set up event listeners for the new row
+  setupRowEventListeners(row)
 }
 
-// Import jQuery if it's not already available
-if (typeof jQuery == "undefined") {
-  var script = document.createElement("script")
-  script.src = "https://code.jquery.com/jquery-3.6.0.min.js"
-  script.type = "text/javascript"
-  document.head.appendChild(script)
+// Utility to get all selected product IDs in the order items table
+function getSelectedProductIds() {
+  const selects = document.querySelectorAll('#order-items-body .product-select')
+  return Array.from(selects)
+    .map(sel => sel.value + '') // ensure string
+    .filter(val => val !== '')
+}
 
-  // Wait for jQuery to load before initializing enhancements
-  script.onload = () => {
-    var jQuery = window.jQuery // Declare jQuery variable
-    $(document).ready(() => {
-      enhanceViewOrderModal()
+// Refresh all product dropdowns to hide already-selected products
+function refreshProductDropdowns() {
+  const selects = document.querySelectorAll('#order-items-body .product-select')
+  // Gather selected product IDs, but for each select, exclude its own value
+  selects.forEach(select => {
+    const currentValue = select.value + ''
+    // Gather all selected except this one
+    const selectedIds = Array.from(selects)
+      .filter(s => s !== select)
+      .map(s => s.value + '')
+      .filter(val => val !== '')
+    // Remove all except the placeholder
+    select.innerHTML = '<option value="">Select Product</option>'
+    allProducts.forEach(product => {
+      // Only show if not selected elsewhere, or if it's the current value
+      if (!selectedIds.includes(product.product_id + '') || product.product_id + '' === currentValue) {
+        const option = document.createElement('option')
+        option.value = product.product_id
+        option.textContent = product.product_name
+        option.setAttribute('data-price', product.retail_price)
+        if (product.product_id + '' === currentValue) option.selected = true
+        select.appendChild(option)
+      }
     })
-  }
-} else {
-  // jQuery is already available, so initialize enhancements
-  $(document).ready(() => {
-    enhanceViewOrderModal()
   })
 }
 
-// Add this function to properly close all modals
-function closeAllModals() {
-  // Close confirmation modal
-  const confirmationModal = document.getElementById("orderConfirmationModal")
-  if (confirmationModal) {
-    const bsConfirmationModal = bootstrap.Modal.getInstance(confirmationModal)
-    if (bsConfirmationModal) {
-      bsConfirmationModal.hide()
-    }
-  }
+// Patch addOrderItemRow to refresh dropdowns after adding
+const _origAddOrderItemRow = addOrderItemRow
+addOrderItemRow = function() {
+  _origAddOrderItemRow.apply(this, arguments)
+  refreshProductDropdowns()
+}
 
-  // Close create order modal
-  const createOrderModal = document.getElementById("createOrderModal")
-  if (createOrderModal) {
-    const bsCreateOrderModal = bootstrap.Modal.getInstance(createOrderModal)
-    if (bsCreateOrderModal) {
-      bsCreateOrderModal.hide()
-    }
+// Patch setupRowEventListeners to refresh dropdowns on product change
+const _origSetupRowEventListeners = setupRowEventListeners
+setupRowEventListeners = function(row) {
+  _origSetupRowEventListeners.apply(this, arguments)
+  const productSelect = row.querySelector('.product-select')
+  if (productSelect) {
+    productSelect.addEventListener('change', function() {
+      refreshProductDropdowns()
+    })
   }
-
-  // Close edit order modal if it exists
-  const editOrderModal = document.getElementById("editOrderModal")
-  if (editOrderModal) {
-    const bsEditOrderModal = bootstrap.Modal.getInstance(editOrderModal)
-    if (bsEditOrderModal) {
-      bsEditOrderModal.hide()
-    }
+  // Also refresh when deleting a row
+  const deleteBtn = row.querySelector('.delete-item')
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', function() {
+      setTimeout(refreshProductDropdowns, 10)
+    })
   }
 }

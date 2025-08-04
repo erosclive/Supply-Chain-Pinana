@@ -192,6 +192,55 @@ if ($row = $result->fetch_assoc()) {
   0% { background-color: rgba(255, 193, 7, 0.2); }
   100% { background-color: transparent; }
 }
+
+/* Add this to your CSS file */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Success message styling */
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+/* Error message styling */
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+/* Payment modal styling */
+#cashPaymentModal,
+#mobilePaymentModal {
+  z-index: 1056;
+}
+
+/* Payment status badge styling */
+.badge.partial {
+  background-color: #ffc107 !important;
+  color: #212529;
+}
+
 </style>
 </head>
 <body>
@@ -210,15 +259,15 @@ if ($row = $result->fetch_assoc()) {
           
           <ul class="nav flex-column sidebar-nav">
             <li class="nav-item">
-              <a class="nav-link" href="rt_dashboard.php" data-page="dashboard">
+              <a class="nav-link" href="rt_home.php" data-page="home">
                 <div class="nav-icon">
                   <i class="bi bi-grid"></i>
                 </div>
-                <span>Dashboard</span>
+                <span>Home</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" href="rt_inventory.php" data-page="inventory">
+              <a class="nav-link active" href="rt_home.php" data-page="home">
                 <div class="nav-icon">
                   <i class="bi bi-box"></i>
                 </div>
@@ -233,14 +282,7 @@ if ($row = $result->fetch_assoc()) {
                 <span>Orders</span>
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="rt_payments.php" data-page="payments">
-                <div class="nav-icon">
-                  <i class="bi bi-credit-card"></i>
-                </div>
-                <span>Payments</span>
-              </a>
-            </li>
+           
           </ul>
           
         </div>
@@ -446,6 +488,70 @@ if ($row = $result->fetch_assoc()) {
     </div>
   </div>
 
+  <!-- Cash Payment Modal -->
+<div class="modal fade" id="cashPaymentModal" tabindex="-1" aria-labelledby="cashPaymentModalLabel" aria-hidden="true" style="z-index: 1056;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cashPaymentModalLabel">
+          <i class="bi bi-cash-coin me-2"></i> Cash Payment
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="cashPaymentForm">
+          <div class="mb-3">
+            <label for="cashTotalAmount" class="form-label">Total Amount</label>
+            <input type="text" class="form-control" id="cashTotalAmount" readonly>
+          </div>
+          <div class="mb-3">
+            <label for="cashNotes" class="form-label">Notes (Optional)</label>
+            <textarea class="form-control" id="cashNotes" rows="3" placeholder="Add any notes..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="confirmCashPayment">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Payment Modal -->
+<div class="modal fade" id="mobilePaymentModal" tabindex="-1" aria-labelledby="mobilePaymentModalLabel" aria-hidden="true" style="z-index: 1056;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mobilePaymentModalLabel">
+          <i class="bi bi-phone me-2"></i> Mobile Payment
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="mobilePaymentForm">
+          <div class="mb-3">
+            <label for="mobileTotalAmount" class="form-label">Total Amount</label>
+            <input type="text" class="form-control" id="mobileTotalAmount" readonly>
+          </div>
+          <div class="mb-3">
+            <label for="mobileReferenceNumber" class="form-label">Reference Number</label>
+            <input type="text" class="form-control" id="mobileReferenceNumber" placeholder="Enter reference number" required>
+          </div>
+          <div class="mb-3">
+            <label for="mobileNotes" class="form-label">Notes (Optional)</label>
+            <textarea class="form-control" id="mobileNotes" rows="3" placeholder="Add any notes..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="confirmMobilePayment">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
   <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Fetch batch alerts
@@ -565,5 +671,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <script src="inventory.js"></script>
   <script src="inventory-batch-tracking.js"></script>
   <script src="inventory-pricing.js"></script>
+  <script src="payment-functions.js"></script>
+  
 </body>
 </html>

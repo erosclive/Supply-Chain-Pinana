@@ -1,4 +1,3 @@
-
 <?php
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
@@ -59,10 +58,19 @@ function getRetailerProfile($conn, $user_id) {
 * @return bool True if successful, false otherwise
 */
 function updateRetailerProfile($conn, $user_id, $data) {
-   // Calculate age from birthday
-   $birthdate = new DateTime($data['birthday']);
-   $today = new DateTime();
-   $age = $birthdate->diff($today)->y;
+   $birthday = $data['birthday'] ?? '';
+   $age = 0; // Default age to 0
+
+   if (!empty($birthday)) {
+       try {
+           $birthdate_obj = new DateTime($birthday);
+           $today = new DateTime();
+           $age = $birthdate_obj->diff($today)->y;
+       } catch (Exception $e) {
+           // If birthday is invalid, age remains 0 and birthday remains empty string
+           $birthday = '';
+       }
+   }
    
    $query = "UPDATE retailer_profiles SET 
              first_name = ?, 
@@ -83,8 +91,8 @@ function updateRetailerProfile($conn, $user_id, $data) {
    $stmt->bind_param("sssisssisssi", 
                    $data['first_name'], 
                    $data['last_name'], 
-                   $data['birthday'], 
-                   $age, 
+                   $birthday, // Use the potentially modified birthday
+                   $age,      // Use the calculated or default age
                    $data['nationality'], 
                    $data['business_name'], 
                    $data['business_address'], 
@@ -403,25 +411,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        
        switch ($action) {
            case 'update_profile':
-               // Validate required fields
-               $required_fields = ['first_name', 'last_name', 'birthday', 'nationality', 'business_name', 'business_address', 'phone'];
-               foreach ($required_fields as $field) {
-                   if (!isset($_POST[$field]) || empty($_POST[$field])) {
-                    $response = ['success' => false, 'message' => 'All required fields must be filled'];
-                    echo json_encode($response);
-                    exit;
-                }
-            }
+               // Removed validation for required fields.
+               // All fields are now optional on the server-side.
                
-               // Prepare data for update
+               // Prepare data for update, defaulting to empty string if not set
                $data = [
-                   'first_name' => $_POST['first_name'],
-                   'last_name' => $_POST['last_name'],
-                   'birthday' => $_POST['birthday'],
-                   'nationality' => $_POST['nationality'],
-                   'business_name' => $_POST['business_name'],
-                   'business_address' => $_POST['business_address'],
-                   'phone' => $_POST['phone'],
+                   'first_name' => $_POST['first_name'] ?? '',
+                   'last_name' => $_POST['last_name'] ?? '',
+                   'birthday' => $_POST['birthday'] ?? '',
+                   'nationality' => $_POST['nationality'] ?? '',
+                   'business_name' => $_POST['business_name'] ?? '',
+                   'business_address' => $_POST['business_address'] ?? '',
+                   'phone' => $_POST['phone'] ?? '',
                    'facebook' => $_POST['facebook'] ?? '',
                    'instagram' => $_POST['instagram'] ?? '',
                    'tiktok' => $_POST['tiktok'] ?? ''

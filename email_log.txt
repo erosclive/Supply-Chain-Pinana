@@ -122,3 +122,131 @@
 2025-04-23 12:31:50 - Attempting to send welcome email to: fohrtargaryen@gmail.com
 2025-04-23 12:31:50 - Logo found and encoded for welcome email
 2025-04-23 12:31:56 - Welcome email sent successfully to: fohrtargaryen@gmail.com
+2025-05-02 06:07:09 - Attempting to send verification email to: jamesguevarra070827@gmail.com
+2025-05-02 06:07:09 - Logo found and encoded
+2025-05-02 06:07:17 - Verification email sent successfully to: jamesguevarra070827@gmail.com
+2025-05-02 06:07:17 - Attempting to send verification email to: jamesguevarra070827@gmail.com
+2025-05-02 06:07:17 - Logo found and encoded
+2025-05-02 06:07:26 - Verification email sent successfully to: jamesguevarra070827@gmail.com
+2025-05-06 07:26:11 - Attempting to send verification email to: noinetargaryen@gmail.com
+2025-05-06 07:26:11 - Logo found and encoded
+2025-05-06 07:26:18 - Verification email sent successfully to: noinetargaryen@gmail.com
+2025-05-06 07:26:18 - Attempting to send verification email to: noinetargaryen@gmail.com
+2025-05-06 07:26:18 - Logo found and encoded
+2025-05-06 07:26:24 - Verification email sent successfully to: noinetargaryen@gmail.com
+2025-05-06 14:34:45 - Attempting to send verification email to: noinetargaryen@gmail.com
+2025-05-06 14:34:45 - Logo found and encoded
+2025-05-06 14:34:55 - Verification email sent successfully to: noinetargaryen@gmail.com
+2025-05-06 14:34:55 - Attempting to send verification email to: noinetargaryen@gmail.com
+2025-05-06 14:34:55 - Logo found and encoded
+2025-05-06 14:35:08 - Verification email sent successfully to: noinetargaryen@gmail.com
+2025-05-27 08:20:32 - Attempting to send verification email to: zorinmagnus@gmail.com
+2025-05-27 08:20:32 - Logo found and encoded
+2025-05-27 08:20:38 - Verification email sent successfully to: zorinmagnus@gmail.com
+2025-05-27 08:20:38 - Attempting to send verification email to: zorinmagnus@gmail.com
+2025-05-27 08:20:38 - Logo found and encoded
+2025-05-27 08:20:44 - Verification email sent successfully to: zorinmagnus@gmail.com
+2025-05-27 08:21:22 - Attempting to send welcome email to: zorinmagnus@gmail.com
+2025-05-27 08:21:22 - Logo found and encoded for welcome email
+2025-05-27 08:21:28 - Welcome email sent successfully to: zorinmagnus@gmail.com
+2025-05-28 05:36:05 - Attempting to send verification email to: zorinmagnus@gmail.com
+2025-05-28 05:36:05 - Logo found and encoded
+2025-05-28 05:36:13 - Verification email sent successfully to: zorinmagnus@gmail.com
+2025-05-28 05:36:13 - Attempting to send verification email to: zorinmagnus@gmail.com
+2025-05-28 05:36:13 - Logo found and encoded
+2025-05-28 05:36:20 - Verification email sent successfully to: zorinmagnus@gmail.com
+2025-05-28 05:36:54 - Attempting to send welcome email to: zorinmagnus@gmail.com
+2025-05-28 05:36:54 - Logo found and encoded for welcome email
+2025-05-28 05:37:00 - Welcome email sent successfully to: zorinmagnus@gmail.com
+2025-06-20 08:39:31 - Attempting to send verification email to: tureetargaryen@gmail.com
+2025-06-20 08:39:31 - Logo found and encoded
+2025-06-20 08:39:58 - Verification email sent successfully to: tureetargaryen@gmail.com
+2025-06-20 08:39:58 - Attempting to send verification email to: tureetargaryen@gmail.com
+2025-06-20 08:39:58 - Logo found and encoded
+2025-06-20 08:40:15 - Verification email sent successfully to: tureetargaryen@gmail.com
+2025-06-25 10:44:45 - Attempting to send verification email to: vanngaming@gmail.com
+2025-06-25 10:44:45 - Logo found and encoded
+2025-06-25 10:46:06 - Verification email sent successfully to: vanngaming@gmail.com
+2025-06-25 10:46:06 - Attempting to send verification email to: vanngaming@gmail.com
+2025-06-25 10:46:06 - Logo found and encoded
+2025-06-25 10:46:19 - Verification email sent successfully to: vanngaming@gmail.com
+2025-06-25 10:59:01 - Attempting to send verification email to: vanngaming2003@gmail.com
+2025-06-25 10:59:01 - Logo found and encoded
+2025-06-25 11:00:18 - Verification email sent successfully to: vanngaming2003@gmail.com
+2025-06-25 11:00:18 - Attempting to send verification email to: vanngaming2003@gmail.com
+2025-06-25 11:00:18 - Logo found and encoded
+2025-06-25 11:02:00 - Verification email sent successfully to: vanngaming2003@gmail.com
+2025-07-17 13:03:18 - Attempting to send verification email to: siextargaryen@gmail.com
+2025-07-17 13:03:18 - Logo found and encoded
+2025-07-17 13:03:28 - Verification email sent successfully to: siextargaryen@gmail.com
+2025-07-17 13:03:28 - Attempting to send verification email to: siextargaryen@gmail.com
+2025-07-17 13:03:28 - Logo found and encoded
+2025-07-17 13:03:39 - Verification email sent successfully to: siextargaryen@gmail.com
+2025-07-17 13:04:23 - Attempting to send welcome email to: siextargaryen@gmail.com
+2025-07-17 13:04:23 - Logo found and encoded for welcome email
+2025-07-17 13:04:31 - Welcome email sent successfully to: siextargaryen@gmail.com
+2025-07-24 15:52:41 - Attempting to send verification email to: noinetargaryen@gmail.com
+2025-07-24 15:52:41 - Logo found and encoded
+2025-07-24 15:52:49 - Verification email sent successfully to: noinetargaryen@gmail.com
+2025-07-24 15:52:50 - Attempting to send verification email to: noinetargaryen@gmail.com
+2025-07-24 15:52:50 - Logo found and encoded
+2025-07-24 15:52:56 - Verification email sent successfully to: noinetargaryen@gmail.com
+2025-07-24 15:53:56 - Attempting to send welcome email to: noinetargaryen@gmail.com
+2025-07-24 15:53:56 - Logo found and encoded for welcome email
+2025-07-24 15:54:04 - Welcome email sent successfully to: noinetargaryen@gmail.com
+2025-07-27 08:31:20 - Attempting to send verification email to: siextargaryen@gmail.com
+2025-07-27 08:31:20 - Logo found and encoded
+2025-07-27 08:31:27 - Verification email sent successfully to: siextargaryen@gmail.com
+2025-07-27 14:46:55 - Attempting to send welcome email to: siextargaryen@gmail.com
+2025-07-27 14:46:55 - Logo found and encoded for welcome email
+2025-07-27 14:47:10 - Welcome email sent successfully to: siextargaryen@gmail.com
+2025-07-27 16:33:00 - Attempting to send verification email to: wantargaryen@gmail.com
+2025-07-27 16:33:00 - Logo found and encoded
+2025-07-27 16:33:11 - Verification email sent successfully to: wantargaryen@gmail.com
+2025-07-27 16:33:11 - Attempting to send verification email to: wantargaryen@gmail.com
+2025-07-27 16:33:11 - Logo found and encoded
+2025-07-27 16:33:22 - Verification email sent successfully to: wantargaryen@gmail.com
+2025-07-27 16:34:40 - Attempting to send welcome email to: wantargaryen@gmail.com
+2025-07-27 16:34:40 - Logo found and encoded for welcome email
+2025-07-27 16:34:58 - Welcome email sent successfully to: wantargaryen@gmail.com
+2025-07-27 22:44:44 - Attempting to send verification email to: junkundesu1017@gmail.com
+2025-07-27 22:44:44 - Logo found and encoded
+2025-07-27 22:48:11 - Attempting to send verification email to: wantargaryen@gmail.com
+2025-07-27 22:48:11 - Logo found and encoded
+2025-07-27 22:50:26 - Attempting to send verification email to: wantargaryen@gmail.com
+2025-07-27 22:50:26 - Logo found and encoded
+2025-07-27 22:52:46 - Attempting to send verification email to: tuhtargaryen@gmail.com
+2025-07-27 22:52:46 - Logo found and encoded
+2025-07-28 06:27:14 - Attempting to send verification email to: benchlaxa5@gmail.com
+2025-07-28 06:27:14 - Logo found and encoded
+2025-07-28 06:27:23 - Attempting to send verification email to: benchlaxa5@gmail.com
+2025-07-28 06:27:23 - Logo found and encoded
+2025-07-28 06:27:25 - Attempting to send verification email to: benchlaxa5@gmail.com
+2025-07-28 06:27:25 - Logo found and encoded
+2025-07-28 06:27:27 - Verification email sent successfully to: benchlaxa5@gmail.com
+2025-07-28 06:27:36 - Verification email sent successfully to: benchlaxa5@gmail.com
+2025-07-28 06:27:38 - Verification email sent successfully to: benchlaxa5@gmail.com
+2025-07-28 09:47:29 - Attempting to send verification email to: Profj@outlook.com
+2025-07-28 09:47:29 - Logo found and encoded
+2025-07-28 09:47:41 - Verification email sent successfully to: Profj@outlook.com
+2025-07-28 09:47:41 - Attempting to send verification email to: Profj@outlook.com
+2025-07-28 09:47:41 - Logo found and encoded
+2025-07-28 09:47:48 - Verification email sent successfully to: Profj@outlook.com
+2025-07-28 09:51:06 - Attempting to send verification email to: Profj@outlook.com
+2025-07-28 09:51:06 - Logo found and encoded
+2025-07-28 09:51:09 - Attempting to send verification email to: Profj@outlook.com
+2025-07-28 09:51:09 - Logo found and encoded
+2025-07-28 09:51:16 - Verification email sent successfully to: Profj@outlook.com
+2025-07-28 09:51:18 - Verification email sent successfully to: Profj@outlook.com
+2025-07-28 09:53:18 - Attempting to send verification email to: johncarlolandicho13@gmail.com
+2025-07-28 09:53:18 - Logo found and encoded
+2025-07-28 09:53:26 - Verification email sent successfully to: johncarlolandicho13@gmail.com
+2025-07-28 09:53:26 - Attempting to send verification email to: johncarlolandicho13@gmail.com
+2025-07-28 09:53:26 - Logo found and encoded
+2025-07-28 09:53:35 - Verification email sent successfully to: johncarlolandicho13@gmail.com
+2025-07-28 09:56:46 - Attempting to send verification email to: pural.johnashleyc@gmail.com
+2025-07-28 09:56:46 - Logo found and encoded
+2025-07-28 09:56:55 - Verification email sent successfully to: pural.johnashleyc@gmail.com
+2025-07-28 09:56:55 - Attempting to send verification email to: pural.johnashleyc@gmail.com
+2025-07-28 09:56:55 - Logo found and encoded
+2025-07-28 09:57:04 - Verification email sent successfully to: pural.johnashleyc@gmail.com

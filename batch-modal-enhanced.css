@@ -285,5 +285,24 @@
       max-width: none;
     }
   }
+
+  /* Updated styles for Edit Batch Modal */
+  #editBatchModal .modal-header {
+    background-color: #007bff;
+    color: #fff;
+  }
   
+  #editBatchModal .modal-footer {
+    display: flex;
+    justify-content: space-between;
+  }
   
+  #editBatchModal .form-control {
+    border-radius: 0.25rem;
+  }
+
+  /* Align buttons in Add New Batch modal */
+  .modal-footer.d-flex.justify-content-between {
+    gap: 10px;
+  }
+

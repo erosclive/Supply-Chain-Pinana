@@ -6,6 +6,7 @@ ini_set('display_errors', 1);
 // Include database connection
 require_once 'db_connection.php';
 
+
 // Function to validate and sanitize input
 function sanitize($conn, $input) {
     return mysqli_real_escape_string($conn, trim($input));
@@ -45,6 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $products = $_POST['products'];
         $quantities = $_POST['quantities'];
         $prices = $_POST['prices'];
+        
         
         // Check if order_id exists (update) or not (insert)
         if (!empty($order_id)) {

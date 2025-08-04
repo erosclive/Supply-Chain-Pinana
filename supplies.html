@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piñana Gourmet - Supplies</title>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<!-- Flatpickr for date picking -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Custom CSS -->
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="Retailer/mono-green.png">
+
+<style>
+  /* Submenu styles */
+  .submenu {
+    padding-left: 2rem;
+    list-style: none;
+  }
+
+  .submenu .nav-item {
+    margin-bottom: 0.25rem;
+  }
+
+  .submenu .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .submenu .nav-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .nav-link.dropdown-toggle::after {
+    display: inline-block;
+    margin-left: auto;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  /* Additional styles for supplies page */
+  .status-badge {
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 500;
+    border-radius: 30px;
+    display: inline-block;
+    min-width: 90px;
+    text-align: center;
+  }
+  .status-in-stock {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+  }
+  .status-low-stock {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+  }
+  .status-out-stock {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    color: #6c757d;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .action-btn-edit:hover {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+  }
+  .action-btn-delete:hover {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+  }
+  .action-btn-view:hover {
+    background-color: #198754;
+    color: white;
+    border-color: #198754;
+  }
+  .search-container {
+    min-width: 250px;
+  }
+  .table-modern {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .table-modern th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+  }
+  .table-modern th, .table-modern td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+  }
+  #response-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: none;
+  }
+
+/* Enhanced Modal Styles */
+.modal-xxl {
+  --bs-modal-width: 95vw;
+  max-width: 1400px;
+}
+
+.modal-enhanced {
+  --bs-modal-width: 90vw;
+  max-width: 1200px;
+}
+
+.modal-content {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border-radius: 15px 15px 0 0;
+  padding: 1.5rem 2rem;
+  border-bottom: none;
+}
+
+.modal-header .modal-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.modal-header .btn-close {
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+}
+
+.modal-header .btn-close:hover {
+  opacity: 1;
+}
+
+.modal-body {
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+.modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  border-radius: 0 0 15px 15px;
+  padding: 1.5rem 2rem;
+}
+
+/* Wizard Styles */
+.wizard-step-content {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wizard-step {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.wizard-step:hover {
+  color: #28a745 !important;
+}
+
+.wizard-step.text-success {
+  font-weight: 500;
+}
+
+.wizard-step.text-primary {
+  font-weight: 600;
+}
+
+.progress {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  transition: width 0.5s ease;
+}
+
+/* Enhanced Form Sections */
+.form-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #28a745;
+}
+
+.form-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #155724;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #d4edda;
+  display: flex;
+  align-items: center;
+}
+
+.form-section-title i {
+  margin-right: 0.5rem;
+  color: #28a745;
+}
+
+/* Enhanced Form Controls */
+.form-label {
+  font-weight: 500;
+  color: #155724;
+  margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1px solid #28a745;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #ffc107;
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+.input-group-text {
+  background-color: #d4edda;
+  border: 1px solid #28a745;
+  border-radius: 8px 0 0 8px;
+  color: #155724;
+}
+
+/* Enhanced Buttons */
+.btn {
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #ffc107 0%, #ffeb3b 100%);
+  border: none;
+  color: #212529;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #e0a800 0%, #fdd835 100%);
+  transform: translateY(-1px);
+  color: #212529;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #6c757d 0%, #868e96 100%);
+  border: none;
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #727b84 100%);
+  transform: translateY(-1px);
+}
+
+/* Enhanced Info Cards */
+.info-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #ffc107;
+}
+
+.info-card h6 {
+  color: #155724;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.info-card p {
+  margin-bottom: 0.5rem;
+  color: #6c757d;
+}
+
+.info-card strong {
+  color: #155724;
+}
+
+/* Enhanced Status Badges */
+.status-badge-enhanced {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* Enhanced Table Styles */
+.table-enhanced {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.table-enhanced thead th {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 1rem;
+}
+
+.table-enhanced tbody td {
+  padding: 1rem;
+  border-top: 1px solid #d4edda;
+  vertical-align: middle;
+}
+
+/* Enhanced Alert Styles */
+.alert-enhanced {
+  border-radius: 12px;
+  border: none;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.alert-info-enhanced {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  color: #856404;
+  border-left: 4px solid #ffc107;
+}
+
+/* Category and Option Styling */
+.category-packaging { color: #28a745; }
+.category-ingredients { color: #ffc107; }
+.category-additives { color: #20c997; }
+.category-sweeteners { color: #fd7e14; }
+.category-fruits { color: #28a745; }
+.category-other { color: #6c757d; }
+
+/* Wizard Validation Styles */
+.invalid-feedback {
+  display: block;
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.wizard-step-error {
+  border-radius: 8px;
+  border-left: 4px solid #dc3545;
+}
+
+/* Responsive Enhancements */
+@media (max-width: 768px) {
+  .modal-xxl, .modal-enhanced {
+    --bs-modal-width: 95vw;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .form-section {
+    padding: 1rem;
+  }
+  
+  .wizard-step {
+    font-size: 0.8rem;
+  }
+}
+</style>
+</head>
+<body>
+<!-- Response Message Alert -->
+<div id="response-message" class="alert" role="alert"></div>
+
+<div class="container-fluid">
+  <div class="row">
+   <!-- Sidebar -->
+   <div class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+    <div class="sidebar-inner">
+        <div class="logo-container d-flex align-items-center mb-4 mt-3">
+            <img src="images/final-light.png" class="pineapple-logo">
+        </div>
+      
+      <div class="sidebar-divider" style="margin-top: -1.5rem;">
+        <span>MAIN MENU</span>
+      </div>
+      
+      <ul class="nav flex-column sidebar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="dashboard.html" data-page="dashboard">
+            <div class="nav-icon">
+              <i class="bi bi-grid"></i>
+            </div>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active dropdown-toggle" href="#inventorySubmenu" data-bs-toggle="collapse" aria-expanded="true">
+            <div class="nav-icon">
+              <i class="bi bi-box"></i>
+            </div>
+            <span>Inventory</span>
+          </a>
+          <ul class="collapse show submenu" id="inventorySubmenu">
+            <li class="nav-item">
+              <a class="nav-link" href="inventory.html" data-page="inventory">
+                <div class="nav-icon">
+                  <i class="bi bi-box-seam"></i>
+                </div>
+                <span>Products</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="supplies.html" data-page="supplies">
+                <div class="nav-icon">
+                  <i class="bi bi-tools"></i>
+                </div>
+                <span>Supplies</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+         <li class="nav-item">
+          <a class="nav-link" href="production.html" data-page="production">
+            <div class="nav-icon">
+              <i class="bi bi-layer-backward"></i>
+            </div>
+            <span>Production</span>
+          </a>
+        </li>
+       
+        
+        <div class="sidebar-divider">
+          <span>SALES</span>
+        </div>
+         <li class="nav-item">
+          <a class="nav-link" href="orders.html" data-page="orders">
+            <div class="nav-icon">
+              <i class="bi bi-basket2"></i>
+            </div>
+            <span>Orders</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="billing.html" data-page="delivery">
+            <div class="nav-icon">
+              <i class="bi bi-credit-card"></i>
+            </div>
+            <span>Billing</span>
+          </a>
+        </li>
+        
+        <li class="nav-item">
+          <a class="nav-link" href="reports.html" data-page="reports">
+            <div class="nav-icon">
+              <i class="bi bi-bar-chart"></i>
+            </div>
+            <span>Reports</span>
+          </a>
+        </li>
+
+        <div class="sidebar-divider">
+          <span>USER</span>
+        </div>
+
+        <li class="nav-item">
+          <a class="nav-link" href="retailers.html" data-page="retailers">
+            <div class="nav-icon">
+              <i class="bi bi-person-heart"></i>
+            </div>
+            <span>Retailers</span>
+          </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="suppliers.html" data-page="suppliers">
+              <div class="nav-icon">
+                <i class="bi bi-person-fill-down"></i>
+              </div>
+              <span>Suppliers</span>
+            </a>
+          </li>
+
+      </ul>
+    </div>
+  </div>
+  
+  <!-- Main content -->
+  <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+    <!-- Header -->
+    <div class="fixed-top-header">
+      <div class="d-flex justify-content-between align-items-center w-100">
+        <div class="d-flex align-items-center">
+          <button class="navbar-toggler d-md-none collapsed me-2" type="button" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+          </button>
+          <h5 class="mb-0">Raw Material Supplies Management</h5>
+        </div>
+        
+        <div class="dropdown user-profile-dropdown" >
+          <div class="profile-circle dropdown-toggle position-relative" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-fill"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" id="notification-badge" style="display: none;">
+              0
+              <span class="visually-hidden">unread notifications</span>
+            </span>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown" style="width: 350px;">
+            <li class="dropdown-item-text">
+              <div class="sidebar-divider">
+                <span>NOTIFICATIONS</span>
+                <div class="float-end">
+                  <button class="btn btn-sm btn-link text-decoration-none p-0" id="mark-all-read">Mark all as read</button>
+                </div>
+              </div>
+              <div id="notifications-container" class="notifications-container" style="max-height: 300px; overflow-y: auto;">
+                <div class="text-center py-3 text-muted" id="no-notifications-message">No new notifications</div>
+              </div>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li class="dropdown-item-text">
+              <div class="sidebar-divider">
+                <span>ACCOUNT</span>
+              </div>
+              <div class="user-info d-flex align-items-center">
+                <div class="user-avatar">
+                  <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="user-details">
+                  <div class="user-name">Admin User</div>
+                  <div class="user-role">Piñana Gourmet</div>
+                </div>
+              </div>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" id="logoutButton"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+   <!-- Main Content -->
+            <div class="main-content-inner">
+                <div class="inventory-section">
+          <h5 class="section-title"></h5>
+
+                    <!-- Response Message Container -->
+                    <div id="response-message" class="alert alert-dismissible fade show" style="display: none;"></div>
+
+                    <!-- Filters and Search -->
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <div class="d-flex">
+                                <div class="me-2" style="min-width: 160px;">
+                                    <select class="form-select" id="filter-dropdown">
+                                        <option value="all">All Materials</option>
+                                        <option value="in-stock">In Stock</option>
+                                        <option value="low-stock">Low Stock</option>
+                                        <option value="out-of-stock">Out of Stock</option>
+                                    </select>
+                                </div>
+                                <div class="me-2" style="min-width: 180px;">
+                                    <select class="form-select" id="sort-dropdown">
+                                        <option value="date-desc">Date (Newest First)</option>
+                                        <option value="date-asc">Date (Oldest First)</option>
+                                        <option value="name-asc">Name (A-Z)</option>
+                                        <option value="name-desc">Name (Z-A)</option>
+                                        <option value="price-asc">Price (Low to High)</option>
+                                        <option value="price-desc">Price (High to Low)</option>
+                                        <option value="stock-asc">Stock (Low to High)</option>
+                                        <option value="stock-desc">Stock (High to Low)</option>
+                                    </select>
+                                </div>
+                                <div class="me-2" style="min-width: 140px;">
+                                    <select class="form-select" id="view-toggle-dropdown">
+                                        <option value="table" selected>Table View</option>
+                                        <option value="card">Card View</option>
+                                    </select>
+                                </div>
+                                <div class="input-group" style="margin-left: 10px;" style="min-width: 250px;">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="supplies-search" placeholder="Search materials...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            
+                        <div class="d-flex justify-content-end">
+                                <div class="btn-toolbar mb-2 mb-md-0">
+                            <button type="button" class="btn btn-success" id="add-supply-btn">
+                                <i class="bi bi-plus-lg me-1"></i>Add New Material
+                            </button>
+                        </div>
+                           
+                            
+                        </div>
+                    </div>
+
+                    <!-- Table View Container -->
+                    <div id="table-view-container" class="row mt-2" >
+                        <div class="col-12" style="margin-top: 20px;">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Raw Materials Inventory</h5>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-modern">
+                                            <thead>
+                                                <tr>
+                                                    <th>Material ID</th>
+                                                    <th>Name</th>
+                                                    <th>Category</th>
+                                                    <th>Stock</th>
+                                                    <th>Unit Cost</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="supplies-table-body">
+                                                <!-- Table content will be loaded dynamically -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Pagination -->
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <nav aria-label="Material pagination">
+                                                <ul class="pagination justify-content-center" id="pagination-container">
+                                                    <!-- Pagination will be generated dynamically -->
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card View Container -->
+                    <div id="card-view-container" class="row mt-2 d-none">
+                        <div class="col-12" style="margin-top: 20px;">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Raw Materials Inventory</h5>
+                                    
+                                    <div class="row" id="materials-card-container">
+                                        <!-- Card content will be loaded dynamically -->
+                                    </div>
+                                    
+                                    <!-- Pagination -->
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <nav aria-label="Material pagination">
+                                                <ul class="pagination justify-content-center" id="card-pagination-container">
+                                                    <!-- Pagination will be generated dynamically -->
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+        </div>
+    </div>
+
+<!-- Enhanced Add Material Wizard Modal -->
+<div class="modal fade" id="addMaterialModal" tabindex="-1" aria-labelledby="addMaterialModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addMaterialModalLabel" style="color: white;">
+          <i class="bi bi-tools me-2"></i>Add New Raw Material - Step <span id="wizard-step-number">1</span> of 5
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <!-- Wizard Progress Bar -->
+      <div class="modal-header bg-light border-bottom">
+        <div class="w-100">
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar bg-success" id="wizard-progress" role="progressbar" style="width: 20%"></div>
+          </div>
+          <div class="d-flex justify-content-between mt-2">
+            <small class="text-muted wizard-step" data-step="1">Basic Info</small>
+            <small class="text-muted wizard-step" data-step="2">Measurement</small>
+            <small class="text-muted wizard-step" data-step="3">Quantity & Cost</small>
+            <small class="text-muted wizard-step" data-step="4">Supplier</small>
+            <small class="text-muted wizard-step" data-step="5">Documentation</small>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-body">
+        <form id="add-material-form" enctype="multipart/form-data">
+          
+          <!-- Step 1: Basic Information -->
+          <div class="wizard-step-content" id="step-1">
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-info-circle"></i>
+                Basic Information
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="material_id" class="form-label">Material ID</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-upc"></i></span>
+                    <input type="text" class="form-control" id="material_id" name="material_id" readonly>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="category" class="form-label">Category</label>
+                  <select class="form-select" id="category" name="category" required>
+                    <option disabled selected>Select category</option>
+                    <option value="Packaging"><i class="bi bi-box me-2"></i>Packaging</option>
+                    <option value="Ingredients"><i class="bi bi-egg me-2"></i>Ingredients</option>
+                    <option value="Additives"><i class="bi bi-droplet me-2"></i>Additives</option>
+                    <option value="Sweeteners"><i class="bi bi-heart me-2"></i>Sweeteners</option>
+                    <option value="Fruits"><i class="bi bi-apple me-2"></i>Fruits</option>
+                    <option value="Other"><i class="bi bi-three-dots me-2"></i>Other</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="material_name" class="form-label">Material Name</label>
+                <input type="text" class="form-control" id="material_name" name="material_name" required placeholder="Enter material name">
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Measurement & Conversion -->
+          <div class="wizard-step-content d-none" id="step-2">
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-rulers"></i>
+                Measurement & Conversion System
+              </div>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="measurement_type" class="form-label">Measurement Type</label>
+                  <select class="form-select" id="measurement_type" name="measurement_type" required>
+                    <option disabled selected>Select measurement type</option>
+                    <option value="Unit"><i class="bi bi-rulers me-2"></i>Unit (Weight/Volume)</option>
+                    <option value="Pieces"><i class="bi bi-123 me-2"></i>Pieces</option>
+                    <option value="Dozen"><i class="bi bi-collection me-2"></i>Dozen (12 pieces)</option>
+                    <option value="Pack"><i class="bi bi-box me-2"></i>Pack</option>
+                    <option value="Box"><i class="bi bi-archive me-2"></i>Box</option>
+                    <option value="Bulk"><i class="bi bi-building me-2"></i>Bulk</option>
+                  </select>
+                </div>
+                
+                <div class="col-md-4 mb-3" id="unit_measurement_div" style="display: none;">
+                  <label for="unit_measurement" class="form-label">Unit of Measurement</label>
+                  <select class="form-select" id="unit_measurement" name="unit_measurement">
+                    <option disabled selected>Select unit</option>
+                    <optgroup label="Weight">
+                      <option value="kg"><i class="bi bi-speedometer2 me-2"></i>Kilogram (kg)</option>
+                      <option value="g"><i class="bi bi-speedometer me-2"></i>Gram (g)</option>
+                      <option value="lb"><i class="bi bi-speedometer2 me-2"></i>Pound (lb)</option>
+                      <option value="oz"><i class="bi bi-speedometer me-2"></i>Ounce (oz)</option>
+                    </optgroup>
+                    <optgroup label="Volume">
+                      <option value="L"><i class="bi bi-cup me-2"></i>Liter (L)</option>
+                      <option value="ml"><i class="bi bi-cup-straw me-2"></i>Milliliter (ml)</option>
+                      <option value="gal"><i class="bi bi-bucket me-2"></i>Gallon (gal)</option>
+                      <option value="fl_oz"><i class="bi bi-cup-straw me-2"></i>Fluid Ounce (fl oz)</option>
+                    </optgroup>
+                  </select>
+                </div>
+                
+                <div class="col-md-4 mb-3" id="pieces_per_container_div" style="display: none;">
+                  <label for="pieces_per_container" class="form-label">Pieces per Container</label>
+                  <input type="number" class="form-control" id="pieces_per_container" name="pieces_per_container" min="1" placeholder="e.g., 24">
+                  <div class="form-text">How many pieces in each container?</div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                  <label for="base_unit" class="form-label">Base Unit for Tracking</label>
+                  <select class="form-select" id="base_unit" name="base_unit">
+                    <option value="pieces"><i class="bi bi-123 me-2"></i>Pieces</option>
+                    <option value="g"><i class="bi bi-speedometer me-2"></i>Grams</option>
+                    <option value="ml"><i class="bi bi-cup-straw me-2"></i>Milliliters</option>
+                  </select>
+                  <div class="form-text">This determines how the system tracks usage internally</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Step 3: Quantity & Cost -->
+          <div class="wizard-step-content d-none" id="step-3">
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-calculator"></i>
+                Quantity & Cost Information
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="quantity" class="form-label">Initial Quantity</label>
+                  <div class="input-group">
+                    <input type="number" step="0.01" class="form-control" id="quantity" name="quantity" required min="0" placeholder="0.00">
+                    <span class="input-group-text" id="quantity_unit">units</span>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="cost" class="form-label">Total Cost</label>
+                  <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input type="number" step="0.01" class="form-control" id="cost" name="cost" required min="0" placeholder="0.00">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Step 4: Supplier Information -->
+          <div class="wizard-step-content d-none" id="step-4">
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-truck"></i>
+                Supplier Information
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="is_alternative_supplier" class="form-label">Supplier Source</label>
+                  <select class="form-select" id="is_alternative_supplier" name="is_alternative_supplier" required>
+                    <option value="no" selected><i class="bi bi-building me-2"></i>Primary Supplier</option>
+                    <option value="yes"><i class="bi bi-arrow-repeat me-2"></i>Alternative Supplier</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="supplier" class="form-label">Supplier</label>
+                  <select class="form-select" id="supplier" name="supplier">
+                    <option disabled selected>Select supplier</option>
+                    <!-- Suppliers will be loaded dynamically -->
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3 d-none" id="alternative_supplier_div">
+                  <label for="alternative_supplier" class="form-label">Alternative Supplier</label>
+                  <select class="form-select" id="alternative_supplier" name="alternative_supplier">
+                      <option value="" disabled selected>Select alternative supplier</option>
+                      <!-- Options will be loaded dynamically -->
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Step 5: Date & Documentation -->
+          <div class="wizard-step-content d-none" id="step-5">
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-calendar-check"></i>
+                Date & Documentation
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="date_received" class="form-label">Date Received</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                    <input type="text" class="form-control" id="date_received" name="date_received" required>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="expiry_date" class="form-label">Expiry Date (Optional)</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
+                    <input type="text" class="form-control" id="expiry_date" name="expiry_date">
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="receipt_upload" class="form-label">Upload Receipt / Certificate</label>
+                <input type="file" class="form-control" id="receipt_upload" name="receipt_upload" accept=".pdf,.jpg,.jpeg,.png">
+                <div class="form-text">📄 Upload documentation for receiving or quality certificates (PDF or Image)</div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-journal-text"></i>
+                Notes & Special Instructions
+              </div>
+              <div class="mb-3">
+                <label for="notes" class="form-label">Notes & Special Instructions</label>
+                <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="Add any special handling instructions, storage requirements, usage notes, or other important information..."></textarea>
+              </div>
+            </div>
+          </div>
+          
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="wizard-prev-btn" style="display: none;">
+          <i class="bi bi-arrow-left me-1"></i> Previous
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-primary" id="wizard-next-btn">
+          <i class="bi bi-arrow-right me-1"></i> Next
+        </button>
+        <button type="submit" form="add-material-form" class="btn btn-success" id="wizard-save-btn" style="display: none;">
+          <i class="bi bi-save me-1"></i> Save Material
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced View Material Modal -->
+<div class="modal fade" id="viewMaterialModal" tabindex="-1" aria-labelledby="viewMaterialModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewMaterialModalLabel" style="color: white;">
+          <i class="bi bi-eye me-2"></i>Material Details & Information
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="info-card">
+              <h6><i class="bi bi-info-circle me-2"></i>Basic Information</h6>
+              <p><strong>Material ID:</strong> <span id="view_material_id" class="text-primary"></span></p>
+              <p><strong>Name:</strong> <span id="view_material_name"></span></p>
+              <p><strong>Category:</strong> <span id="view_category"></span></p>
+              <p><strong>Current Stock:</strong> <span id="view_quantity" class="fw-bold text-success"></span></p>
+              <p><strong>Total Cost:</strong> <span id="view_cost" class="fw-bold text-info"></span></p>
+              <p><strong>Unit Cost:</strong> <span id="view_unit_cost" class="fw-bold text-warning"></span></p>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="info-card">
+              <h6><i class="bi bi-rulers me-2"></i>Measurement & Conversion</h6>
+              <p><strong>Measurement Type:</strong> <span id="view_measurement_type"></span></p>
+              <p><strong>Unit of Measurement:</strong> <span id="view_unit_measurement"></span></p>
+              <p><strong>Pieces per Container:</strong> <span id="view_pieces_per_container"></span></p>
+              <p><strong>Base Unit:</strong> <span id="view_base_unit"></span></p>
+              <p><strong>Container Status:</strong> <span id="view_container_status" class="badge status-badge-enhanced"></span></p>
+              <p><strong>Opened Containers:</strong> <span id="view_opened_containers"></span></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="info-card">
+              <h6><i class="bi bi-truck me-2"></i>Supplier Information</h6>
+              <p><strong>Supplier:</strong> <span id="view_supplier"></span></p>
+              <p><strong>Date Received:</strong> <span id="view_date_received"></span></p>
+              <p><strong>Expiry Date:</strong> <span id="view_expiry_date"></span></p>
+              <p><strong>Receipt/Certificate:</strong> <span id="view_receipt"></span></p>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="info-card">
+              <h6><i class="bi bi-graph-up me-2"></i>Usage Tracking</h6>
+              <p><strong>Remaining in Open Container:</strong> <span id="view_remaining_in_container"></span></p>
+              <div class="alert-enhanced alert-info-enhanced">
+                <i class="bi bi-lightbulb me-2"></i>
+                <strong>Production Tip:</strong> Track partial container usage for better inventory management and waste reduction.
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-section">
+          <div class="form-section-title">
+            <i class="bi bi-journal-text me-2"></i>
+            Notes & Instructions
+          </div>
+          <div class="p-3 bg-light rounded">
+            <p id="view_notes" class="mb-0"></p>
+          </div>
+        </div>
+        
+        <div class="form-section">
+          <div class="form-section-title">
+            <i class="bi bi-clock-history me-2"></i>
+            Batch History & Cost Analysis
+          </div>
+          <div class="table-responsive">
+            <table class="table table-enhanced">
+              <thead>
+                <tr>
+                  <th>Batch #</th>
+                  <th>Quantity</th>
+                  <th>Total Cost</th>
+                  <th>Unit Cost</th>
+                  <th>Date Received</th>
+                  <th>Expiry Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="batch_history_body">
+                <!-- Batch history will be loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Close
+        </button>
+        <button type="button" class="btn btn-primary" id="add_batch_btn">
+          <i class="bi bi-plus-lg me-1"></i> Add New Batch
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Edit Material Modal -->
+<div class="modal fade" id="editMaterialModal" tabindex="-1" aria-labelledby="editMaterialModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editMaterialModalLabel" style="color: white;">
+          <i class="bi bi-pencil me-2"></i>Edit Material Information
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-material-form" onsubmit="event.preventDefault(); updateMaterial();">
+
+          <input type="hidden" id="edit_id" name="id">
+          
+          <!-- Basic Information Section -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-info-circle"></i>
+              Basic Information
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="edit_material_id" class="form-label">Material ID</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-upc"></i></span>
+                  <input type="text" class="form-control" id="edit_material_id" name="material_id" readonly>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="edit_category" class="form-label">Category</label>
+                <select class="form-select" id="edit_category" name="category" required>
+                  <option disabled>Select category</option>
+                  <option value="Packaging"><i class="bi bi-box me-2"></i>Packaging</option>
+                  <option value="Ingredients"><i class="bi bi-egg me-2"></i>Ingredients</option>
+                  <option value="Additives"><i class="bi bi-droplet me-2"></i>Additives</option>
+                  <option value="Sweeteners"><i class="bi bi-heart me-2"></i>Sweeteners</option>
+                  <option value="Fruits"><i class="bi bi-apple me-2"></i>Fruits</option>
+                  <option value="Other"><i class="bi bi-three-dots me-2"></i>Other</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="edit_material_name" class="form-label">Material Name</label>
+              <input type="text" class="form-control" id="edit_material_name" name="material_name" required>
+            </div>
+          </div>
+
+          <!-- Enhanced Measurement Section -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-rulers"></i>
+              Measurement & Conversion System
+            </div>
+            <div class="row">
+              <div class="col-md-3 mb-3">
+                <label for="edit_measurement_type" class="form-label">Measurement Type</label>
+                <select class="form-select" id="edit_measurement_type" name="measurement_type" required>
+                  <option disabled>Select measurement type</option>
+                  <option value="Unit"><i class="bi bi-rulers me-2"></i>Unit</option>
+                  <option value="Pieces"><i class="bi bi-123 me-2"></i>Pieces</option>
+                  <option value="Dozen"><i class="bi bi-collection me-2"></i>Dozen</option>
+                  <option value="Pack"><i class="bi bi-box me-2"></i>Pack</option>
+                  <option value="Box"><i class="bi bi-archive me-2"></i>Box</option>
+                  <option value="Bulk"><i class="bi bi-building me-2"></i>Bulk</option>
+                </select>
+              </div>
+              
+              <div class="col-md-3 mb-3" id="edit_unit_measurement_div" style="display: none;">
+                <label for="edit_unit_measurement" class="form-label">Unit of Measurement</label>
+                <select class="form-select" id="edit_unit_measurement" name="unit_measurement">
+                  <option disabled>Select unit</option>
+                  <optgroup label="Weight">
+                    <option value="kg"><i class="bi bi-speedometer2 me-2"></i>Kilogram (kg)</option>
+                    <option value="g"><i class="bi bi-speedometer me-2"></i>Gram (g)</option>
+                    <option value="lb"><i class="bi bi-speedometer2 me-2"></i>Pound (lb)</option>
+                    <option value="oz"><i class="bi bi-speedometer me-2"></i>Ounce (oz)</option>
+                  </optgroup>
+                  <optgroup label="Volume">
+                    <option value="L"><i class="bi bi-cup me-2"></i>Liter (L)</option>
+                    <option value="ml"><i class="bi bi-cup-straw me-2"></i>Milliliter (ml)</option>
+                    <option value="gal"><i class="bi bi-bucket me-2"></i>Gallon (gal)</option>
+                    <option value="fl_oz"><i class="bi bi-cup-straw me-2"></i>Fluid Ounce (fl oz)</option>
+                  </optgroup>
+                </select>
+              </div>
+              
+              <div class="col-md-3 mb-3" id="edit_pieces_per_container_div" style="display: none;">
+                <label for="edit_pieces_per_container" class="form-label">Pieces per Container</label>
+                <input type="number" class="form-control" id="edit_pieces_per_container" name="pieces_per_container" min="1">
+                <div class="form-text">How many pieces in each container?</div>
+              </div>
+
+              <div class="col-md-3 mb-3">
+                <label for="edit_base_unit" class="form-label">Base Unit for Tracking</label>
+                <select class="form-select" id="edit_base_unit" name="base_unit">
+                  <option value="pieces"><i class="bi bi-123 me-2"></i>Pieces</option>
+                  <option value="g"><i class="bi bi-speedometer me-2"></i>Grams</option>
+                  <option value="ml"><i class="bi bi-cup-straw me-2"></i>Milliliters</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Current Status Section -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-graph-up"></i>
+              Current Status & Costs
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="edit_quantity" class="form-label">Current Quantity</label>
+                <div class="input-group">
+                  <input type="number" step="0.01" class="form-control" id="edit_quantity" name="quantity" readonly>
+                  <span class="input-group-text" id="edit_quantity_unit">units</span>
+                </div>
+                <small class="text-muted">💡 To update quantity, use the Batch History section.</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="edit_cost" class="form-label">Total Cost</label>
+                <div class="input-group">
+                  <span class="input-group-text">₱</span>
+                  <input type="number" step="0.01" class="form-control" id="edit_cost" name="cost" readonly>
+                </div>
+                <small class="text-muted">💡 Cost is calculated from batch totals.</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Supplier Section -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-truck"></i>
+              Supplier Information
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="edit_is_alternative_supplier" class="form-label">Supplier Source</label>
+                <select class="form-select" id="edit_is_alternative_supplier" name="is_alternative_supplier" required>
+                  <option value="no"><i class="bi bi-building me-2"></i>Primary Supplier</option>
+                  <option value="yes"><i class="bi bi-arrow-repeat me-2"></i>Alternative Supplier</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="edit_supplier" class="form-label">Supplier</label>
+                <select class="form-select" id="edit_supplier" name="supplier" required>
+                  <option disabled>Select supplier</option>
+                  <!-- Suppliers will be loaded dynamically -->
+                </select>
+              </div>
+              <div class="col-md-6 mb-3 d-none" id="edit_alternative_supplier_div">
+                <label for="edit_alternative_supplier" class="form-label">Alternative Supplier</label>
+                <select class="form-select" id="edit_alternative_supplier" name="alternative_supplier">
+                    <option value="" disabled selected>Select alternative supplier</option>
+                    <!-- Options will be loaded dynamically -->
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Documentation Section -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-file-earmark-text"></i>
+              Documentation
+            </div>
+            <div class="mb-3">
+              <label for="edit_receipt_upload" class="form-label">Upload Receipt / Certificate</label>
+              <input type="file" class="form-control" id="edit_receipt_upload" name="receipt_upload" accept=".pdf,.jpg,.jpeg,.png">
+              <div class="form-text">📄 Upload documentation for receiving or quality certificates</div>
+              <div id="current_receipt" class="mt-2"></div>
+            </div>
+          </div>
+          
+          <!-- Notes Section -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-journal-text"></i>
+              Notes & Special Instructions
+            </div>
+            <div class="mb-3">
+              <label for="edit_notes" class="form-label">Notes & Special Instructions</label>
+              <textarea class="form-control" id="edit_notes" name="notes" rows="4" placeholder="Add any special handling instructions, storage requirements, usage notes, or other important information..."></textarea>
+            </div>
+          </div>
+          
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Cancel
+        </button>
+        <button type="submit" form="edit-material-form" class="btn btn-primary">
+          <i class="bi bi-save me-1"></i> Update Material
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Batch Modal -->
+<div class="modal fade" id="addBatchModal" tabindex="-1" aria-labelledby="addBatchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addBatchModalLabel" style="color: white;">
+          <i class="bi bi-plus-circle me-2 text-primary"></i>Add New Batch
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="add-batch-form">
+          <input type="hidden" id="batch_material_id" name="material_id">
+          
+          <div class="mb-3">
+            <label for="batch_quantity" class="form-label">Quantity</label>
+            <div class="input-group">
+              <input type="number" step="0.01" class="form-control" id="batch_quantity" name="quantity" required min="0">
+              <span class="input-group-text" id="batch_unit"></span>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="batch_cost" class="form-label">Cost (Price of material)</label>
+            <div class="input-group">
+              <span class="input-group-text">₱</span>
+              <input type="number" step="0.01" class="form-control" id="batch_cost" name="cost" required min="0">
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="batch_date_received" class="form-label">Date Received</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+              <input type="text" class="form-control" id="batch_date_received" name="date_received" required>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="batch_expiry_date" class="form-label">Expiry Date (Optional)</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+              <input type="text" class="form-control" id="batch_expiry_date" name="expiry_date">
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="batch_receipt_upload" class="form-label">Upload Receipt / Certificate (PDF or Image)</label>
+            <input type="file" class="form-control" id="batch_receipt_upload" name="receipt_upload" accept=".pdf,.jpg,.jpeg,.png">
+          </div>
+          
+          <div class="mb-3">
+            <label for="batch_notes" class="form-label">Notes</label>
+            <textarea class="form-control" id="batch_notes" name="notes" rows="3"></textarea>
+          </div>
+          
+          <div class="modal-footer px-0 pb-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg me-1"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save me-1"></i> Add Batch
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Batch Modal -->
+<div class="modal fade" id="viewBatchModal" tabindex="-1" aria-labelledby="viewBatchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewBatchModalLabel" style="color: white;">
+          <i class="bi bi-eye me-2 text-primary"></i>Batch Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="view_batch_details">
+          <!-- Batch details will be loaded here dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Batch Modal -->
+<div class="modal fade" id="editBatchModal" tabindex="-1" aria-labelledby="editBatchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editBatchModalLabel" style="color: white;">ss
+          <i class="bi bi-pencil me-2 text-primary"></i>Edit Batch
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-batch-form" enctype="multipart/form-data">
+          <input type="hidden" id="edit_batch_id" name="batch_id">
+          <div id="edit_batch_fields">
+            <!-- Batch fields will be loaded here dynamically -->
+          </div>
+          <div class="modal-footer px-0 pb-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg me-1"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save me-1"></i> Update Batch
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Batch Modal -->
+<div class="modal fade" id="deleteBatchModal" tabindex="-1" aria-labelledby="deleteBatchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteBatchModalLabel" style="color: white;">
+          <i class="bi bi-trash me-2 text-danger"></i>Delete Batch
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this batch? This action cannot be undone.</p>
+        <input type="hidden" id="delete_batch_id">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBatchBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal for Deleting Material -->
+<div class="modal fade" id="deleteMaterialModal" tabindex="-1" aria-labelledby="deleteMaterialModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteMaterialModalLabel" style="color: white;">
+          <i class="bi bi-trash me-2 text-danger"></i>Delete Material
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this material? This action cannot be undone.</p>
+        <input type="hidden" id="delete_material_id">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteMaterialBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body py-5">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+        <div class="fw-bold fs-5">Processing...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body py-5">
+        <div class="text-success mb-3">
+          <i class="bi bi-check-circle-fill" style="font-size: 3rem;"></i>
+        </div>
+        <div id="successModalMessage" class="fw-bold fs-5">Success!</div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body py-5">
+        <div class="text-danger mb-3">
+          <i class="bi bi-x-circle-fill" style="font-size: 3rem;"></i>
+        </div>
+        <div id="errorModalMessage" class="fw-bold fs-5">An error occurred.</div>
+        <button type="button" class="btn btn-danger mt-4" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script>
+// Redirect to login page if user accessed the site directly (no referrer)
+window.onload = function () {
+  const isLoggedIn = false; // Replace this with your actual login check logic
+
+  if (document.referrer === '' && !isLoggedIn) {
+    // Redirect only if not already on login page
+    if (!window.location.pathname.includes("index.html")) {
+      window.location.href = "index.html"; // Adjust this to your actual login page path
+    }
+  }
+};
+</script>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Custom JavaScript -->
+<script src="script.js"></script>
+<script src="mobile-menu.js"></script>
+<script src="raw-materials.js"></script>
+<script src="wizard-functionality.js"></script>
+<script src="logout.js"></script>
+</body>
+</html>

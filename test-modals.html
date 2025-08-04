@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modal Test</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1>Modal Handler Test</h1>
+    <p>This page tests the loading and success modals for supplier management operations.</p>
+    
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5>Test Operations</h5>
+          </div>
+          <div class="card-body">
+            <button class="btn btn-success mb-2 w-100" onclick="testAddSupplier()">
+              <i class="bi bi-plus-circle me-2"></i>Test Add Supplier
+            </button>
+            <button class="btn btn-primary mb-2 w-100" onclick="testEditSupplier()">
+              <i class="bi bi-pencil me-2"></i>Test Edit Supplier
+            </button>
+            <button class="btn btn-danger mb-2 w-100" onclick="testDeleteSupplier()">
+              <i class="bi bi-trash me-2"></i>Test Delete Supplier
+            </button>
+            <button class="btn btn-info mb-2 w-100" onclick="testAddAlternative()">
+              <i class="bi bi-plus-circle me-2"></i>Test Add Alternative
+            </button>
+            <button class="btn btn-warning mb-2 w-100" onclick="testEditFixedPineapple()">
+              <i class="bi bi-pencil me-2"></i>Test Edit Fixed Pineapple
+            </button>
+            <button class="btn btn-danger mb-2 w-100" onclick="testDeleteAlternative()">
+              <i class="bi bi-trash me-2"></i>Test Delete Alternative
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5>Test Results</h5>
+          </div>
+          <div class="card-body">
+            <div id="test-results">
+              <p class="text-muted">Click a test button to see the modals in action.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Modal -->
+  <div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <div class="loading-spinner mb-3">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <h5 class="modal-title mb-2">Processing...</h5>
+          <p id="loading-message">Please wait while we process your request.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <div class="success-icon mb-3">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+          </div>
+          <h5 class="modal-title mb-2">Success!</h5>
+          <p id="success-message">Operation completed successfully.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Error</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="error-message">An error occurred.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Modal Handlers JavaScript -->
+  <script src="modal-handlers.js"></script>
+  
+  <script>
+    // Test functions
+    async function testAddSupplier() {
+      try {
+        await modalHandler.addSupplier(async () => {
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          addTestResult("Add Supplier: Success");
+          return { status: "success" };
+        });
+      } catch (error) {
+        addTestResult("Add Supplier: Error - " + error.message);
+      }
+    }
+
+    async function testEditSupplier() {
+      try {
+        await modalHandler.editSupplier(async () => {
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          addTestResult("Edit Supplier: Success");
+          return { status: "success" };
+        });
+      } catch (error) {
+        addTestResult("Edit Supplier: Error - " + error.message);
+      }
+    }
+
+    async function testDeleteSupplier() {
+      try {
+        await modalHandler.deleteSupplier(async () => {
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          addTestResult("Delete Supplier: Success");
+          return { status: "success" };
+        });
+      } catch (error) {
+        addTestResult("Delete Supplier: Error - " + error.message);
+      }
+    }
+
+    async function testAddAlternative() {
+      try {
+        await modalHandler.addAlternative(async () => {
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          addTestResult("Add Alternative: Success");
+          return { status: "success" };
+        });
+      } catch (error) {
+        addTestResult("Add Alternative: Error - " + error.message);
+      }
+    }
+
+    async function testEditFixedPineapple() {
+      try {
+        await modalHandler.editFixedPineapple(async () => {
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          addTestResult("Edit Fixed Pineapple: Success");
+          return { status: "success" };
+        });
+      } catch (error) {
+        addTestResult("Edit Fixed Pineapple: Error - " + error.message);
+      }
+    }
+
+    async function testDeleteAlternative() {
+      try {
+        await modalHandler.deleteAlternative(async () => {
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          addTestResult("Delete Alternative: Success");
+          return { status: "success" };
+        });
+      } catch (error) {
+        addTestResult("Delete Alternative: Error - " + error.message);
+      }
+    }
+
+    function addTestResult(message) {
+      const resultsDiv = document.getElementById('test-results');
+      const timestamp = new Date().toLocaleTimeString();
+      const resultElement = document.createElement('div');
+      resultElement.className = 'alert alert-success mb-2';
+      resultElement.innerHTML = `<strong>${timestamp}:</strong> ${message}`;
+      resultsDiv.appendChild(resultElement);
+      
+      // Keep only last 10 results
+      const results = resultsDiv.querySelectorAll('.alert');
+      if (results.length > 10) {
+        results[0].remove();
+      }
+    }
+  </script>
+</body>
+</html> 

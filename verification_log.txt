@@ -133,3 +133,56 @@
 2025-04-23 12:31:50 - Verification attempt with token: 7094862806dcb7e31946e18f8414745c126a981205194f1ed34e65cc3cb72b1c
 2025-04-23 12:31:56 - Welcome email sent to: fohrtargaryen@gmail.com
 2025-04-23 12:31:56 - Success: Email verified for user ID: 24
+2025-05-02 06:07:26 - Resent verification email to: jamesguevarra070827@gmail.com
+2025-05-06 07:26:24 - Resent verification email to: noinetargaryen@gmail.com
+2025-05-06 14:35:08 - Resent verification email to: noinetargaryen@gmail.com
+2025-05-27 08:20:45 - Resent verification email to: zorinmagnus@gmail.com
+2025-05-27 08:21:12 - Verification attempt with token: f5648fe8a4a14a3990a7018c2ca532a4827c2a80a1368ffbcbbd52338ac87950
+2025-05-27 08:21:12 - Error: Invalid or already used token
+2025-05-27 08:21:22 - Verification attempt with token: a7edc8cbcbce3b1ff2980ad4d8e01f6ea502b64e04a68e29f03ea1f7f09bcd3a
+2025-05-27 08:21:28 - Welcome email sent to: zorinmagnus@gmail.com
+2025-05-27 08:21:28 - Success: Email verified for user ID: 28
+2025-05-28 05:36:20 - Resent verification email to: zorinmagnus@gmail.com
+2025-05-28 05:36:54 - Verification attempt with token: 72ec9f9fed996856ddb0b5ca406bf4efc27899ffee241b567de98027a716e980
+2025-05-28 05:37:00 - Welcome email sent to: zorinmagnus@gmail.com
+2025-05-28 05:37:00 - Success: Email verified for user ID: 29
+2025-06-20 08:40:15 - Resent verification email to: tureetargaryen@gmail.com
+2025-06-20 08:41:17 - Verification attempt with token: 27d6a7fee75b8479f31a3dc4a64cf3bef0879a7340b70c25ca6af13a9d7da346
+2025-06-20 08:41:17 - Error: Invalid or already used token
+2025-06-20 08:41:29 - Verification attempt with token: 27d6a7fee75b8479f31a3dc4a64cf3bef0879a7340b70c25ca6af13a9d7da346
+2025-06-20 08:41:29 - Error: Invalid or already used token
+2025-06-25 10:46:19 - Resent verification email to: vanngaming@gmail.com
+2025-06-25 11:02:00 - Resent verification email to: vanngaming2003@gmail.com
+2025-07-17 13:03:39 - Resent verification email to: siextargaryen@gmail.com
+2025-07-17 13:04:12 - Verification attempt with token: 4076149cf68c26ed2c0b757f8b6840377cc2b511b7468556d0f5f77a8e66b448
+2025-07-17 13:04:12 - Error: Invalid or already used token
+2025-07-17 13:04:23 - Verification attempt with token: cdf4431958463668d1ce4fc9f079829c10d0ddb95c97bb19715112fe765fc295
+2025-07-17 13:04:31 - Welcome email sent to: siextargaryen@gmail.com
+2025-07-17 13:04:31 - Success: Email verified for user ID: 33
+2025-07-17 13:12:51 - Verification attempt with token: 2d8cb0de28ae1ac4aaae2f3203f235e42be6b4e54e8165b0845eab502f6a9449
+2025-07-17 13:12:52 - Error: Invalid or already used token
+2025-07-17 13:12:59 - Verification attempt with token: 7583aae157d8e9ec20fdbfdceab0639bda8c3282b84ad533add031244478dce4
+2025-07-17 13:12:59 - Error: Invalid or already used token
+2025-07-17 13:13:05 - Verification attempt with token: 2d8cb0de28ae1ac4aaae2f3203f235e42be6b4e54e8165b0845eab502f6a9449
+2025-07-17 13:13:05 - Error: Invalid or already used token
+2025-07-17 13:13:15 - Verification attempt with token: 7583aae157d8e9ec20fdbfdceab0639bda8c3282b84ad533add031244478dce4
+2025-07-17 13:13:15 - Error: Invalid or already used token
+2025-07-24 15:52:56 - Resent verification email to: noinetargaryen@gmail.com
+2025-07-24 15:53:56 - Verification attempt with token: 7643500b27d6aafa492f0933525cdb34c66bfd769c4942de15826ec20ab61441
+2025-07-24 15:54:04 - Welcome email sent to: noinetargaryen@gmail.com
+2025-07-24 15:54:04 - Success: Email verified for user ID: 34
+2025-07-27 14:46:55 - Verification attempt with token: 5e77e4751cf64ce0ef4544b3f13ca562b24b5279b310d384d16bca1801c33379
+2025-07-27 14:47:10 - Welcome email sent to: siextargaryen@gmail.com
+2025-07-27 14:47:10 - Success: Email verified for user ID: 35
+2025-07-27 16:33:23 - Resent verification email to: wantargaryen@gmail.com
+2025-07-27 16:34:40 - Verification attempt with token: b116fea4ffbd58a93875118e8830768a0696309d0316beae3577dc85462c5310
+2025-07-27 16:34:58 - Welcome email sent to: wantargaryen@gmail.com
+2025-07-27 16:34:58 - Success: Email verified for user ID: 36
+2025-07-28 06:27:27 - Resent verification email to: benchlaxa5@gmail.com
+2025-07-28 06:27:37 - Resent verification email to: benchlaxa5@gmail.com
+2025-07-28 06:27:38 - Resent verification email to: benchlaxa5@gmail.com
+2025-07-28 09:47:58 - Resent verification email to: Profj@outlook.com
+2025-07-28 09:51:16 - Resent verification email to: Profj@outlook.com
+2025-07-28 09:51:18 - Resent verification email to: Profj@outlook.com
+2025-07-28 09:53:35 - Resent verification email to: johncarlolandicho13@gmail.com
+2025-07-28 09:57:04 - Resent verification email to: pural.johnashleyc@gmail.com

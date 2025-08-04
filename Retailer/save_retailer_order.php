@@ -29,9 +29,33 @@ try {
         throw new Exception("Invalid data format: " . json_last_error_msg());
     }
     
-    // Validate required fields
+    // Validate required fields - now including user_id
     if (!isset($data['retailer_name']) || !isset($data['retailer_email']) || !isset($data['order_date'])) {
         throw new Exception("Missing required fields");
+    }
+    
+    // Get user_id - this should come from the logged-in user session or the request data
+    $userId = null;
+    if (isset($data['user_id']) && !empty($data['user_id'])) {
+        // If user_id is provided in the request data
+        $userId = $data['user_id'];
+    } elseif (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+        // If user_id is available in session (logged-in user)
+        $userId = $_SESSION['user_id'];
+    } else {
+        // Try to get user_id from retailer_profiles based on email
+        $userQuery = "SELECT user_id FROM retailer_profiles WHERE user_id IN (
+                        SELECT id FROM users WHERE email = ?
+                      ) LIMIT 1";
+        $userStmt = $conn->prepare($userQuery);
+        if ($userStmt) {
+            $userStmt->bind_param("s", $data['retailer_email']);
+            $userStmt->execute();
+            $userResult = $userStmt->get_result();
+            if ($userRow = $userResult->fetch_assoc()) {
+                $userId = $userRow['user_id'];
+            }
+        }
     }
     
     // Start transaction
@@ -41,7 +65,7 @@ try {
     $isUpdate = isset($data['order_id']) && !empty($data['order_id']);
     
     if ($isUpdate) {
-        // Update existing order
+        // Update existing order - now including user_id
         $updateQuery = "UPDATE retailer_orders SET 
                         retailer_name = ?,
                         retailer_email = ?,
@@ -57,6 +81,7 @@ try {
                         discount = ?,
                         total_amount = ?,
                         consignment_term = ?,
+                        user_id = ?,
                         updated_at = NOW()
                         WHERE order_id = ?";
         
@@ -84,7 +109,7 @@ try {
         $orderId = $data['order_id'];
         
         // Debug log
-        error_log("Updating order with ID: $orderId, Delivery Mode: $deliveryMode, Consignment Term: $consignmentTerm");
+        error_log("Updating order with ID: $orderId, User ID: $userId, Delivery Mode: $deliveryMode, Consignment Term: $consignmentTerm");
         
         // Validate date formats
         if ($expectedDelivery && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $expectedDelivery)) {
@@ -105,10 +130,10 @@ try {
             }
         }
         
-        $stmt->bind_param("ssssssssssdddii", 
-            $retailerName, $retailerEmail, $retailerContact, 
+        $stmt->bind_param("ssssssssssdddiii", 
+            $retailerName, $retailerEmail, $retailerContact,
             $orderDate, $expectedDelivery, $deliveryMode, $pickupLocation, $pickupDate,
-            $notes, $status, $subtotal, $discount, $totalAmount, $consignmentTerm, $orderId);
+            $notes, $status, $subtotal, $discount, $totalAmount, $consignmentTerm, $userId, $orderId);
         
         if (!$stmt->execute()) {
             throw new Exception("Failed to update order: " . $stmt->error);
@@ -131,9 +156,9 @@ try {
     } else {
         // Generate PO number (format: RO-YYYYMMDD-XXX)
         $today = date('Ymd');
-        $poNumberQuery = "SELECT MAX(SUBSTRING_INDEX(po_number, '-', -1)) as last_number 
-                         FROM retailer_orders 
-                         WHERE po_number LIKE 'RO-$today-%'";
+        $poNumberQuery = "SELECT MAX(SUBSTRING_INDEX(po_number, '-', -1)) as last_number
+                          FROM retailer_orders
+                          WHERE po_number LIKE 'RO-$today-%'";
         $result = $conn->query($poNumberQuery);
         
         if (!$result) {
@@ -145,13 +170,13 @@ try {
         $newNumber = $lastNumber + 1;
         $poNumber = "RO-$today-" . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
         
-        // Insert new order
+        // Insert new order - now including user_id
         $insertQuery = "INSERT INTO retailer_orders (
                         po_number, retailer_name, retailer_email, retailer_contact, 
                         order_date, expected_delivery, delivery_mode,
                         pickup_location, pickup_date, notes, status, subtotal, discount, total_amount,
-                        consignment_term, created_at, updated_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+                        consignment_term, user_id, created_at, updated_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
         
         $stmt = $conn->prepare($insertQuery);
         
@@ -194,10 +219,10 @@ try {
             }
         }
         
-        $stmt->bind_param("sssssssssssdddi", 
-            $poNumber, $retailerName, $retailerEmail, $retailerContact, 
+        $stmt->bind_param("sssssssssssdddii", 
+            $poNumber, $retailerName, $retailerEmail, $retailerContact,
             $orderDate, $expectedDelivery, $deliveryMode, $pickupLocation, $pickupDate,
-            $notes, $status, $subtotal, $discount, $totalAmount, $consignmentTerm);
+            $notes, $status, $subtotal, $discount, $totalAmount, $consignmentTerm, $userId);
         
         if (!$stmt->execute()) {
             throw new Exception("Failed to create order: " . $stmt->error);
@@ -224,6 +249,31 @@ try {
         if (!$historyStmt->execute()) {
             throw new Exception("Failed to create status history: " . $historyStmt->error);
         }
+
+        // --- Notification logic start ---
+        // Prepare notification message
+        $deliveryInfo = '';
+        if ($deliveryMode === 'pickup') {
+            $pickupDateStr = $pickupDate ? date('M d, Y', strtotime($pickupDate)) : 'N/A';
+            $deliveryInfo = "Pickup on $pickupDateStr at $pickupLocation";
+        } else {
+            $expectedDeliveryStr = $expectedDelivery ? date('M d, Y', strtotime($expectedDelivery)) : 'N/A';
+            $deliveryInfo = "Expected delivery on $expectedDeliveryStr";
+        }
+        $notifMessage = "New order ($poNumber) from $retailerName. $deliveryInfo";
+        $notificationId = uniqid('notif_');
+        $notifType = 'new_order';
+        // Before notification insert, get user_id
+        $user_id = $_SESSION['user_id'] ?? null;
+        $notifInsert = $conn->prepare("INSERT INTO notifications (notification_id, related_id, type, message, user_id) VALUES (?, ?, ?, ?, ?)");
+        if (!$notifInsert) {
+            throw new Exception("Prepare failed for notification insert: " . $conn->error);
+        }
+        $notifInsert->bind_param("ssssi", $notificationId, $orderId, $notifType, $notifMessage, $user_id);
+        if (!$notifInsert->execute()) {
+            throw new Exception("Failed to insert notification: " . $notifInsert->error);
+        }
+        // --- Notification logic end ---
     }
     
     // Insert order items
@@ -259,9 +309,9 @@ try {
             $totalPrice = $quantity * $unitPrice;
             
             // Get product name from item or look it up
-            $productName = isset($item['product_name']) && !empty($item['product_name']) 
-                          ? $item['product_name'] 
-                          : getProductName($conn, $productId);
+            $productName = isset($item['product_name']) && !empty($item['product_name'])
+                           ? $item['product_name']
+                           : getProductName($conn, $productId);
             
             // Force product_id to be treated as a string
             $itemStmt->bind_param("issidd", $orderId, $productId, $productName, $quantity, $unitPrice, $totalPrice);
@@ -281,6 +331,7 @@ try {
     $response['success'] = true;
     $response['message'] = $isUpdate ? "Order updated successfully" : "Order created successfully";
     $response['order_id'] = $orderId;
+    $response['user_id'] = $userId; // Include user_id in response for debugging
     if (!$isUpdate) {
         $response['po_number'] = $poNumber;
     }

@@ -1,2 +1,46 @@
 2025-04-23 12:30:39 - Registration attempt for: Fohr Targaryen, Email: fohrtargaryen@gmail.com
 2025-04-23 12:30:46 - Registration successful for: Fohr Targaryen, Email: fohrtargaryen@gmail.com, User ID: 24
+2025-05-02 06:03:44 - Registration attempt for: Pepito Manaloto, Email: jamesaaron.guevarra@lu.edu.ph
+2025-05-02 06:04:16 - Registration attempt for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com
+2025-05-02 06:04:27 - Registration attempt for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com
+2025-05-02 06:04:39 - Registration attempt for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com
+2025-05-02 06:04:48 - Registration attempt for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com
+2025-05-02 06:07:09 - Registration attempt for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com
+2025-05-02 06:07:17 - Registration successful for: Pepito Manaloto, Email: jamesguevarra070827@gmail.com, User ID: 25
+2025-05-05 06:49:55 - Registration attempt for: gds dbds, Email: jhovanmagno@gmail.com
+2025-05-06 07:26:11 - Registration attempt for: Noine Targaryen, Email: noinetargaryen@gmail.com
+2025-05-06 07:26:18 - Registration successful for: Noine Targaryen, Email: noinetargaryen@gmail.com, User ID: 26
+2025-05-06 14:34:44 - Registration attempt for: Noine Targaryen, Email: noinetargaryen@gmail.com
+2025-05-06 14:34:55 - Registration successful for: Noine Targaryen, Email: noinetargaryen@gmail.com, User ID: 27
+2025-05-27 08:20:31 - Registration attempt for: Zorin Magnus, Email: zorinmagnus@gmail.com
+2025-05-27 08:20:38 - Registration successful for: Zorin Magnus, Email: zorinmagnus@gmail.com, User ID: 28 (Pending Approval)
+2025-05-28 05:36:05 - Registration attempt for: Zorin Magnus, Email: zorinmagnus@gmail.com
+2025-05-28 05:36:13 - Registration successful for: Zorin Magnus, Email: zorinmagnus@gmail.com, User ID: 29 (Status: pending, Active: 0)
+2025-06-20 08:39:31 - Registration attempt for: Pepito Manaloto, Email: tureetargaryen@gmail.com
+2025-06-20 08:39:58 - Registration successful for: Pepito Manaloto, Email: tureetargaryen@gmail.com, User ID: 30 (Status: pending, Active: 0)
+2025-06-25 10:44:44 - Registration attempt for: Van Magno, Email: vanngaming@gmail.com
+2025-06-25 10:46:06 - Registration successful for: Van Magno, Email: vanngaming@gmail.com, User ID: 31 (Status: pending, Active: 0)
+2025-06-25 10:57:26 - Registration attempt for: Van Gaming, Email: vanngaming2003@gmail.com
+2025-06-25 10:57:34 - Registration attempt for: Van Gaming, Email: vanngaming2003@gmail.com
+2025-06-25 10:57:39 - Registration attempt for: Van Gaming, Email: vanngaming2003@gmail.com
+2025-06-25 10:59:00 - Registration attempt for: Van Gaming, Email: vanngaming2003@gmail.com
+2025-06-25 11:00:18 - Registration successful for: Van Gaming, Email: vanngaming2003@gmail.com, User ID: 32 (Status: pending, Active: 0)
+2025-07-11 07:20:24 - Registration attempt for: d d, Email: gy@yahoo.com
+2025-07-17 13:03:18 - Registration attempt for: gelai nicole, Email: siextargaryen@gmail.com
+2025-07-17 13:03:28 - Registration successful for: gelai nicole, Email: siextargaryen@gmail.com, User ID: 33 (Status: pending, Active: 0)
+2025-07-24 15:52:41 - Registration attempt for: Noine Targaryen, Email: noinetargaryen@gmail.com
+2025-07-24 15:52:50 - Registration successful for: Noine Targaryen, Email: noinetargaryen@gmail.com, User ID: 34 (Status: pending, Active: 0)
+2025-07-27 08:31:19 - Registration attempt for: Siex Targaryen, Email: siextargaryen@gmail.com
+2025-07-27 16:33:00 - Registration attempt for: Niroz Magnus, Email: wantargaryen@gmail.com
+2025-07-27 16:33:11 - Registration successful for: Niroz Magnus, Email: wantargaryen@gmail.com, User ID: 36 (Status: pending, Active: 0)
+2025-07-27 22:44:43 - Registration attempt for: CBR Calauan, Email: junkundesu1017@gmail.com
+2025-07-27 22:47:12 - Registration attempt for: CBR Calauan, Email: wantargaryen@gmail.com
+2025-07-27 22:48:10 - Registration attempt for: CBR Calauan, Email: wantargaryen@gmail.com
+2025-07-27 22:50:26 - Registration attempt for: CBR Calauan, Email: wantargaryen@gmail.com
+2025-07-27 22:52:44 - Registration attempt for: CBR Calauan, Email: tuhtargaryen@gmail.com
+2025-07-28 09:47:29 - Registration attempt for: A A, Email: Profj@outlook.com
+2025-07-28 09:47:41 - Registration successful for: A A, Email: Profj@outlook.com, User ID: 41 (Status: pending, Active: 0)
+2025-07-28 09:53:18 - Registration attempt for: A A, Email: johncarlolandicho13@gmail.com
+2025-07-28 09:53:26 - Registration successful for: A A, Email: johncarlolandicho13@gmail.com, User ID: 42 (Status: pending, Active: 0)
+2025-07-28 09:56:46 - Registration attempt for: A A, Email: pural.johnashleyc@gmail.com
+2025-07-28 09:56:55 - Registration successful for: A A, Email: pural.johnashleyc@gmail.com, User ID: 43 (Status: pending, Active: 0)

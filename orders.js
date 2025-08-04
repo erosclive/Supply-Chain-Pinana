@@ -57,6 +57,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize tabs
   initTabs()
+
+  // Initialize the return request tab
+  initReturnRequestTab()
+
+  // Add event listener for the resolve button
+  document.body.addEventListener("click", (e) => {
+    if (e.target && e.target.closest(".resolve-return-btn")) {
+      const btn = e.target.closest(".resolve-return-btn")
+      const orderId = btn.getAttribute("data-id")
+      showResolveReturnModal(orderId)
+    }
+  })
+
+  // Add event listener for the confirm resolve return button
+  const confirmResolveReturnBtn = document.getElementById("confirmResolveReturnBtn")
+  if (confirmResolveReturnBtn) {
+    confirmResolveReturnBtn.addEventListener("click", processReturnResolution)
+  }
 })
 
 // Initialize sidebar toggle for mobile
@@ -1787,6 +1805,9 @@ function renderRetailerOrders(orders) {
         case "cancelled":
           statusClass = "bg-danger"
           break
+        case "return_requested":
+          statusClass = "bg-warning text-dark"
+          break
         default:
           statusClass = "bg-secondary"
       }
@@ -1841,6 +1862,12 @@ function renderRetailerOrders(orders) {
         </button>
         `
       }
+    } else if (order.status === "return_requested") {
+      actionButtons += `
+      <button type="button" class="btn btn-sm btn-success resolve-return-btn" data-id="${order.order_id}" title="Resolve Return">
+        <i class="bi bi-check2-circle"></i> Resolve
+      </button>
+      `
     }
 
     html += `
@@ -1927,6 +1954,14 @@ function renderRetailerOrders(orders) {
     btn.addEventListener("click", function () {
       const orderId = this.getAttribute("data-id")
       showPickedUpModal(orderId)
+    })
+  })
+
+  // Add event listeners for resolve return buttons
+  document.querySelectorAll(".resolve-return-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-id")
+      showResolveReturnModal(orderId)
     })
   })
 }
@@ -2048,7 +2083,197 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("confirmPickedUpBtn").addEventListener("click", () => {
     processPickedUpOrder()
   })
+
+  // Confirm Resolve Return button
+  document.getElementById("confirmResolveReturnBtn").addEventListener("click", () => {
+    processReturnResolution()
+  })
 })
+
+// Function to initialize the return request tab
+function initReturnRequestTab() {
+  // Add the Return Request tab to the order stage tabs
+  const orderStageTabs = document.getElementById("orderStageTabs")
+  if (orderStageTabs) {
+    const returnRequestTab = document.createElement("li")
+    returnRequestTab.className = "nav-item"
+    returnRequestTab.innerHTML = `
+      <a class="nav-link" id="return-request-tab" data-bs-toggle="tab" href="#" role="tab" aria-selected="false">
+        Return Requests
+      </a>
+    `
+    orderStageTabs.appendChild(returnRequestTab)
+
+    // Add event listener for the return request tab
+    document.getElementById("return-request-tab").addEventListener("click", function (e) {
+      e.preventDefault()
+      setActiveTab(this)
+      loadReturnRequestedOrders()
+    })
+  }
+}
+
+// Function to set active tab
+function setActiveTab(tab) {
+  document.querySelectorAll("#orderStageTabs .nav-link").forEach((t) => {
+    t.classList.remove("active")
+    t.setAttribute("aria-selected", "false")
+  })
+  tab.classList.add("active")
+  tab.setAttribute("aria-selected", "true")
+}
+
+// Function to load return requested orders
+function loadReturnRequestedOrders() {
+  // Show loading spinner
+  document.getElementById("retailer-orders-table-body").innerHTML = `
+    <tr>
+      <td colspan="8" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading return requests...</p>
+      </td>
+    </tr>
+  `
+
+  // Set filter to return_requested status
+  retailerFilters.status = "return_requested"
+
+  // Build query string
+  let queryString = `fetch_retailer_orders.php?page=${retailerCurrentPage}&limit=${itemsPerPage}&status=return_requested`
+
+  if (retailerFilters.search) {
+    queryString += `&search=${encodeURIComponent(retailerFilters.search)}`
+  }
+
+  // Fetch return requested orders
+  fetch(queryString)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      return response.json()
+    })
+    .then((data) => {
+      if (data.success) {
+        currentRetailerOrders = data.orders
+        retailerTotalPages = Math.ceil(data.total_count / itemsPerPage)
+
+        // Render return requested orders
+        renderRetailerOrders(data.orders)
+
+        // Update pagination
+        renderRetailerPagination()
+
+        // Update retailer order count text
+        document.getElementById("retailerOrderCount").textContent =
+          `Showing ${data.orders.length} of ${data.total_count} return requests`
+      } else {
+        showAlert("danger", "Failed to load return requests: " + (data.message || "Unknown error"))
+        document.getElementById("retailer-orders-table-body").innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-4">
+              <div class="text-danger">
+                <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+                <p>Error loading return requests. Please try again.</p>
+              </div>
+            </td>
+          </tr>
+        `
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading return requests:", error)
+      showAlert("danger", "Error loading return requests. Please try again.")
+      document.getElementById("retailer-orders-table-body").innerHTML = `
+        <tr>
+          <td colspan="8" class="text-center py-4">
+            <div class="text-danger">
+              <i class="bi bi-exclamation-triangle-fill fs-1 mb-3"></i>
+              <p>Error loading return requests. Please try again.</p>
+              <button class="btn btn-sm btn-outline-danger mt-2" onclick="loadReturnRequestedOrders()">Retry</button>
+            </div>
+          </td>
+        </tr>
+      `
+    })
+}
+
+// Function to show the resolve return modal
+function showResolveReturnModal(orderId) {
+  // Fetch order details to determine if it's pickup or delivery
+  fetch(`get_retailer_order_details.php?order_id=${orderId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        const order = data.order
+        const deliveryMode = order.delivery_mode
+
+        // Set the order ID in the hidden field
+        document.getElementById("resolveReturnOrderId").value = orderId
+        document.getElementById("resolveReturnDeliveryMode").value = deliveryMode
+
+        // Show the modal
+        const resolveReturnModal = new bootstrap.Modal(document.getElementById("resolveReturnModal"))
+        resolveReturnModal.show()
+      } else {
+        showAlert("danger", "Failed to load order details: " + (data.message || "Unknown error"))
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading order details:", error)
+      showAlert("danger", "Error loading order details. Please try again.")
+    })
+}
+
+// Function to process the return resolution
+function processReturnResolution() {
+  const orderId = document.getElementById("resolveReturnOrderId").value
+  const deliveryMode = document.getElementById("resolveReturnDeliveryMode").value
+  const resolution = document.getElementById("returnResolution").value
+  const newStatus = deliveryMode === "pickup" ? "picked up" : "delivered"
+
+  // Validate resolution
+  if (!resolution.trim()) {
+    showAlert("warning", "Please enter a resolution for the return request")
+    return
+  }
+
+  // Show loading indicator
+  showAlert("info", `Resolving return request for order #${orderId}...`)
+
+  // Create form data
+  const formData = new FormData()
+  formData.append("order_id", orderId)
+  formData.append("status", newStatus)
+  formData.append("notes", `Return request resolved: ${resolution}`)
+
+  // Send request to update status
+  fetch("update_order_status.php", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        showAlert("success", "Return request resolved successfully")
+
+        // Hide the modal
+        const resolveReturnModal = bootstrap.Modal.getInstance(document.getElementById("resolveReturnModal"))
+        resolveReturnModal.hide()
+
+        // Refresh orders list
+        loadReturnRequestedOrders()
+      } else {
+        showAlert("danger", "Failed to resolve return request: " + (data.message || "Unknown error"))
+      }
+    })
+    .catch((error) => {
+      console.error("Error resolving return request:", error)
+      showAlert("danger", "Error resolving return request. Please try again.")
+    })
+}
 
 // Mock functions to resolve undeclared variable errors.  These should be replaced with actual implementations.
 function viewRetailerOrderFunc(orderId) {
@@ -2842,6 +3067,9 @@ function renderRetailerOrderDetailsFunc(order, items, statusHistory) {
     case "cancelled":
       statusClass = "bg-danger"
       break
+    case "return_requested":
+      statusClass = "bg-warning text-dark"
+      break
     default:
       statusClass = "bg-secondary"
   }
@@ -2898,6 +3126,72 @@ function renderRetailerOrderDetailsFunc(order, items, statusHistory) {
   // Set modal title
   document.getElementById("viewOrderModalLabel").textContent = `Order #${order.po_number || order.order_id}`
 
+  // Generate action buttons based on current status and delivery mode
+  let actionButtons = ""
+
+  // Add status-specific action buttons
+  if (order.status === "order") {
+    actionButtons += `
+    <button type="button" class="btn btn-success confirm-order-btn" data-id="${order.order_id}" title="Confirm Order">
+      <i class="bi bi-check-circle me-1"></i> Confirm Order
+    </button>
+    `
+  } else if (order.status === "confirmed") {
+    if (order.delivery_mode === "delivery") {
+      actionButtons += `
+      <button type="button" class="btn btn-primary ship-order-btn" data-id="${order.order_id}" title="Mark as Shipped">
+        <i class="bi bi-truck me-1"></i> Mark as Shipped
+      </button>
+      `
+    } else if (order.delivery_mode === "pickup") {
+      actionButtons += `
+      <button type="button" class="btn btn-primary ready-for-pickup-btn" data-id="${order.order_id}" title="Mark as Ready for Pickup">
+        <i class="bi bi-bag-check me-1"></i> Mark as Ready for Pickup
+      </button>
+      `
+    }
+  } else if (
+    order.status === "shipped" ||
+    order.status === "ready_for_pickup" ||
+    order.status === "ready-to-pickup" ||
+    order.status === "ready for pickup"
+  ) {
+    if (order.delivery_mode === "delivery") {
+      actionButtons += `
+      <button type="button" class="btn btn-info deliver-order-btn" data-id="${order.order_id}" title="Mark as Delivered">
+        <i class="bi bi-check2-all me-1"></i> Mark as Delivered
+      </button>
+      `
+    } else if (order.delivery_mode === "pickup") {
+      actionButtons += `
+      <button type="button" class="btn btn-info pickup-complete-btn" data-id="${order.order_id}" title="Mark as Picked Up">
+        <i class="bi bi-check2-all me-1"></i> Mark as Picked Up
+      </button>
+      `
+    }
+  } else if (order.status === "return_requested") {
+    actionButtons += `
+    <button type="button" class="btn btn-success resolve-return-btn" data-id="${order.order_id}" title="Resolve Return">
+      <i class="bi bi-check2-circle me-1"></i> Resolve Return
+    </button>
+    `
+  }
+
+  // Add print invoice button for all statuses
+  if (actionButtons) {
+    actionButtons += `
+    <button type="button" class="btn btn-outline-secondary ms-2" onclick="showPrintInvoiceModal('${order.order_id}')" title="Print Invoice">
+      <i class="bi bi-printer me-1"></i> Print Invoice
+    </button>
+    `
+  } else {
+    actionButtons = `
+    <button type="button" class="btn btn-outline-secondary" onclick="showPrintInvoiceModal('${order.order_id}')" title="Print Invoice">
+      <i class="bi bi-printer me-1"></i> Print Invoice
+    </button>
+    `
+  }
+
   // Build modal content
   viewOrderModalBody.innerHTML = `
     <div class="order-details">
@@ -2926,7 +3220,7 @@ function renderRetailerOrderDetailsFunc(order, items, statusHistory) {
                 <div class="small text-muted">Delivery Mode</div>
                 <div>${capitalizeFirstLetter(order.delivery_mode || "Not specified")}</div>
               </div>
-              <div class="mb-3">
+              <div class="mb3">
                 <div class="small text-muted">Consignment Term</div>
                 <div>${order.consignment_term || "N/A"} days</div>
               </div>
@@ -3051,10 +3345,95 @@ function renderRetailerOrderDetailsFunc(order, items, statusHistory) {
               </div>
             </div>
           </div>
+          
+          <!-- Add action buttons section -->
+          <h6 class="text-muted mb-2 mt-4">Order Actions</h6>
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex flex-wrap gap-2">
+                ${actionButtons}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   `
+
+  // Add event listeners to the newly created buttons
+  const modalBody = document.querySelector("#viewOrderModal .modal-body")
+
+  // Confirm order button
+  const confirmOrderBtn = modalBody.querySelector(".confirm-order-btn")
+  if (confirmOrderBtn) {
+    confirmOrderBtn.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-id")
+      confirmOrder(orderId)
+      // Close the view modal
+      const viewOrderModal = bootstrap.Modal.getInstance(document.getElementById("viewOrderModal"))
+      viewOrderModal.hide()
+    })
+  }
+
+  // Ship order button
+  const shipOrderBtn = modalBody.querySelector(".ship-order-btn")
+  if (shipOrderBtn) {
+    shipOrderBtn.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-id")
+      showShippedModal(orderId)
+      // Close the view modal
+      const viewOrderModal = bootstrap.Modal.getInstance(document.getElementById("viewOrderModal"))
+      viewOrderModal.hide()
+    })
+  }
+
+  // Ready for pickup button
+  const readyForPickupBtn = modalBody.querySelector(".ready-for-pickup-btn")
+  if (readyForPickupBtn) {
+    readyForPickupBtn.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-id")
+      showReadyForPickupModal(orderId)
+      // Close the view modal
+      const viewOrderModal = bootstrap.Modal.getInstance(document.getElementById("viewOrderModal"))
+      viewOrderModal.hide()
+    })
+  }
+
+  // Deliver order button
+  const deliverOrderBtn = modalBody.querySelector(".deliver-order-btn")
+  if (deliverOrderBtn) {
+    deliverOrderBtn.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-id")
+      showDeliveredModal(orderId)
+      // Close the view modal
+      const viewOrderModal = bootstrap.Modal.getInstance(document.getElementById("viewOrderModal"))
+      viewOrderModal.hide()
+    })
+  }
+
+  // Pickup complete button
+  const pickupCompleteBtn = modalBody.querySelector(".pickup-complete-btn")
+  if (pickupCompleteBtn) {
+    pickupCompleteBtn.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-id")
+      showPickedUpModal(orderId)
+      // Close the view modal
+      const viewOrderModal = bootstrap.Modal.getInstance(document.getElementById("viewOrderModal"))
+      viewOrderModal.hide()
+    })
+  }
+
+  // Resolve return button
+  const resolveReturnBtn = modalBody.querySelector(".resolve-return-btn")
+  if (resolveReturnBtn) {
+    resolveReturnBtn.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-id")
+      showResolveReturnModal(orderId)
+      // Close the view modal
+      const viewOrderModal = bootstrap.Modal.getInstance(document.getElementById("viewOrderModal"))
+      viewOrderModal.hide()
+    })
+  }
 }
 
 // Helper function to get status color for timeline
@@ -3068,18 +3447,15 @@ function getStatusColor(status) {
       return "primary"
     case "delivered":
     case "picked_up":
+    case "picked up":
       return "info"
     case "cancelled":
       return "danger"
+    case "return_requested":
+      return "warning"
     default:
       return "secondary"
   }
-}
-
-// Helper function to capitalize first letter
-function capitalizeFirstLetter(string) {
-  if (!string) return ""
-  return string.charAt(0).toUpperCase() + string.slice(1).replace("_", " ")
 }
 
 // Export retailer orders to CSV
@@ -3116,23 +3492,25 @@ function exportRetailerOrders() {
 function showAlert(type, message) {
   const alertContainer = document.getElementById("alertContainer")
   if (!alertContainer) {
-    console.warn("Alert container not found")
+    console.error("Alert container not found")
     return
   }
 
-  const alertDiv = document.createElement("div")
-  alertDiv.className = `alert alert-${type} alert-dismissible fade show`
-  alertDiv.setAttribute("role", "alert")
-  alertDiv.textContent = message
+  const alert = document.createElement("div")
+  alert.className = `alert alert-${type} alert-dismissible fade show`
+  alert.role = "alert"
+  alert.innerHTML = `
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  `
 
-  const closeButton = document.createElement("button")
-  closeButton.setAttribute("type", "button")
-  closeButton.className = "btn-close"
-  closeButton.setAttribute("data-bs-dismiss", "alert")
-  closeButton.setAttribute("aria-label", "Close")
+  alertContainer.appendChild(alert)
 
-  alertDiv.appendChild(closeButton)
-  alertContainer.appendChild(alertDiv)
+  // Automatically dismiss the alert after 3 seconds
+  setTimeout(() => {
+    alert.classList.remove("show")
+    alert.addEventListener("transitionend", () => alert.remove())
+  }, 3000)
 }
 
 // Make sure the showAlert function is properly defined and accessible
@@ -3180,6 +3558,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <li><a class="dropdown-item retailer-status-filter" href="#" data-status="confirmed">Confirmed</a></li>
         <li><a class="dropdown-item retailer-status-filter" href="#" data-status="shipped">Shipped</a></li>
         <li><a class="dropdown-item retailer-status-filter" href="#" data-status="delivered">Delivered</a></li>
+        <li><a class="dropdown-item retailer-status-filter" href="#" data-status="return_requested">Return Requested</a></li>
         <li><a class="dropdown-item retailer-status-filter" href="#" data-status="cancelled">Cancelled</a></li>
       `
     }
@@ -3326,6 +3705,10 @@ const orderStatus = {
               statusClass = "bg-danger"
               statusText = "Cancelled"
               break
+            case "return_requested":
+              statusClass = "bg-warning text-dark"
+              statusText = "Return Requested"
+              break
             default:
               statusClass = "bg-secondary"
               statusText = "Unknown"
@@ -3352,6 +3735,10 @@ const orderStatus = {
         case "cancelled":
           statusClass = "bg-danger"
           statusText = "Cancelled"
+          break
+        case "return_requested":
+          statusClass = "bg-warning text-dark"
+          statusText = "Return Requested"
           break
         default:
           statusClass = "bg-secondary"

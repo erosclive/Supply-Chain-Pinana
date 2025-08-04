@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Piñana Gourmet - Completed Orders</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Modal Enhancements CSS -->
+  <link rel="stylesheet" href="modal-enhancements.css">
+  <!-- Modal Animations CSS -->
+  <link rel="stylesheet" href="modal-animations.css">
+  <!-- Datepicker CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="icon" href="Retailer/mono-green.png">
+
+  <style>
+     /* Submenu styles */
+.submenu {
+  padding-left: 2rem;
+  list-style: none;
+}
+
+.submenu .nav-item {
+  margin-bottom: 0.25rem;
+}
+
+.submenu .nav-link {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.submenu .nav-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.nav-link.dropdown-toggle::after {
+  display: inline-block;
+  margin-left: auto;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+  
+  .submenu-link {
+    padding-left: 3rem !important;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .submenu-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .submenu-link.active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  #inventorySubmenu {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+  
+  .nav-link.dropdown-toggle::after {
+    display: inline-block;
+    margin-left: auto;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .nav-link.dropdown-toggle[aria-expanded="true"]::after {
+    transform: translateY(-50%) rotate(180deg);
+  }
+  </style>
+
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+        <div class="sidebar-inner">
+            <div class="logo-container d-flex align-items-center mb-4 mt-3">
+                <img src="images/final-light.png" class="pineapple-logo">
+            </div>
+          
+          <div class="sidebar-divider" style="margin-top: -1.5rem;">
+            <span>MAIN MENU</span>
+          </div>
+          
+          <ul class="nav flex-column sidebar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="dashboard.html" data-page="dashboard">
+                <div class="nav-icon">
+                  <i class="bi bi-grid"></i>
+                </div>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link dropdown-toggle" href="#inventorySubmenu" data-bs-toggle="collapse" aria-expanded="false">
+                <div class="nav-icon">
+                  <i class="bi bi-box"></i>
+                </div>
+                <span>Inventory</span>
+              </a>
+              <ul class="collapse submenu" id="inventorySubmenu">
+                <li class="nav-item">
+                  <a class="nav-link" href="inventory.html" data-page="inventory">
+                    <div class="nav-icon">
+                      <i class="bi bi-box-seam"></i>
+                    </div>
+                    <span>Products</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="supplies.html" data-page="supplies">
+                    <div class="nav-icon">
+                      <i class="bi bi-tools"></i>
+                    </div>
+                    <span>Supplies</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+             <li class="nav-item">
+          <a class="nav-link" href="production.html" data-page="production">
+            <div class="nav-icon">
+              <i class="bi bi-layer-backward"></i>
+            </div>
+            <span>Production</span>
+          </a>
+        </li>
+       
+        
+        <div class="sidebar-divider">
+          <span>SALES</span>
+        </div>
+         <li class="nav-item">
+          <a class="nav-link" href="orders.html" data-page="orders">
+            <div class="nav-icon">
+              <i class="bi bi-basket2"></i>
+            </div>
+            <span>Orders</span>
+          </a>
+        </li>
+    
+            <li class="nav-item">
+              <a class="nav-link active" href="billing.html" data-page="billing">
+                <div class="nav-icon">
+                  <i class="bi bi-credit-card"></i>
+                </div>
+                <span>Billing</span>
+              </a>
+            </li>
+            
+            
+            <li class="nav-item">
+              <a class="nav-link" href="reports.html" data-page="reports">
+                <div class="nav-icon">
+                  <i class="bi bi-bar-chart"></i>
+                </div>
+                <span>Reports</span>
+              </a>
+            </li>
+    
+            <div class="sidebar-divider">
+              <span>USER</span>
+            </div>
+    
+            <li class="nav-item">
+              <a class="nav-link" href="retailers.html" data-page="retailers">
+                <div class="nav-icon">
+                  <i class="bi bi-person-heart"></i>
+                </div>
+                <span>Retailers</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="suppliers.html" data-page="suppliers">
+                <div class="nav-icon">
+                  <i class="bi bi-person-fill-down"></i>
+                </div>
+                <span>Suppliers</span>
+              </a>
+            </li>
+    
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Main content -->
+      <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+        <!-- Header -->
+        <div class="fixed-top-header">
+          <div class="d-flex justify-content-between align-items-center w-100">
+            <div class="d-flex justify-content-between align-items-center w-100">
+  <!-- Left: Button + Title -->
+  <div class="d-flex align-items-center">
+    <button class="navbar-toggler d-md-none collapsed me-2" type="button" id="sidebarToggle">
+      <i class="bi bi-list"></i>
+    </button>
+    <h5 class="mb-0">Billing Transaction Management</h5>
+  </div>
+
+  <!-- Right: Current Date -->
+  <span id="current-date" class="text-muted small pe-3" style="white-space: nowrap;"></span>
+</div>
+
+            <div class="d-flex align-items-center">
+              <div class="dropdown user-profile-dropdown" >
+                <div class="profile-circle dropdown-toggle position-relative" id="userProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person-fill"></i>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" id="notification-badge" style="display: none;">
+                    0
+                    <span class="visually-hidden">unread notifications</span>
+                  </span>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown" style="width: 350px;">
+                  <li class="dropdown-item-text">
+                    <div class="sidebar-divider">
+                      <span>NOTIFICATIONS</span>
+                      <div class="float-end">
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" id="mark-all-read">Mark all as read</button>
+                      </div>
+                    </div>
+                    <div id="notifications-container" class="notifications-container" style="max-height: 300px; overflow-y: auto;">
+                      <div class="text-center py-3 text-muted" id="no-notifications-message">No new notifications</div>
+                    </div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li class="dropdown-item-text">
+                    <div class="sidebar-divider">
+                      <span>ACCOUNT</span>
+                    </div>
+                    <div class="user-info d-flex align-items-center">
+                      <div class="user-avatar">
+                        <i class="bi bi-person-circle"></i>
+                      </div>
+                      <div class="user-details">
+                        <div class="user-name">Admin User</div>
+                        <div class="user-role">Piñana Gourmet</div>
+                      </div>
+                    </div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="#" id="logoutButton" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-content-inner">
+          <h5 class="section-title"> </h5>
+          <!-- Billing Tabs -->
+          <div class="row mt-2">
+            <div class="col-12">
+              <ul class="nav nav-tabs" id="billingTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="completed-orders-tab" data-bs-toggle="tab" data-bs-target="#completed-orders" type="button" role="tab" aria-controls="completed-orders" aria-selected="true">
+                    Active Orders
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="pending-payments-tab" data-bs-toggle="tab" data-bs-target="#pending-payments" type="button" role="tab" aria-controls="pending-payments" aria-selected="false">
+                    Pending Payments
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="partial-payments-tab" data-bs-toggle="tab" data-bs-target="#partial-payments" type="button" role="tab" aria-controls="partial-payments" aria-selected="false">
+                    <i class="bi bi-wallet2 me-1"></i> Partial Payments
+                  </button>
+                </li>
+              </ul>
+              
+              <div class="tab-content" id="billingTabsContent">
+                <!-- Completed Orders Tab -->
+                <div class="tab-pane fade show active" id="completed-orders" role="tabpanel" aria-labelledby="completed-orders-tab">
+                  <div class="card mt-3">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title">Completed Orders</h5>
+                        <div class="d-flex">
+                          <div class="input-group me-2" style="width: 250px;">
+                            <input type="text" class="form-control" id="searchCompletedOrders" placeholder="Search orders...">
+                            <button class="btn btn-outline-secondary" type="button" id="searchCompletedOrdersBtn">
+                              <i class="bi bi-search"></i>
+                            </button>
+                          </div>
+                          <button class="btn btn-outline-primary" id="refreshCompletedOrdersBtn">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead class="table-light">
+                            <tr>
+                              <th>Order ID</th>
+                              <th>PO Number</th>
+                              <th>Retailer</th>
+                              <th>Date</th>
+                              <th>Delivery Mode</th>
+                              <th>Total Amount</th>
+                              <th>Payment Status</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody id="completedOrdersTableBody">
+                            <!-- Rows will be dynamically populated -->
+                            <tr>
+                              <td colspan="8" class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                  <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading completed orders...</p>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      
+                      <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted small" id="completedOrdersCount">Showing 0 orders</div>
+                        <nav aria-label="Completed Orders pagination">
+                          <ul class="pagination pagination-sm" id="completedOrdersPagination">
+                            <!-- Pagination will be added dynamically -->
+                          </ul>
+                        </nav>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Pending Payments Tab -->
+                <div class="tab-pane fade" id="pending-payments" role="tabpanel" aria-labelledby="pending-payments-tab">
+                  <div class="card mt-3">
+                    <div class="card-body">
+                      <h5 class="card-title">Pending Payments</h5>
+                      <div id="pendingPaymentsContainer" class="table-responsive">
+                        <table class="table table-hover">
+                          <thead class="table-light">
+                            <tr>
+                              <th>Order ID</th>
+                              <th>Retailer</th>
+                              <th>Total Amount</th>
+                              <th>Payment Status</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody id="pendingPaymentsTableBody">
+                            <!-- Rows will be dynamically populated -->
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Partial Payments Tab -->
+                <div class="tab-pane fade" id="partial-payments" role="tabpanel" aria-labelledby="partial-payments-tab">
+                  <div class="card">
+                    <div class="card-header bg-light">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Partial Payment Orders</h5>
+                        <div>
+                          <button type="button" class="btn btn-sm btn-outline-primary" id="refreshPartialOrdersBtn">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                          <thead>
+                            <tr>
+                              <th>Order ID</th>
+                              <th>Retailer</th>
+                              <th>Total Amount</th>
+                              <th>Paid Amount</th>
+                              <th>Remaining</th>
+                              <th>Status</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody id="partialPaymentsTableBody">
+                            <tr>
+                              <td colspan="7" class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                  <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading partial payment orders...</p>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span id="partialOrdersCount">Showing 0 orders</span>
+                        <nav aria-label="Page navigation">
+                          <ul class="pagination pagination-sm" id="partialOrdersPagination"></ul>
+                        </nav>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Order Details Modal -->
+  <div class="modal fade" id="viewOrderModal" tabindex="-1" aria-labelledby="viewOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewOrderModalLabel">Order Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="viewOrderModalBody">
+          <!-- Order details will be loaded here -->
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading order details...</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="printOrderBtn">
+            <i class="bi bi-printer"></i> Print
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to logout?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmLogout">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Added a floating Transaction History button -->
+  <div class="floating-button-container">
+    <button class="btn btn-primary floating-button" id="transactionHistoryBtn">
+      <i class="bi bi-clock-history"></i> Transaction History
+    </button>
+  </div>
+
+  <style>
+    .floating-button-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1050;
+    }
+
+    .floating-button {
+      border-radius: 50px;
+      padding: 10px 20px;
+      font-size: 16px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+
+  <script>
+    document.getElementById('transactionHistoryBtn').addEventListener('click', function() {
+      window.location.href = 'transactions.html';
+    });
+  </script>
+
+  <script>
+  function updateCurrentDate() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = now.toLocaleDateString(undefined, options);
+    document.getElementById('current-date').textContent = formattedDate;
+  }
+
+  // Initial call
+  updateCurrentDate();
+
+  // Optional: Update every minute if you want real-time freshness
+  setInterval(updateCurrentDate, 60000);
+</script>
+
+  <script>
+// Redirect to login page if user accessed the site directly (no referrer)
+window.onload = function () {
+  const isLoggedIn = false; // Replace this with your actual login check logic
+
+  if (document.referrer === '' && !isLoggedIn) {
+    // Redirect only if not already on login page
+    if (!window.location.pathname.includes("index.html")) {
+      window.location.href = "index.html"; // Adjust this to your actual login page path
+    }
+  }
+};
+</script>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Flatpickr for Date Picker -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- Custom JavaScript -->
+  <script src="script.js"></script>
+  <script src="billing.js"></script>
+  <!-- Modal Enhancements JavaScript -->
+  <script src="modal-enhancements.js"></script>
+  <script src="logout.js"></script>
+  
+</body>
+</html>

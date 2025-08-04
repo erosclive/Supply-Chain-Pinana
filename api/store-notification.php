@@ -6,15 +6,15 @@ require_once '../db_connection.php';
 header('Content-Type: application/json');
 
 // Function to store a notification in the database
-function storeNotification($conn, $relatedId, $type, $message) {
+function storeNotification($conn, $relatedId, $type, $message, $user_id = null) {
     // Generate a unique notification ID
     $notificationId = uniqid('notif_');
     
-    $sql = "INSERT INTO notifications (notification_id, related_id, type, message) 
-            VALUES (?, ?, ?, ?)";
+    $sql = "INSERT INTO notifications (notification_id, related_id, type, message, user_id) 
+            VALUES (?, ?, ?, ?, ?)";
     
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "ssss", $notificationId, $relatedId, $type, $message);
+    mysqli_stmt_bind_param($stmt, "ssssi", $notificationId, $relatedId, $type, $message, $user_id);
     $result = mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
     
@@ -43,11 +43,13 @@ try {
         $data = json_decode(file_get_contents('php://input'), true);
         
         if (isset($data['related_id']) && isset($data['type']) && isset($data['message'])) {
+            $user_id = $data['user_id'] ?? ($_SESSION['user_id'] ?? null);
             $success = storeNotification(
                 $conn, 
                 $data['related_id'], 
                 $data['type'], 
-                $data['message']
+                $data['message'],
+                $user_id
             );
             
             if ($success) {

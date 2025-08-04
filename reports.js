@@ -1,1759 +1,1288 @@
-import { Chart } from "@/components/ui/chart"
-// Global variables
-let currentReportData
-let filteredData
-let reportChart
-let currentReportType = "sales"
-const currentDateRange = {
-  startDate: moment().subtract(30, "days").format("YYYY-MM-DD"),
-  endDate: moment().format("YYYY-MM-DD"),
-}
-const currentFilters = {
-  category: "",
-  period: "month",
-  year: new Date().getFullYear(),
-  month: new Date().getMonth() + 1,
-}
+// Declare global chart instances
+let mainChartInstance = null;
+let secondaryChartInstance = null;
 
-// Import necessary libraries
-import $ from "jquery"
-import "daterangepicker"
-import moment from "moment"
-import * as bootstrap from "bootstrap"
+// Initialize charts and data when the document is ready
+document.addEventListener('DOMContentLoaded', async function () {
+  try {
+    initializeDateRangePicker();
+    initializeReportTypeSelector();
+    initializeChannelSelector();
+    initializeTimePeriodSelector();
+    await initializeCategorySelector();
+    await generateReports();
 
-// Initialize the page when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
-  // Initialize date range picker
-  initDateRangePicker()
-
-  // Load categories for filter
-  loadCategories()
-
-  // Set up event listeners
-  setupEventListeners()
-
-  // Initialize report tabs
-  initReportTabs()
-
-  // Generate initial report
-  generateReport()
-})
+    document.getElementById('applyFilters').addEventListener('click', generateReports);
+    document.getElementById('exportReport').addEventListener('click', exportReport);
+    document.getElementById('printReport').addEventListener('click', printReport);
+    document.getElementById('sidebarToggle').addEventListener('click', function () {
+      document.getElementById('sidebar').classList.toggle('show');
+    });
+  } catch (error) {
+    console.error('Error initializing reports:', error);
+    showErrorMessage('Failed to initialize reports. Please try again later.');
+  }
+});
 
 // Initialize date range picker
-function initDateRangePicker() {
-  $("#date-range").daterangepicker(
-    {
-      opens: "left",
-      maxDate: new Date(),
-      ranges: {
-        Today: [moment(), moment()],
-        Yesterday: [moment().subtract(1, "days"), moment().subtract(1, "days")],
-        "Last 7 Days": [moment().subtract(6, "days"), moment()],
-        "Last 30 Days": [moment().subtract(29, "days"), moment()],
-        "This Month": [moment().startOf("month"), moment().endOf("month")],
-        "Last Month": [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")],
-      },
-      startDate: moment().subtract(29, "days"),
-      endDate: moment(),
-    },
-    (start, end) => {
-      currentDateRange.startDate = start.format("YYYY-MM-DD")
-      currentDateRange.endDate = end.format("YYYY-MM-DD")
-    },
-  )
-}
-
-// Load categories for filter
-function loadCategories() {
-  fetch("fetch_categories.php")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok")
-      }
-      return response.json()
-    })
-    .then((data) => {
-      if (data.success) {
-        const categoryFilter = document.getElementById("category-filter")
-        data.categories.forEach((category) => {
-          const option = document.createElement("option")
-          option.value = category
-          option.textContent = category
-          categoryFilter.appendChild(option)
-        })
-      } else {
-        console.error("Failed to load categories:", data.message)
-      }
-    })
-    .catch((error) => {
-      console.error("Error loading categories:", error)
-    })
-}
-
-// Initialize report tabs
-function initReportTabs() {
-  const reportTabsContainer = document.getElementById("report-tabs")
-
-  if (!reportTabsContainer) {
-    console.error("Report tabs container not found")
-    return
-  }
-
-  // Create report tabs
-  reportTabsContainer.innerHTML = `
-        <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="sales-tab" data-bs-toggle="tab" data-report-type="sales" type="button" role="tab" aria-selected="true">
-                    <i class="bi bi-graph-up"></i> Sales Trend
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-report-type="products" type="button" role="tab" aria-selected="false">
-                    <i class="bi bi-box-seam"></i> Product Sales
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-report-type="inventory" type="button" role="tab" aria-selected="false">
-                    <i class="bi bi-clipboard-data"></i> Inventory
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-report-type="categories" type="button" role="tab" aria-selected="false">
-                    <i class="bi bi-tags"></i> Categories
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="payment-methods-tab" data-bs-toggle="tab" data-report-type="payment_methods" type="button" role="tab" aria-selected="false">
-                    <i class="bi bi-credit-card"></i> Payment Methods
-                </button>
-            </li>
-        </ul>
-    `
-
-  // Add event listeners to tabs
-  document.querySelectorAll("#reportTabs .nav-link").forEach((tab) => {
-    tab.addEventListener("click", function () {
-      const reportType = this.getAttribute("data-report-type")
-      currentReportType = reportType
-
-      // Update report type in filter
-      const reportTypeSelect = document.getElementById("report-type")
-      if (reportTypeSelect) {
-        reportTypeSelect.value = reportType
-      }
-
-      // Update filter visibility based on report type
-      updateFilterVisibility(reportType)
-
-      // Generate report
-      generateReport()
-    })
-  })
-}
-
-// Update filter visibility based on report type
-function updateFilterVisibility(reportType) {
-  const categoryFilterContainer = document.getElementById("category-filter-container")
-  const periodFilterContainer = document.getElementById("period-filter-container")
-  const dateRangeContainer = document.getElementById("date-range-container")
-  const yearMonthContainer = document.getElementById("year-month-container")
-
-  // Reset all filters
-  if (categoryFilterContainer) categoryFilterContainer.style.display = "block"
-  if (periodFilterContainer) periodFilterContainer.style.display = "block"
-  if (dateRangeContainer) dateRangeContainer.style.display = "block"
-  if (yearMonthContainer) yearMonthContainer.style.display = "none"
-
-  // Adjust filters based on report type
-  switch (reportType) {
-    case "inventory":
-      if (categoryFilterContainer) categoryFilterContainer.style.display = "block"
-      if (periodFilterContainer) periodFilterContainer.style.display = "none"
-      if (dateRangeContainer) dateRangeContainer.style.display = "none"
-      if (yearMonthContainer) yearMonthContainer.style.display = "block"
-      break
-
-    case "products":
-      if (categoryFilterContainer) categoryFilterContainer.style.display = "block"
-      if (periodFilterContainer) periodFilterContainer.style.display = "block"
-      break
-
-    case "categories":
-      if (categoryFilterContainer) categoryFilterContainer.style.display = "none"
-      break
-
-    case "payment_methods":
-      if (categoryFilterContainer) categoryFilterContainer.style.display = "none"
-      break
-  }
-}
-
-// Set up event listeners
-function setupEventListeners() {
-  // Generate report button
-  document.getElementById("generate-report-btn").addEventListener("click", generateReport)
-
-  // Export report button
-  document.getElementById("export-report-btn").addEventListener("click", () => {
-    const exportModal = new bootstrap.Modal(document.getElementById("exportModal"))
-    exportModal.show()
-  })
-
-  // Chart type buttons
-  document.querySelectorAll("[data-chart-type]").forEach((button) => {
-    button.addEventListener("click", function () {
-      const chartType = this.getAttribute("data-chart-type")
-      updateChartType(chartType)
-
-      // Update active state
-      document.querySelectorAll("[data-chart-type]").forEach((btn) => {
-        btn.classList.remove("active")
-      })
-      this.classList.add("active")
-    })
-  })
-
-  // Table search
-  document.getElementById("table-search").addEventListener("input", function () {
-    filterTableData(this.value)
-  })
-
-  // Export options
-  document.getElementById("exportCSV").addEventListener("click", () => exportReport("csv"))
-  document.getElementById("exportExcel").addEventListener("click", () => exportReport("excel"))
-  document.getElementById("exportPDF").addEventListener("click", () => exportReport("pdf"))
-  document.getElementById("printReport").addEventListener("click", printReport)
-
-  // Report type change
-  document.getElementById("report-type").addEventListener("change", function () {
-    currentReportType = this.value
-
-    // Update active tab
-    document.querySelectorAll("#reportTabs .nav-link").forEach((tab) => {
-      tab.classList.remove("active")
-      if (tab.getAttribute("data-report-type") === currentReportType) {
-        tab.classList.add("active")
-      }
-    })
-
-    // Update filter visibility
-    updateFilterVisibility(currentReportType)
-
-    // Update report title
-    updateReportTitle(currentReportType)
-  })
-
-  // Period filter change
-  document.getElementById("period-filter").addEventListener("change", function () {
-    currentFilters.period = this.value
-
-    // Show/hide year-month filter based on period
-    const yearMonthContainer = document.getElementById("year-month-container")
-    if (yearMonthContainer) {
-      yearMonthContainer.style.display = this.value === "custom" ? "block" : "none"
+function initializeDateRangePicker() {
+  $('input[name="daterange"]').daterangepicker({
+    opens: 'left',
+    startDate: moment(),
+    endDate: moment(),
+    ranges: {
+      'Today': [moment(), moment()],
+      'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+      'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+      'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+      'This Month': [moment().startOf('month'), moment().endOf('month')],
+      'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+      'This Quarter': [moment().startOf('quarter'), moment().endOf('quarter')],
+      'Last Quarter': [moment().subtract(1, 'quarter').startOf('quarter'), moment().subtract(1, 'quarter').endOf('quarter')],
+      'This Year': [moment().startOf('year'), moment().endOf('year')],
+      'Last Year': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
     }
   })
-
-  // Year filter change
-  document.getElementById("year-filter").addEventListener("change", function () {
-    currentFilters.year = this.value
-  })
-
-  // Month filter change
-  document.getElementById("month-filter").addEventListener("change", function () {
-    currentFilters.month = this.value
-  })
-
-  // Sidebar toggle for mobile
-  document.getElementById("sidebarToggle").addEventListener("click", () => {
-    document.getElementById("sidebar").classList.toggle("show")
-  })
+  .on('apply.daterangepicker', function(ev, picker) {
+    const tp = document.getElementById('timePeriod');
+    tp.value = 'custom';        // reset back to “Custom”
+    tp.disabled = true;         // gray it out
+    tp.classList.add('text-muted'); // optional: give it a muted look via Bootstrap
+  });
 }
 
-// Generate report based on selected filters
-function generateReport() {
-  // Get filter values
-  const reportType = document.getElementById("report-type").value
-  currentReportType = reportType
+function initializeReportTypeSelector() {
+  const reportTypeSelector = document.getElementById('reportType');
+  reportTypeSelector.addEventListener('change', function () {
+    const selectedReport = reportTypeSelector.value;
+    const categoryContainer = document.getElementById('categoryFilterContainer');
+    const categorySelect    = document.getElementById('categoryFilter');
 
-  const dateRange = document.getElementById("date-range").value
-  const category = document.getElementById("category-filter").value
-  currentFilters.category = category
+    if (selectedReport === 'salesByCategory') {
+      // reset to default…
+      categorySelect.value = 'all';
+      // …then hide & disable it
+      categoryContainer.style.display = 'none';
+      categorySelect.disabled = true;
+    } else {
+      // show & re-enable for other report types
+      categoryContainer.style.display = 'block';
+      categorySelect.disabled = false;
+    }
+  });
+}
 
-  // Parse date range
-  const dates = dateRange.split(" - ")
-  currentDateRange.startDate = moment(dates[0], "MM/DD/YYYY").format("YYYY-MM-DD")
-  currentDateRange.endDate = moment(dates[1], "MM/DD/YYYY").format("YYYY-MM-DD")
 
-  // Get period filter
-  const periodFilter = document.getElementById("period-filter").value
-  currentFilters.period = periodFilter
+// Initialize channel selector
+function initializeChannelSelector() {
+  const channelSelector = document.getElementById('channelFilter');
+  channelSelector.innerHTML = '';
 
-  // Get year and month filters
-  const yearFilter = document.getElementById("year-filter").value
-  const monthFilter = document.getElementById("month-filter").value
-  currentFilters.year = yearFilter
-  currentFilters.month = monthFilter
+  ['all', 'POS', 'Retailer'].forEach(channel => {
+    const option = document.createElement('option');
+    option.value = channel;
+    option.textContent = channel === 'all' ? 'All Channels' : channel;
+    channelSelector.appendChild(option);
+  });
 
-  // Show loading state
-  showReportLoadingState()
+  channelSelector.value = 'all';
+}
 
-  // Update report title
-  updateReportTitle(reportType)
+// Initialize category selector
+async function initializeCategorySelector() {
+  try {
+    const response = await fetch('fetch_categories.php');
+    const data = await response.json();
 
-  // Build URL based on report type and filters
-  let url = ""
+    if (data.status === 'error') throw new Error(data.message);
 
-  switch (reportType) {
-    case "inventory":
-      url = `fetch_inventory_report.php?year=${yearFilter}&month=${monthFilter}&category=${category}`
-      break
+    const categories = data.categories || [];
+    const categorySelector = document.getElementById('categoryFilter');
+    categorySelector.innerHTML = '';
 
-    default:
-      url = `fetch_reports_data.php?type=${reportType}&start_date=${currentDateRange.startDate}&end_date=${currentDateRange.endDate}&category=${category}&period=${periodFilter}`
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = 'All Categories';
+    categorySelector.appendChild(allOption);
+
+    categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      categorySelector.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error initializing category selector:', error);
+    showErrorMessage('Failed to load product categories. Using default categories.');
+
+    const defaultCategories = ['Fresh Fruit', 'Dried Fruit', 'Juices', 'Uncategorized'];
+    const categorySelector = document.getElementById('categoryFilter');
+    categorySelector.innerHTML = '';
+
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = 'All Categories';
+    categorySelector.appendChild(allOption);
+
+    defaultCategories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      categorySelector.appendChild(option);
+    });
   }
+}
 
-  console.log("Fetching data from:", url)
+// Initialize time period selector
+function initializeTimePeriodSelector() {
+  const timePeriodSelector = document.getElementById('timePeriod');
+  timePeriodSelector.addEventListener('change', function () {
+    timePeriodSelector.disabled = false;
 
-  fetch(url)
-    .then((response) => {
-      console.log("Response status:", response.status)
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`)
-      }
-      return response.json()
-    })
-    .then((data) => {
-      console.log("Data received:", data)
-      if (data.success) {
-        // Store report data
-        currentReportData = data
-        filteredData = [...data.data]
+    const selectedPeriod = timePeriodSelector.value;
+    const dateRangePicker = $('input[name="daterange"]').data('daterangepicker');
 
-        // Check if we have data
-        if (data.data.length === 0) {
-          console.log("No data returned from server")
-          showReportErrorState(data.message || "No data available for the selected filters")
-          return
+    switch (selectedPeriod) {
+      case 'weekly':
+        dateRangePicker.setStartDate(moment().subtract(1, 'week').startOf('week'));
+        dateRangePicker.setEndDate(moment().subtract(1, 'week').endOf('week'));
+        break;
+      case 'monthly':
+        dateRangePicker.setStartDate(moment().subtract(1, 'month').startOf('month'));
+        dateRangePicker.setEndDate(moment().subtract(1, 'month').endOf('month'));
+        break;
+      case 'quarterly':
+        dateRangePicker.setStartDate(moment().subtract(1, 'quarter').startOf('quarter'));
+        dateRangePicker.setEndDate(moment().subtract(1, 'quarter').endOf('quarter'));
+        break;
+      case 'yearly':
+        dateRangePicker.setStartDate(moment().subtract(1, 'year').startOf('year'));
+        dateRangePicker.setEndDate(moment().subtract(1, 'year').endOf('year'));
+        break;
+      default:
+        break;
+    }
+  });
+}
+
+// Fetch data
+async function fetchData() {
+  try {
+    const dateRange = $('input[name="daterange"]').data('daterangepicker');
+    const params = new URLSearchParams({
+      startDate: dateRange.startDate.format('YYYY-MM-DD'),
+      endDate: dateRange.endDate.format('YYYY-MM-DD'),
+      channel: document.getElementById('channelFilter').value,
+      reportType: document.getElementById('reportType').value,
+      category: document.getElementById('categoryFilter').value
+    });
+
+    const response = await fetch(`fetch_reports_data.php?${params.toString()}`);
+    const data = await response.json();
+
+    if (data.status === 'error') throw new Error(data.message);
+    return data.data || [];
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    showErrorMessage('Failed to fetch data from database. Please try again later.');
+    return [];
+  }
+}
+
+// Fetch metrics
+async function fetchSummaryMetrics() {
+  try {
+    const dateRange = $('input[name="daterange"]').data('daterangepicker');
+    const params = new URLSearchParams({
+      startDate: dateRange.startDate.format('YYYY-MM-DD'),
+      endDate: dateRange.endDate.format('YYYY-MM-DD'),
+      channel: document.getElementById('channelFilter').value,
+      category: document.getElementById('categoryFilter').value
+    });
+
+    const response = await fetch(`fetch_summary_metrics.php?${params.toString()}`);
+    const data = await response.json();
+
+    if (data.status === 'error') throw new Error(data.message);
+    return data.metrics || {
+      totalSales: 0,
+      totalProfit: 0,
+      profitMargin: 0,
+      averageOrder: 0,
+      totalOrders: 0
+    };
+  } catch (error) {
+    console.error('Error fetching summary metrics:', error);
+    return {
+      totalSales: 0,
+      totalProfit: 0,
+      profitMargin: 0,
+      averageOrder: 0,
+      totalOrders: 0
+    };
+  }
+}
+
+// Generate reports
+async function generateReports() {
+  try {
+    showLoadingIndicator();
+    const data = await fetchData();
+    const metrics = await fetchSummaryMetrics();
+    const reportType = document.getElementById('reportType').value;
+
+    clearCharts();
+
+    switch (reportType) {
+      case 'salesTrends':
+        await generateSalesTrendsReport();
+        break;
+      case 'profitAnalysis':
+        await generateProfitAnalysisReport();
+        break;
+      case 'salesByCategory':
+        await generateSalesByCategoryReport();
+        break;
+      case 'profitabilityAnalysis':
+        await generateProfitabilityAnalysisReport(data);
+        break;
+      default:
+        await generateSalesTrendsReport();
+    }
+
+    updateSummaryMetrics(metrics);
+    populateDataTable(data);
+    hideLoadingIndicator();
+  } catch (error) {
+    console.error('Error generating reports:', error);
+    hideLoadingIndicator();
+    showErrorMessage('Failed to generate reports. Please try again later.');
+  }
+}
+
+// Show/hide loading
+function showLoadingIndicator() {
+  const el = document.getElementById('loadingIndicator');
+  if (el) el.style.display = 'flex';
+}
+
+function hideLoadingIndicator() {
+  const el = document.getElementById('loadingIndicator');
+  if (el) el.style.display = 'none';
+}
+
+// Error message
+function showErrorMessage(message) {
+  const container = document.getElementById('errorContainer');
+  if (container) {
+    container.textContent = message;
+    container.style.display = 'block';
+    setTimeout(() => container.style.display = 'none', 5000);
+  }
+}
+
+// Clear previous charts
+function clearCharts() {
+  if (mainChartInstance) {
+    mainChartInstance.destroy();
+    mainChartInstance = null;
+  }
+  if (secondaryChartInstance) {
+    secondaryChartInstance.destroy();
+    secondaryChartInstance = null;
+  }
+}
+
+// Generate Sales Trends Report
+async function generateSalesTrendsReport() {
+  try {
+    const dateRange = $('input[name="daterange"]').data('daterangepicker');
+    const params = new URLSearchParams({
+      startDate: dateRange.startDate.format('YYYY-MM-DD'),
+      endDate: dateRange.endDate.format('YYYY-MM-DD'),
+      channel: document.getElementById('channelFilter').value,
+      category: document.getElementById('categoryFilter').value,
+      reportType: document.getElementById('reportType').value
+    });
+    
+
+    const resp = await fetch(`fetch_sales_trends.php?${params.toString()}`);
+    const raw = await resp.text();
+console.log('🎯 RAW RESPONSE from', raw);
+const result = JSON.parse(raw);
+    if (result.status === 'error') throw new Error(result.message);
+
+    const data = result.data;
+
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    mainChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.labels,
+        datasets: [
+          {
+            label: 'POS Sales',
+            data: data.pos,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1
+          },
+          {
+            label: 'Retailer Sales',
+            data: data.retailer,
+            borderColor: 'rgba(153, 102, 255, 1)',
+            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+            tension: 0.1
+          },
+          {
+            label: 'Total Sales',
+            data: data.total,
+            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            tension: 0.1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: true, text: 'Sales Trends by Channel' },
+          tooltip: {
+            callbacks: {
+              label: ctx => ctx.dataset.label + ': ₱' + ctx.raw.toLocaleString()
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: value => '₱' + value.toLocaleString()
+            }
+          }
         }
-
-        // Update report with fetched data
-        updateReportSummary(data)
-        updateReportChart(data)
-        updateReportTable(data)
-      } else {
-        throw new Error(data.message || "Failed to load report data")
       }
-    })
-    .catch((error) => {
-      console.error("Error loading report data:", error)
-      showReportErrorState(error.message)
-    })
-}
-
-// Show loading state for report
-function showReportLoadingState() {
-  // Summary loading state
-  document.getElementById("report-summary").innerHTML = `
-        <div class="col-12 text-center py-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Loading report data...</p>
-        </div>
-    `
-
-  // Chart loading state
-  if (reportChart) {
-    reportChart.destroy()
-  }
-
-  const chartCanvas = document.getElementById("report-chart")
-  if (chartCanvas) {
-    const ctx = chartCanvas.getContext("2d")
-    ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height)
-  }
-
-  // Table loading state
-  document.getElementById("report-table-head").innerHTML = "<tr><th>Loading...</th></tr>"
-  document.getElementById("report-table-body").innerHTML = `
-        <tr>
-            <td class="text-center py-3">
-                <div class="spinner-border spinner-border-sm text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <span class="ms-2">Loading data...</span>
-            </td>
-        </tr>
-    `
-
-  // Reset pagination and counts
-  document.getElementById("showing-entries").textContent = "0"
-  document.getElementById("total-entries").textContent = "0"
-  document.getElementById("table-pagination").innerHTML = ""
-}
-
-// Show error state for report
-function showReportErrorState(errorMessage) {
-  // Summary error state
-  document.getElementById("report-summary").innerHTML = `
-        <div class="col-12 text-center py-4">
-            <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                ${errorMessage || "Failed to load report data"}
-            </div>
-        </div>
-    `
-
-  // Chart error state
-  if (reportChart) {
-    reportChart.destroy()
-  }
-
-  // Table error state
-  document.getElementById("report-table-head").innerHTML = "<tr><th>Error</th></tr>"
-  document.getElementById("report-table-body").innerHTML = `
-        <tr>
-            <td class="text-center py-3 text-danger">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                ${errorMessage || "Failed to load data"}
-            </td>
-        </tr>
-    `
-
-  // Reset pagination and counts
-  document.getElementById("showing-entries").textContent = "0"
-  document.getElementById("total-entries").textContent = "0"
-  document.getElementById("table-pagination").innerHTML = ""
-}
-
-// Update report title based on report type
-function updateReportTitle(reportType) {
-  const titleElement = document.getElementById("report-title")
-  const visualizationTitleElement = document.getElementById("visualization-title")
-
-  switch (reportType) {
-    case "sales":
-      titleElement.textContent = "Sales Report"
-      visualizationTitleElement.textContent = "Sales Trend"
-      break
-    case "products":
-      titleElement.textContent = "Product Sales Report"
-      visualizationTitleElement.textContent = "Top Products by Revenue"
-      break
-    case "inventory":
-      titleElement.textContent = "Inventory Report"
-      visualizationTitleElement.textContent = "Inventory Status"
-      break
-    case "categories":
-      titleElement.textContent = "Category Sales Report"
-      visualizationTitleElement.textContent = "Revenue by Category"
-      break
-    case "payment_methods":
-      titleElement.textContent = "Payment Methods Report"
-      visualizationTitleElement.textContent = "Payment Methods Distribution"
-      break
-    default:
-      titleElement.textContent = "Sales Report"
-      visualizationTitleElement.textContent = "Sales Trend"
-  }
-}
-
-// Update report summary cards
-function updateReportSummary(data) {
-  const summaryElement = document.getElementById("report-summary")
-  let summaryHTML = ""
-
-  // Format currency
-  const formatCurrency = (value) => {
-    return (
-      "₱" +
-      Number.parseFloat(value).toLocaleString("en-PH", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    )
-  }
-
-  // Generate summary cards based on report type
-  switch (data.report_type) {
-    case "sales":
-      // Calculate totals
-      const totalSales = data.data.reduce((sum, item) => sum + Number.parseFloat(item.total_sales || 0), 0)
-      const totalTransactions = data.data.reduce((sum, item) => sum + Number.parseInt(item.transaction_count || 0), 0)
-      const avgTransactionValue = totalTransactions > 0 ? totalSales / totalTransactions : 0
-      const totalTax = data.data.reduce((sum, item) => sum + Number.parseFloat(item.total_tax || 0), 0)
-      const totalDiscount = data.data.reduce((sum, item) => sum + Number.parseFloat(item.total_discount || 0), 0)
-
-      summaryHTML = `
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Total Sales</h6>
-                                    <h4 class="card-title mb-0">${formatCurrency(totalSales)}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-currency-dollar text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Transactions</h6>
-                                    <h4 class="card-title mb-0">${totalTransactions.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-receipt text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Avg. Transaction</h6>
-                                    <h4 class="card-title mb-0">${formatCurrency(avgTransactionValue)}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-cash-stack text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `
-      break
-
-    case "products":
-      // Calculate totals
-      const totalUnitsSold = data.data.reduce((sum, item) => sum + Number.parseInt(item.units_sold || 0), 0)
-      const totalRevenue = data.data.reduce((sum, item) => sum + Number.parseFloat(item.total_revenue || 0), 0)
-      const productCount = data.data.length
-
-      summaryHTML = `
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Total Revenue</h6>
-                                    <h4 class="card-title mb-0">${formatCurrency(totalRevenue)}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-currency-dollar text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Units Sold</h6>
-                                    <h4 class="card-title mb-0">${totalUnitsSold.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-box-seam text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Products Sold</h6>
-                                    <h4 class="card-title mb-0">${productCount.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-grid text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `
-      break
-
-    case "inventory":
-      // Calculate inventory stats
-      const totalProducts = data.data.length
-      const totalStock = data.data.reduce((sum, item) => sum + Number.parseInt(item.stocks || 0), 0)
-      const lowStockCount = data.data.filter((item) => item.status === "Low Stock").length
-      const outOfStockCount = data.data.filter((item) => item.status === "Out of Stock").length
-
-      summaryHTML = `
-                <div class="col-md-3 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Total Products</h6>
-                                    <h4 class="card-title mb-0">${totalProducts.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-box text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Total Stock</h6>
-                                    <h4 class="card-title mb-0">${totalStock.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-boxes text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Low Stock</h6>
-                                    <h4 class="card-title mb-0">${lowStockCount.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-warning bg-opacity-10 rounded">
-                                    <i class="bi bi-exclamation-triangle text-warning fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Out of Stock</h6>
-                                    <h4 class="card-title mb-0">${outOfStockCount.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-danger bg-opacity-10 rounded">
-                                    <i class="bi bi-x-circle text-danger fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `
-      break
-
-    case "categories":
-      // Calculate totals
-      const totalCategoryRevenue = data.data.reduce((sum, item) => sum + Number.parseFloat(item.total_revenue || 0), 0)
-      const totalCategoryUnitsSold = data.data.reduce((sum, item) => sum + Number.parseInt(item.units_sold || 0), 0)
-      const categoryCount = data.data.length
-
-      summaryHTML = `
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Total Revenue</h6>
-                                    <h4 class="card-title mb-0">${formatCurrency(totalCategoryRevenue)}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-currency-dollar text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Units Sold</h6>
-                                    <h4 class="card-title mb-0">${totalCategoryUnitsSold.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-box-seam text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Categories</h6>
-                                    <h4 class="card-title mb-0">${categoryCount.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-tags text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `
-      break
-
-    case "payment_methods":
-      // Calculate totals
-      const totalPaymentAmount = data.data.reduce((sum, item) => sum + Number.parseFloat(item.total_amount || 0), 0)
-      const totalPaymentCount = data.data.reduce((sum, item) => sum + Number.parseInt(item.payment_count || 0), 0)
-      const methodCount = data.data.length
-
-      summaryHTML = `
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Total Amount</h6>
-                                    <h4 class="card-title mb-0">${formatCurrency(totalPaymentAmount)}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-currency-dollar text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Payment Count</h6>
-                                    <h4 class="card-title mb-0">${totalPaymentCount.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-credit-card text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Payment Methods</h6>
-                                    <h4 class="card-title mb-0">${methodCount.toLocaleString()}</h4>
-                                </div>
-                                <div class="p-2 bg-light rounded">
-                                    <i class="bi bi-wallet2 text-primary fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `
-      break
-
-    default:
-      summaryHTML = `
-                <div class="col-12">
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        Unknown report type: ${data.report_type}
-                    </div>
-                </div>
-            `
-  }
-
-  // Update summary element
-  summaryElement.innerHTML = summaryHTML
-}
-
-// Update report chart
-function updateReportChart(data) {
-  const ctx = document.getElementById("report-chart").getContext("2d")
-
-  // Destroy existing chart if it exists
-  if (reportChart) {
-    reportChart.destroy()
-  }
-
-  // Format currency
-  const formatCurrency = (value) => {
-    return (
-      "₱" +
-      Number.parseFloat(value).toLocaleString("en-PH", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    )
-  }
-
-  // Generate chart based on report type
-  let chartConfig
-
-  switch (data.report_type) {
-    case "sales":
-      // Sort data by date ascending
-      const sortedSalesData = [...data.data].sort((a, b) => new Date(a.date) - new Date(b.date))
-
-      // Extract labels and values
-      const salesLabels = sortedSalesData.map((item) => {
-        const date = new Date(item.date)
-        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-      })
-
-      const salesValues = sortedSalesData.map((item) => Number.parseFloat(item.total_sales || 0))
-
-      chartConfig = {
-        type: "bar",
-        data: {
-          labels: salesLabels,
-          datasets: [
-            {
-              label: "Sales",
-              data: salesValues,
-              backgroundColor: "rgba(248, 215, 117, 0.7)",
-              borderColor: "rgba(248, 215, 117, 1)",
-              borderWidth: 1,
-              borderRadius: 4,
-              maxBarThickness: 35,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false,
-            },
-            tooltip: {
-              callbacks: {
-                label: (context) => formatCurrency(context.raw),
-              },
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: (value) => formatCurrency(value),
-              },
-            },
-          },
-        },
-      }
-      break
-
-    case "products":
-      // Sort data by revenue descending and take top 10
-      const sortedProductsData = [...data.data]
-        .sort((a, b) => Number.parseFloat(b.total_revenue || 0) - Number.parseFloat(a.total_revenue || 0))
-        .slice(0, 10)
-
-      // Extract labels and values
-      const productLabels = sortedProductsData.map((item) => item.product_name)
-      const productValues = sortedProductsData.map((item) => Number.parseFloat(item.total_revenue || 0))
-
-      chartConfig = {
-        type: "bar",
-        data: {
-          labels: productLabels,
-          datasets: [
-            {
-              label: "Revenue",
-              data: productValues,
-              backgroundColor: "rgba(248, 215, 117, 0.7)",
-              borderColor: "rgba(248, 215, 117, 1)",
-              borderWidth: 1,
-              borderRadius: 4,
-              maxBarThickness: 35,
-            },
-          ],
-        },
-        options: {
-          indexAxis: "y",
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false,
-            },
-            tooltip: {
-              callbacks: {
-                label: (context) => formatCurrency(context.raw),
-              },
-            },
-          },
-          scales: {
-            x: {
-              beginAtZero: true,
-              ticks: {
-                callback: (value) => formatCurrency(value),
-              },
-            },
-          },
-        },
-      }
-      break
-
-    case "inventory":
-      // Count products by status
-      const statusCounts = {
-        "In Stock": data.data.filter((item) => item.status === "In Stock").length,
-        "Low Stock": data.data.filter((item) => item.status === "Low Stock").length,
-        "Out of Stock": data.data.filter((item) => item.status === "Out of Stock").length,
-      }
-
-      // Extract labels and values
-      const statusLabels = Object.keys(statusCounts)
-      const statusValues = Object.values(statusCounts)
-
-      // Generate colors
-      const statusColors = [
-        "rgba(25, 135, 84, 0.7)", // In Stock - Green
-        "rgba(255, 193, 7, 0.7)", // Low Stock - Yellow
-        "rgba(220, 53, 69, 0.7)", // Out of Stock - Red
-      ]
-
-      const statusBorderColors = ["rgba(25, 135, 84, 1)", "rgba(255, 193, 7, 1)", "rgba(220, 53, 69, 1)"]
-
-      chartConfig = {
-        type: "pie",
-        data: {
-          labels: statusLabels,
-          datasets: [
-            {
-              data: statusValues,
-              backgroundColor: statusColors,
-              borderColor: statusBorderColors,
-              borderWidth: 1,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "right",
-              labels: {
-                boxWidth: 12,
-                padding: 10,
-              },
-            },
-            tooltip: {
-              callbacks: {
-                label: (context) => {
-                  const label = context.label || ""
-                  const value = context.raw
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                  const percentage = Math.round((value / total) * 100)
-                  return `${label}: ${value} (${percentage}%)`
-                },
-              },
-            },
-          },
-        },
-      }
-      break
-
-    case "categories":
-      // Sort data by revenue descending
-      const sortedCategoriesData = [...data.data].sort(
-        (a, b) => Number.parseFloat(b.total_revenue || 0) - Number.parseFloat(a.total_revenue || 0),
-      )
-
-      // Extract labels and values
-      const categoryLabels = sortedCategoriesData.map((item) => item.category)
-      const categoryValues = sortedCategoriesData.map((item) => Number.parseFloat(item.total_revenue || 0))
-
-      // Generate colors
-      const backgroundColors = [
-        "rgba(248, 215, 117, 0.7)",
-        "rgba(220, 53, 69, 0.7)",
-        "rgba(25, 135, 84, 0.7)",
-        "rgba(255, 193, 7, 0.7)",
-        "rgba(111, 66, 193, 0.7)",
-        "rgba(23, 162, 184, 0.7)",
-        "rgba(102, 16, 242, 0.7)",
-        "rgba(253, 126, 20, 0.7)",
-        "rgba(32, 201, 151, 0.7)",
-        "rgba(108, 117, 125, 0.7)",
-      ]
-
-      const borderColors = backgroundColors.map((color) => color.replace("0.7", "1"))
-
-      chartConfig = {
-        type: "pie",
-        data: {
-          labels: categoryLabels,
-          datasets: [
-            {
-              data: categoryValues,
-              backgroundColor: backgroundColors.slice(0, categoryLabels.length),
-              borderColor: borderColors.slice(0, categoryLabels.length),
-              borderWidth: 1,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "right",
-              labels: {
-                boxWidth: 12,
-                padding: 10,
-              },
-            },
-            tooltip: {
-              callbacks: {
-                label: (context) => {
-                  const label = context.label || ""
-                  const value = context.raw
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                  const percentage = Math.round((value / total) * 100)
-                  return `${label}: ${formatCurrency(value)} (${percentage}%)`
-                },
-              },
-            },
-          },
-        },
-      }
-      break
-
-    case "payment_methods":
-      // Extract labels and values
-      const methodLabels = data.data.map((item) => item.method_name)
-      const methodValues = data.data.map((item) => Number.parseFloat(item.total_amount || 0))
-
-      // Generate colors
-      const methodBackgroundColors = [
-        "rgba(248, 215, 117, 0.7)",
-        "rgba(220, 53, 69, 0.7)",
-        "rgba(25, 135, 84, 0.7)",
-        "rgba(255, 193, 7, 0.7)",
-        "rgba(111, 66, 193, 0.7)",
-      ]
-
-      const methodBorderColors = methodBackgroundColors.map((color) => color.replace("0.7", "1"))
-
-      chartConfig = {
-        type: "doughnut",
-        data: {
-          labels: methodLabels,
-          datasets: [
-            {
-              data: methodValues,
-              backgroundColor: methodBackgroundColors.slice(0, methodLabels.length),
-              borderColor: methodBorderColors.slice(0, methodLabels.length),
-              borderWidth: 1,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "right",
-              labels: {
-                boxWidth: 12,
-                padding: 10,
-              },
-            },
-            tooltip: {
-              callbacks: {
-                label: (context) => {
-                  const label = context.label || ""
-                  const value = context.raw
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                  const percentage = Math.round((value / total) * 100)
-                  return `${label}: ${formatCurrency(value)} (${percentage}%)`
-                },
-              },
-            },
-          },
-          cutout: "60%",
-        },
-      }
-      break
-
-    default:
-      // Default empty chart
-      chartConfig = {
-        type: "bar",
-        data: {
-          labels: [],
-          datasets: [
-            {
-              label: "No Data",
-              data: [],
-              backgroundColor: "rgba(248, 215, 117, 0.7)",
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false,
-            },
-          },
-        },
-      }
-  }
-
-  // Create new chart
-  reportChart = new Chart(ctx, chartConfig)
-}
-
-// Update chart type (bar or line)
-function updateChartType(chartType) {
-  if (!reportChart || !currentReportData) return
-
-  // Only applicable for sales report
-  if (currentReportData.report_type !== "sales") return
-
-  // Update chart type
-  reportChart.config.type = chartType
-
-  // Update chart
-  reportChart.update()
-}
-
-// Update report table
-function updateReportTable(data) {
-  const tableHead = document.getElementById("report-table-head")
-  const tableBody = document.getElementById("report-table-body")
-
-  // Format currency
-  const formatCurrency = (value) => {
-    return (
-      "₱" +
-      Number.parseFloat(value).toLocaleString("en-PH", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    )
-  }
-
-  // Generate table headers and rows based on report type
-  let headHTML = ""
-  let bodyHTML = ""
-
-  switch (data.report_type) {
-    case "sales":
-      headHTML = `
-                <tr>
-                    <th>Date</th>
-                    <th class="text-center">Transactions</th>
-                    <th class="text-end">Total Sales</th>
-                    <th class="text-end">Avg. Transaction</th>
-                    <th class="text-end">Tax</th>
-                    <th class="text-end">Discount</th>
-                </tr>
-            `
-
-      // Sort data by date descending
-      const sortedSalesData = [...data.data].sort((a, b) => new Date(b.date) - new Date(a.date))
-
-      sortedSalesData.forEach((item) => {
-        const date = new Date(item.date)
-        const formattedDate = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-
-        const transactionCount = Number.parseInt(item.transaction_count || 0)
-        const totalSales = Number.parseFloat(item.total_sales || 0)
-        const avgTransaction = transactionCount > 0 ? totalSales / transactionCount : 0
-
-        bodyHTML += `
-                    <tr>
-                        <td>${formattedDate}</td>
-                        <td class="text-center">${transactionCount.toLocaleString()}</td>
-                        <td class="text-end">${formatCurrency(totalSales)}</td>
-                        <td class="text-end">${formatCurrency(avgTransaction)}</td>
-                        <td class="text-end">${formatCurrency(item.total_tax || 0)}</td>
-                        <td class="text-end">${formatCurrency(item.total_discount || 0)}</td>
-                    </tr>
-                `
-      })
-      break
-
-    case "products":
-      headHTML = `
-                <tr>
-                    <th>Product</th>
-                    <th>Category</th>
-                    <th class="text-center">Units Sold</th>
-                    <th class="text-end">Avg. Price</th>
-                    <th class="text-end">Revenue</th>
-                    <th class="text-center">Transactions</th>
-                </tr>
-            `
-
-      // Sort data by revenue descending
-      const sortedProductsData = [...data.data].sort(
-        (a, b) => Number.parseFloat(b.total_revenue || 0) - Number.parseFloat(a.total_revenue || 0),
-      )
-
-      sortedProductsData.forEach((item) => {
-        bodyHTML += `
-                    <tr>
-                        <td>${item.product_name}</td>
-                        <td>${item.category || "N/A"}</td>
-                        <td class="text-center">${Number.parseInt(item.units_sold || 0).toLocaleString()}</td>
-                        <td class="text-end">${formatCurrency(item.avg_price || 0)}</td>
-                        <td class="text-end">${formatCurrency(item.total_revenue || 0)}</td>
-                        <td class="text-center">${Number.parseInt(item.transaction_count || 0).toLocaleString()}</td>
-                    </tr>
-                `
-      })
-      break
-
-    case "inventory":
-      headHTML = `
-                <tr>
-                    <th>Product ID</th>
-                    <th>Product Name</th>
-                    <th>Category</th>
-                    <th class="text-center">Stock</th>
-                    <th class="text-end">Price</th>
-                    <th>Expiration Date</th>
-                    <th>Status</th>
-                    <th>Last Updated</th>
-                </tr>
-            `
-
-      // Sort data by stock level (ascending)
-      const sortedInventoryData = [...data.data].sort(
-        (a, b) => Number.parseInt(a.stocks || 0) - Number.parseInt(b.stocks || 0),
-      )
-
-      sortedInventoryData.forEach((item) => {
-        // Determine status class
-        let statusClass = ""
-        switch (item.status) {
-          case "In Stock":
-            statusClass = "bg-success"
-            break
-          case "Low Stock":
-            statusClass = "bg-warning"
-            break
-          case "Out of Stock":
-            statusClass = "bg-danger"
-            break
+    });
+
+    const totalPOS = data.pos.reduce((sum, value) => sum + value, 0);
+    const totalRetailer = data.retailer.reduce((sum, value) => sum + value, 0);
+
+    const secondaryCtx = document.getElementById('secondaryChart').getContext('2d');
+    secondaryChartInstance = new Chart(secondaryCtx, {
+      type: 'pie',
+      data: {
+        labels: ['POS', 'Retailer'],
+        datasets: [{
+          data: [totalPOS, totalRetailer],
+          backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: true, text: 'Sales Distribution by Channel' },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const label = ctx.label || '';
+                const value = ctx.raw;
+                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((value / total) * 100);
+                return `${label}: ₱${value.toLocaleString()} (${percentage}%)`;
+              }
+            }
+          }
         }
+      }
+    });
 
-        // Format expiration date
-        const expirationDate =
-          item.expiration_date && item.expiration_date !== "0000-00-00"
-            ? new Date(item.expiration_date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
-            : "N/A"
-
-        // Format updated date
-        const updatedDate = item.updated_at
-          ? new Date(item.updated_at).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "N/A"
-
-        bodyHTML += `
-                    <tr>
-                        <td>${item.product_id}</td>
-                        <td>${item.product_name}</td>
-                        <td>${item.category || "N/A"}</td>
-                        <td class="text-center">${Number.parseInt(item.stocks || 0).toLocaleString()}</td>
-                        <td class="text-end">${formatCurrency(item.price || 0)}</td>
-                        <td>${expirationDate}</td>
-                        <td><span class="badge ${statusClass}">${item.status}</span></td>
-                        <td>${updatedDate}</td>
-                    </tr>
-                `
-      })
-      break
-
-    case "categories":
-      headHTML = `
-                <tr>
-                    <th>Category</th>
-                    <th class="text-center">Products</th>
-                    <th class="text-center">Units Sold</th>
-                    <th class="text-end">Revenue</th>
-                    <th class="text-center">Transactions</th>
-                </tr>
-            `
-
-      // Sort data by revenue descending
-      const sortedCategoriesData = [...data.data].sort(
-        (a, b) => Number.parseFloat(b.total_revenue || 0) - Number.parseFloat(a.total_revenue || 0),
-      )
-
-      sortedCategoriesData.forEach((item) => {
-        bodyHTML += `
-                    <tr>
-                        <td>${item.category}</td>
-                        <td class="text-center">${Number.parseInt(item.product_count || 0).toLocaleString()}</td>
-                        <td class="text-center">${Number.parseInt(item.units_sold || 0).toLocaleString()}</td>
-                        <td class="text-end">${formatCurrency(item.total_revenue || 0)}</td>
-                        <td class="text-center">${Number.parseInt(item.transaction_count || 0).toLocaleString()}</td>
-                    </tr>
-                `
-      })
-      break
-
-    case "payment_methods":
-      headHTML = `
-                <tr>
-                    <th>Payment Method</th>
-                    <th class="text-center">Payment Count</th>
-                    <th class="text-end">Total Amount</th>
-                    <th class="text-end">Avg. Amount</th>
-                    <th class="text-center">Transactions</th>
-                </tr>
-            `
-
-      // Sort data by total amount descending
-      const sortedMethodsData = [...data.data].sort(
-        (a, b) => Number.parseFloat(b.total_amount || 0) - Number.parseFloat(a.total_amount || 0),
-      )
-
-      sortedMethodsData.forEach((item) => {
-        bodyHTML += `
-                    <tr>
-                        <td>${item.method_name}</td>
-                        <td class="text-center">${Number.parseInt(item.payment_count || 0).toLocaleString()}</td>
-                        <td class="text-end">${formatCurrency(item.total_amount || 0)}</td>
-                        <td class="text-end">${formatCurrency(item.avg_amount || 0)}</td>
-                        <td class="text-center">${Number.parseInt(item.transaction_count || 0).toLocaleString()}</td>
-                    </tr>
-                `
-      })
-      break
-
-    default:
-      headHTML = `<tr><th>No data available</th></tr>`
-      bodyHTML = `<tr><td>No data available for the selected report type</td></tr>`
+    document.getElementById('reportTitle').textContent = 'Sales Trends Report';
+  } catch (error) {
+    console.error('Error generating sales trends report:', error);
+    showErrorMessage('Failed to generate sales trends report. Please try again later.');
   }
-
-  // Update table
-  tableHead.innerHTML = headHTML
-  tableBody.innerHTML = bodyHTML
-
-  // Update pagination and counts
-  document.getElementById("showing-entries").textContent = data.data.length
-  document.getElementById("total-entries").textContent = data.data.length
-
-  // Simple pagination (can be enhanced for larger datasets)
-  updatePagination(data.data.length, 1, 10)
 }
 
-// Filter table data based on search term
-function filterTableData(searchTerm) {
-  if (!currentReportData || !filteredData) return
-
-  searchTerm = searchTerm.toLowerCase()
-
-  if (searchTerm === "") {
-    // Reset to original data
-    filteredData = [...currentReportData.data]
-  } else {
-    // Filter data based on search term
-    filteredData = currentReportData.data.filter((item) => {
-      // Check all properties for a match
-      return Object.values(item).some((value) => {
-        if (value === null || value === undefined) return false
-        return value.toString().toLowerCase().includes(searchTerm)
-      })
-    })
+// Generate Profit Analysis Report
+async function generateProfitAnalysisReport() {
+  try {
+    const dateRange = $('input[name="daterange"]').data('daterangepicker');
+    const startDate = dateRange.startDate.format('YYYY-MM-DD');
+    const endDate = dateRange.endDate.format('YYYY-MM-DD');
+    const channelFilter = document.getElementById('channelFilter').value;
+    
+    // Build query parameters
+    const params = new URLSearchParams({
+      startDate: startDate,
+      endDate: endDate,
+      channel: channelFilter
+    });
+    
+    // Fetch profit analysis data from PHP backend
+    const response = await fetch(`fetch_profit_analysis.php?${params.toString()}`);
+    const result = await response.json();
+    
+    if (result.status === 'error') {
+      throw new Error(result.message);
+    }
+    
+    const data = result.data;
+    
+    // Create chart
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          {
+            label: 'Sales',
+            data: data.sales,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            order: 2
+          },
+          {
+            label: 'Cost',
+            data: data.costs,
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            order: 3
+          },
+          {
+            label: 'Profit',
+            data: data.profits,
+            type: 'line',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+            order: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Profit Analysis Over Time'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': ₱' + context.raw.toLocaleString();
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '₱' + value.toLocaleString();
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Create secondary chart - Profit Margin by Channel
+    const channels = Object.keys(data.byChannel);
+    const margins = channels.map(channel => data.byChannel[channel].margin);
+    
+    const secondaryCtx = document.getElementById('secondaryChart').getContext('2d');
+    new Chart(secondaryCtx, {
+      type: 'bar',
+      data: {
+        labels: channels,
+        datasets: [{
+          label: 'Profit Margin (%)',
+          data: margins,
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Profit Margin by Channel'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return value.toFixed(1) + '%';
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Update report title
+    document.getElementById('reportTitle').textContent = 'Profit Analysis Report';
+  } catch (error) {
+    console.error('Error generating profit analysis report:', error);
+    showErrorMessage('Failed to generate profit analysis report. Please try again later.');
   }
+}
 
-  // Update table with filtered data
-  const filteredDataObj = {
-    ...currentReportData,
-    data: filteredData,
+// Generate Sales by Category Report
+async function generateSalesByCategoryReport() {
+  try {
+    // ─── 1) Read filters ───────────────────────────────────────────────────────
+    const dateRange      = $('input[name="daterange"]').data('daterangepicker');
+    const startDate      = dateRange.startDate.format('YYYY-MM-DD');
+    const endDate        = dateRange.endDate.format('YYYY-MM-DD');
+    const channelFilter  = document.getElementById('channelFilter').value;
+    const categoryFilter = document.getElementById('categoryFilter').value;
+
+    // ─── 2) Fetch data ─────────────────────────────────────────────────────────
+    const params = new URLSearchParams({
+      startDate,
+      endDate,
+      channel:  channelFilter,
+      category: categoryFilter
+    });
+    const resp   = await fetch(`fetch_sales_by_category.php?${params}`);
+    const raw    = await resp.text();
+    console.log('🎯 RAW RESPONSE:', raw);
+    const result = JSON.parse(raw);
+    if (result.status === 'error') throw new Error(result.message);
+    const data = result.data;
+
+    // ─── 3) Normalize strings → numbers ────────────────────────────────────────
+    // Use toString() so replace() always works
+    const cleanNum = v => parseInt(v.toString().replace(/,/g,''), 10) || 0;
+
+    const salesNums    = data.sales.map(cleanNum);
+    const posNums      = data.byChannel.POS.map(cleanNum);
+    const retailerNums = data.byChannel.Retailer.map(cleanNum);
+
+    // ─── 4) Destroy old charts (avoid “canvas in use” errors) ─────────────────
+    if (mainChartInstance) {
+      mainChartInstance.destroy();
+      mainChartInstance = null;
+    }
+    if (secondaryChartInstance) {
+      secondaryChartInstance.destroy();
+      secondaryChartInstance = null;
+    }
+
+    // ─── 5) Main “Sales by Category” bar ───────────────────────────────────────
+    const mainCtx = document.getElementById('mainChart').getContext('2d');
+    mainChartInstance = new Chart(mainCtx, {
+      type: 'bar',
+      data: {
+        labels: data.categories,
+        datasets: [{
+          label: 'Sales by Category',
+          data: salesNums,
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(54, 162, 235, 0.6)'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title:      { display: true, text: 'Sales by Product Category' },
+          tooltip:    { callbacks: { label: ctx => `${ctx.dataset.label}: ₱${ctx.raw.toLocaleString()}` } }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks:       { callback: v => `₱${v.toLocaleString()}` }
+          }
+        }
+      }
+    });
+
+    // ─── 6) Secondary “Category Sales by Channel” stacked bar ──────────────────
+  const secondaryCtx = document
+  .getElementById('secondaryChart')
+  .getContext('2d');
+
+// pre-compute the grand total once
+const grandTotal = data.sales.reduce((sum, v) => sum + v, 0);
+
+secondaryChartInstance = new Chart(secondaryCtx, {
+  type: 'doughnut',
+  data: {
+    labels: data.categories,   // still show Beverages, Detergent, etc.
+    datasets: [{
+      data: data.sales,
+      backgroundColor: [
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(153, 102, 255, 0.6)',
+        'rgba(255, 159, 64, 0.6)',
+        'rgba(255, 99, 132, 0.6)'
+      ]
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '50%',
+    plugins: {
+      legend: { display: true },
+      title: {
+        display: true,
+        text: 'Sales Composition by Category & Channel'
+      },
+      tooltip: {
+        callbacks: {
+          title: ctx => ctx[0].label,  // category name
+          label: ctx => {
+            const i   = ctx.dataIndex;
+            const pos = data.byChannel.POS[i];
+            const ret = data.byChannel.Retailer[i];
+            const tot = data.sales[i];
+            // helper to compute % of grandTotal
+            const pct = x => grandTotal
+              ? ((x / grandTotal) * 100).toFixed(1) + '%'
+              : '0%';
+
+            return [
+              `POS:      ${pct(pos)}`,
+              `Retailer: ${pct(ret)}`,
+              `Total:    ${pct(tot)}`
+            ];
+          }
+        }
+      }
+    }
   }
+});
 
-  updateReportTable(filteredDataObj)
+
+    // ─── 7) Update report title ─────────────────────────────────────────────────
+    document.getElementById('reportTitle').textContent = 'Sales by Category Report';
+
+  } catch (error) {
+    console.error('Error generating sales by category report:', error);
+    showErrorMessage('Failed to generate sales by category report. Please try again later.');
+  }
+}
+
+
+// Generate Profitability Analysis Report
+function generateProfitabilityAnalysisReport(data) {
+  try {
+    // Group data by category for profitability analysis
+    const profitabilityByCategory = data.reduce((acc, item) => {
+      const category = item.category;
+      if (!acc[category]) {
+        acc[category] = { sales: 0, cost: 0 };
+      }
+      acc[category].sales += item.amount;
+      acc[category].cost += item.cost;
+      return acc;
+    }, {});
+    
+    // Calculate profit and margin for each category
+    const categories = Object.keys(profitabilityByCategory);
+    const profits = categories.map(category => profitabilityByCategory[category].sales - profitabilityByCategory[category].cost);
+    const margins = categories.map(category => {
+      const data = profitabilityByCategory[category];
+      return ((data.sales - data.cost) / data.sales) * 100;
+    });
+    
+    // Create chart
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: categories,
+        datasets: [
+          {
+            label: 'Profit (₱)',
+            data: profits,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            yAxisID: 'y'
+          },
+          {
+            label: 'Profit Margin (%)',
+            data: margins,
+            backgroundColor: 'rgba(153, 102, 255, 0.6)',
+            type: 'line',
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Profitability Analysis by Category'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                if (context.dataset.label === 'Profit (₱)') {
+                  return context.dataset.label + ': ₱' + context.raw.toLocaleString();
+                } else {
+                  return context.dataset.label + ': ' + context.raw.toFixed(1) + '%';
+                }
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Profit (₱)'
+            },
+            ticks: {
+              callback: function(value) {
+                return '₱' + value.toLocaleString();
+              }
+            }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Profit Margin (%)'
+            },
+            ticks: {
+              callback: function(value) {
+                return value.toFixed(1) + '%';
+              }
+            },
+            grid: {
+              drawOnChartArea: false
+            }
+          }
+        }
+      }
+    });
+    
+    // Group data by date for profitability trend
+    const profitabilityByDate = data.reduce((acc, item) => {
+      const date = item.date;
+      if (!acc[date]) {
+        acc[date] = { sales: 0, cost: 0 };
+      }
+      acc[date].sales += item.amount;
+      acc[date].cost += item.cost;
+      return acc;
+    }, {});
+    
+    const dates = Object.keys(profitabilityByDate).sort();
+    const profitsByDate = dates.map(date => profitabilityByDate[date].sales - profitabilityByDate[date].cost);
+    const marginsByDate = dates.map(date => {
+      const data = profitabilityByDate[date];
+      return ((data.sales - data.cost) / data.sales) * 100;
+    });
+    
+    const secondaryCtx = document.getElementById('secondaryChart').getContext('2d');
+    new Chart(secondaryCtx, {
+      type: 'line',
+      data: {
+        labels: dates.map(date => formatDate(date)),
+        datasets: [
+          {
+            label: 'Profit',
+            data: profitsByDate,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            yAxisID: 'y'
+          },
+          {
+            label: 'Profit Margin (%)',
+            data: marginsByDate,
+            borderColor: 'rgba(153, 102, 255, 1)',
+            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Profitability Trend Over Time'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                if (context.dataset.label === 'Profit') {
+                  return context.dataset.label + ': ₱' + context.raw.toLocaleString();
+                } else {
+                  return context.dataset.label + ': ' + context.raw.toFixed(1) + '%';
+                }
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Profit (₱)'
+            },
+            ticks: {
+              callback: function(value) {
+                return '₱' + value.toLocaleString();
+              }
+            }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Profit Margin (%)'
+            },
+            ticks: {
+              callback: function(value) {
+                return value.toFixed(1) + '%';
+              }
+            },
+            grid: {
+              drawOnChartArea: false
+            }
+          }
+        }
+      }
+    });
+    
+    // Update report title
+    document.getElementById('reportTitle').textContent = 'Profitability Analysis Report';
+  } catch (error) {
+    console.error('Error generating profitability analysis report:', error);
+    showErrorMessage('Failed to generate profitability analysis report. Please try again later.');
+  }
+}
+
+// Update summary metrics
+function updateSummaryMetrics(metrics) {
+  // Update total sales
+  document.getElementById('totalSales').textContent = '₱' + metrics.totalSales.toLocaleString();
+  
+  // Update total profit
+  document.getElementById('totalProfit').textContent = '₱' + metrics.totalProfit.toLocaleString();
+  
+  // Update profit margin
+  document.getElementById('profitMargin').textContent = metrics.profitMargin.toFixed(2) + '%';
+  
+  // Update trend indicators (simulated for now)
+  document.getElementById('salesTrend').textContent = '+12.5%';
+  document.getElementById('profitTrend').textContent = '+8.3%';
+  document.getElementById('marginTrend').textContent = '+2.1%';
+  
+  // Update total records count
+  const totalRecordsElement = document.getElementById('totalRecords');
+  if (totalRecordsElement) {
+    totalRecordsElement.textContent = allTableData.length;
+  }
+}
+
+// Global variables for pagination
+let currentPage = 1;
+let itemsPerPage = 7;
+let allTableData = [];
+
+// Populate data table with pagination
+function populateDataTable(data) {
+  const tableBody = document.getElementById('tableBody');
+  tableBody.innerHTML = '';
+  
+  // Sort data by date (newest first)
+  const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  // Store all data globally for pagination
+  allTableData = sortedData;
+  currentPage = 1;
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(allTableData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = allTableData.slice(startIndex, endIndex);
+  
+  // Populate current page data
+  currentData.forEach(item => {
+    const profit = item.amount - item.cost;
+    const margin = item.amount > 0 ? (profit / item.amount) * 100 : 0;
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${formatDate(item.date)}</td>
+      <td>${item.channel}</td>
+      <td>${item.category}</td>
+      <td>₱${item.amount.toLocaleString()}</td>
+    `;
+    
+    tableBody.appendChild(row);
+  });
+  
+  // Show message if no data
+  if (allTableData.length === 0) {
+    const messageRow = document.createElement('tr');
+    messageRow.innerHTML = `
+      <td colspan="4" class="text-center">
+        <em>No data available for the selected filters.</em>
+      </td>
+    `;
+    tableBody.appendChild(messageRow);
+  }
+  
+  // Update pagination controls
+  updatePaginationControls(totalPages);
 }
 
 // Update pagination controls
-function updatePagination(totalItems, currentPage, itemsPerPage) {
-  const paginationElement = document.getElementById("table-pagination")
-  const totalPages = Math.ceil(totalItems / itemsPerPage)
-
-  // Simple pagination for now
-  let paginationHTML = ""
-
-  if (totalPages > 1) {
-    paginationHTML += `
-            <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
-                <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        `
-
-    for (let i = 1; i <= totalPages; i++) {
-      paginationHTML += `
-                <li class="page-item ${i === currentPage ? "active" : ""}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
-                </li>
-            `
-    }
-
-    paginationHTML += `
-            <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
-                <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        `
+function updatePaginationControls(totalPages) {
+  let paginationContainer = document.getElementById('paginationContainer');
+  
+  // Remove existing pagination if it exists
+  if (paginationContainer) {
+    paginationContainer.remove();
   }
-
-  paginationElement.innerHTML = paginationHTML
-
-  // Add event listeners to pagination links
-  document.querySelectorAll("#table-pagination .page-link").forEach((link) => {
-    link.addEventListener("click", function (e) {
-      e.preventDefault()
-      const page = Number.parseInt(this.getAttribute("data-page"))
-      // Implement pagination logic here
-      // For now, just update the pagination UI
-      updatePagination(totalItems, page, itemsPerPage)
-    })
-  })
+  
+  // Create new pagination container
+  paginationContainer = document.createElement('div');
+  paginationContainer.id = 'paginationContainer';
+  paginationContainer.className = 'd-flex justify-content-between align-items-center mt-3';
+  
+  // Show current page info
+  const pageInfo = document.createElement('div');
+  pageInfo.className = 'text-muted small';
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, allTableData.length);
+  pageInfo.textContent = `Showing ${startItem}-${endItem} of ${allTableData.length} records`;
+  
+  // Create pagination buttons
+  const paginationButtons = document.createElement('div');
+  paginationButtons.className = 'btn-group';
+  
+  // Previous button
+  const prevButton = document.createElement('button');
+  prevButton.className = 'btn btn-outline-secondary btn-sm';
+  prevButton.innerHTML = '<i class="bi bi-chevron-left"></i>';
+  prevButton.disabled = currentPage === 1;
+  prevButton.onclick = () => changePage(currentPage - 1);
+  
+  // Next button
+  const nextButton = document.createElement('button');
+  nextButton.className = 'btn btn-outline-secondary btn-sm';
+  nextButton.innerHTML = '<i class="bi bi-chevron-right"></i>';
+  nextButton.disabled = currentPage === totalPages;
+  nextButton.onclick = () => changePage(currentPage + 1);
+  
+  // Page number display
+  const pageDisplay = document.createElement('span');
+  pageDisplay.className = 'btn btn-outline-secondary btn-sm disabled';
+  pageDisplay.textContent = `Page ${currentPage} of ${totalPages}`;
+  
+  // Add buttons to pagination
+  paginationButtons.appendChild(prevButton);
+  paginationButtons.appendChild(pageDisplay);
+  paginationButtons.appendChild(nextButton);
+  
+  // Add elements to container
+  paginationContainer.appendChild(pageInfo);
+  paginationContainer.appendChild(paginationButtons);
+  
+  // Insert pagination after the table
+  const dataTable = document.getElementById('dataTable');
+  if (dataTable) {
+    const dataTableCard = dataTable.closest('.card');
+    if (dataTableCard) {
+      dataTableCard.appendChild(paginationContainer);
+    }
+  }
 }
 
-// Export report functions
-function exportReport(format) {
-  if (!currentReportData) return
-
-  const reportType = currentReportData.report_type
-  const dateRange = document.getElementById("date-range").value
-
-  // Close modal
-  const exportModal = bootstrap.Modal.getInstance(document.getElementById("exportModal"))
-  if (exportModal) {
-    exportModal.hide()
+// Change page function
+function changePage(newPage) {
+  if (newPage < 1 || newPage > Math.ceil(allTableData.length / itemsPerPage)) {
+    return;
   }
-
-  // Show loading indicator
-  const loadingToast = new bootstrap.Toast(document.getElementById("loadingToast"))
-  loadingToast.show()
-
-  // Prepare data for export
-  const exportData = prepareExportData(currentReportData)
-
-  // Simulate export process (in a real app, this would call a server endpoint)
-  setTimeout(() => {
-    // Hide loading indicator
-    loadingToast.hide()
-
-    // Show success message
-    const successToast = new bootstrap.Toast(document.getElementById("successToast"))
-    document.getElementById("successToastMessage").textContent =
-      `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} report exported as ${format.toUpperCase()}`
-    successToast.show()
-
-    // In a real implementation, you would:
-    // 1. Send data to server for processing
-    // 2. Receive a file URL
-    // 3. Trigger download
-
-    // For demo purposes, we'll simulate a download for CSV
-    if (format === "csv") {
-      downloadCSV(exportData, `${reportType}_report_${new Date().toISOString().split("T")[0]}.csv`)
-    }
-  }, 1500)
+  
+  currentPage = newPage;
+  const tableBody = document.getElementById('tableBody');
+  tableBody.innerHTML = '';
+  
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = allTableData.slice(startIndex, endIndex);
+  
+  // Populate current page data
+  currentData.forEach(item => {
+    const profit = item.amount - item.cost;
+    const margin = item.amount > 0 ? (profit / item.amount) * 100 : 0;
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${formatDate(item.date)}</td>
+      <td>${item.channel}</td>
+      <td>${item.category}</td>
+      <td>₱${item.amount.toLocaleString()}</td>
+    `;
+    
+    tableBody.appendChild(row);
+  });
+  
+  // Update pagination controls
+  updatePaginationControls(Math.ceil(allTableData.length / itemsPerPage));
 }
 
-// Prepare data for export
-function prepareExportData(reportData) {
-  const data = reportData.data
-  const reportType = reportData.report_type
+// Helper function to format date
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
 
-  // Format data based on report type
+// Export report as CSV
+function exportReport() {
+  const reportType = document.getElementById('reportType').value;
+  const dateRange = $('input[name="daterange"]').data('daterangepicker');
+  const startDate = dateRange.startDate.format('YYYY-MM-DD');
+  const endDate = dateRange.endDate.format('YYYY-MM-DD');
+  
+  let csvContent = 'data:text/csv;charset=utf-8,';
+  
+  // Add headers based on report type
   switch (reportType) {
-    case "sales":
-      return data.map((item) => ({
-        Date: new Date(item.date).toLocaleDateString(),
-        Transactions: item.transaction_count,
-        "Total Sales": Number.parseFloat(item.total_sales || 0).toFixed(2),
-        "Average Transaction": (
-          Number.parseFloat(item.total_sales || 0) / Number.parseInt(item.transaction_count || 1)
-        ).toFixed(2),
-        "Tax Amount": Number.parseFloat(item.total_tax || 0).toFixed(2),
-        "Discount Amount": Number.parseFloat(item.total_discount || 0).toFixed(2),
-      }))
-
-    case "products":
-      return data.map((item) => ({
-        Product: item.product_name,
-        Category: item.category || "N/A",
-        "Units Sold": item.units_sold,
-        "Average Price": Number.parseFloat(item.avg_price || 0).toFixed(2),
-        Revenue: Number.parseFloat(item.total_revenue || 0).toFixed(2),
-        Transactions: item.transaction_count,
-      }))
-
-    case "inventory":
-      return data.map((item) => ({
-        "Product ID": item.product_id,
-        "Product Name": item.product_name,
-        Category: item.category || "N/A",
-        Stock: item.stocks,
-        Price: Number.parseFloat(item.price || 0).toFixed(2),
-        "Expiration Date":
-          item.expiration_date && item.expiration_date !== "0000-00-00"
-            ? new Date(item.expiration_date).toLocaleDateString()
-            : "N/A",
-        Status: item.status,
-        "Last Updated": item.updated_at ? new Date(item.updated_at).toLocaleDateString() : "N/A",
-      }))
-
-    case "categories":
-      return data.map((item) => ({
-        Category: item.category,
-        Products: item.product_count,
-        "Units Sold": item.units_sold,
-        Revenue: Number.parseFloat(item.total_revenue || 0).toFixed(2),
-        Transactions: item.transaction_count,
-      }))
-
-    case "payment_methods":
-      return data.map((item) => ({
-        "Payment Method": item.method_name,
-        "Payment Count": item.payment_count,
-        "Total Amount": Number.parseFloat(item.total_amount || 0).toFixed(2),
-        "Average Amount": Number.parseFloat(item.avg_amount || 0).toFixed(2),
-        Transactions: item.transaction_count,
-      }))
-
-    default:
-      return data
+    case 'salesTrends':
+      csvContent += 'Date,Channel,Category,Amount\n';
+      break;
+    case 'profitAnalysis':
+    case 'salesByCategory':
+    case 'profitabilityAnalysis':
+      csvContent += 'Date,Channel,Category,Sales,Cost,Profit,Margin\n';
+      break;
   }
-}
-
-// Download CSV function
-function downloadCSV(data, filename) {
-  if (!data || !data.length) {
-    console.error("No data to export")
-    return
-  }
-
-  // Get headers from first object
-  const headers = Object.keys(data[0])
-
-  // Create CSV content
-  let csvContent = headers.join(",") + "\n"
-
-  // Add rows
-  data.forEach((item) => {
-    const row = headers
-      .map((header) => {
-        // Wrap values with commas in quotes
-        const value = item[header] !== undefined ? item[header] : ""
-        return typeof value === "string" && value.includes(",") ? `"${value}"` : value
-      })
-      .join(",")
-    csvContent += row + "\n"
-  })
-
-  // Create blob and download link
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-  const url = URL.createObjectURL(blob)
-
+  
+  // Add all data rows (not just current page)
+  allTableData.forEach(item => {
+    const profit = item.amount - item.cost;
+    const margin = item.amount > 0 ? (profit / item.amount) * 100 : 0;
+    
+    const rowData = [
+      formatDate(item.date),
+      item.channel,
+      item.category,
+      item.amount.toString()
+    ].map(field => `"${field}"`).join(',');
+    
+    csvContent += rowData + '\n';
+  });
+  
   // Create download link
-  const link = document.createElement("a")
-  link.setAttribute("href", url)
-  link.setAttribute("download", filename)
-  link.style.visibility = "hidden"
-
-  // Add to document, click and remove
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', `${reportType}_report_${startDate}_to_${endDate}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
-// Print report
+// Add this function to your reports.js file
+
 function printReport() {
-  if (!currentReportData) return
-
-  // Close modal
-  const exportModal = bootstrap.Modal.getInstance(document.getElementById("exportModal"))
-  if (exportModal) {
-    exportModal.hide()
+  // Get the report content
+  const reportTitle = document.getElementById('reportTitle').textContent;
+  const dateRange = $('input[name="daterange"]').val();
+  const reportType = document.getElementById('reportType').value;
+  const reportTypeText = document.getElementById('reportType').options[document.getElementById('reportType').selectedIndex].text;
+  
+  // Get metrics
+  const totalSales = document.getElementById('totalSales').textContent;
+  const totalProfit = document.getElementById('totalProfit').textContent;
+  const profitMargin = document.getElementById('profitMargin').textContent;
+  
+  // Get table data from all data (not just current page)
+  let tableContent = '';
+  
+  // Process all data rows (limit to 100 rows for printing)
+  const maxRows = Math.min(allTableData.length, 100);
+  for (let i = 0; i < maxRows; i++) {
+    const item = allTableData[i];
+    const rowHTML = `
+      <tr>
+        <td>${formatDate(item.date)}</td>
+        <td>${item.channel}</td>
+        <td>${item.category}</td>
+        <td>₱${item.amount.toLocaleString()}</td>
+      </tr>
+    `;
+    tableContent += rowHTML;
   }
-
-  // Create print-friendly version
-  const printWindow = window.open("", "_blank")
-
-  // Get report title
-  const reportTitle = document.getElementById("report-title").textContent
-
-  // Get date range
-  const dateRange = document.getElementById("date-range").value
-
-  // Get report summary
-  const reportSummary = document.getElementById("report-summary").innerHTML
-
-  // Get report table
-  const reportTableHead = document.getElementById("report-table-head").innerHTML
-  const reportTableBody = document.getElementById("report-table-body").innerHTML
-
-  // Create print content
-  const printContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>${reportTitle} - Piñana Gourmet</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 20px;
-                }
-                .header {
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-                .logo {
-                    max-width: 150px;
-                    margin-bottom: 10px;
-                }
-                h1 {
-                    margin: 0;
-                    color: #333;
-                }
-                .date-range {
-                    color: #666;
-                    margin-top: 5px;
-                }
-                .summary {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 15px;
-                    margin-bottom: 30px;
-                }
-                .summary-card {
-                    flex: 1;
-                    min-width: 200px;
-                    padding: 15px;
-                    border: 1px solid #ddd;
-                    border-radius: 8px;
-                }
-                .card-subtitle {
-                    color: #666;
-                    margin-bottom: 5px;
-                    font-size: 14px;
-                }
-                .card-title {
-                    font-size: 24px;
-                    margin: 0;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 20px;
-                }
-                th, td {
-                    padding: 10px;
-                    text-align: left;
-                    border-bottom: 1px solid #ddd;
-                }
-                th {
-                    background-color: #f5f5f5;
-                    font-weight: bold;
-                }
-                .text-center {
-                    text-align: center;
-                }
-                .text-end {
-                    text-align: right;
-                }
-                .footer {
-                    margin-top: 30px;
-                    text-align: center;
-                    color: #666;
-                    font-size: 12px;
-                }
-                @media print {
-                    body {
-                        margin: 0;
-                        padding: 15px;
-                    }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <img src="images/final-light.png" alt="Piñana Gourmet Logo" class="logo">
-                <h1>${reportTitle}</h1>
-                <div class="date-range">Date Range: ${dateRange}</div>
-                <div class="date-range">Generated on: ${new Date().toLocaleString()}</div>
-            </div>
-            
-            <div class="summary">
-                ${reportSummary.replace(/class="col-md-\d+/g, 'class="summary-card')}
-            </div>
-            
-            <table>
-                <thead>
-                    ${reportTableHead}
-                </thead>
-                <tbody>
-                    ${reportTableBody}
-                </tbody>
-            </table>
-            
-            <div class="footer">
-                <p>© ${new Date().getFullYear()} Piñana Gourmet. All rights reserved.</p>
-            </div>
-            
-            <script>
-                window.onload = function() {
-                    window.print();
-                    setTimeout(function() {
-                        window.close();
-                    }, 500);
-                };
-            </script>
-        </body>
-        </html>
-    `
-
-  // Write to print window
-  printWindow.document.open()
-  printWindow.document.write(printContent)
-  printWindow.document.close()
+  
+  // Create print window
+  const printWindow = window.open('', '_blank');
+  
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>${reportTitle} - Piñana Gourmet</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+          }
+          .report-header {
+            text-align: center;
+            margin-bottom: 20px;
+          }
+          .logo {
+            max-width: 150px;
+            margin-bottom: 10px;
+          }
+          .report-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+          }
+          .report-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+          }
+          .metrics-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+          }
+          .metric-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            width: 22%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+          }
+          .metric-title {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+          }
+          .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+          }
+          tr:nth-child(even) {
+            background-color: #f9f9f9;
+          }
+          .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+          }
+          @media print {
+            body {
+              width: 100%;
+              padding: 0;
+              margin: 0;
+            }
+            .no-print {
+              display: none;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="report-header">
+          <img src="images/final-light.png" alt="Piñana Gourmet Logo" class="logo">
+          <div class="report-title">${reportTitle}</div>
+          <div class="report-subtitle">
+            Report Type: ${reportTypeText} | Date Range: ${dateRange}
+          </div>
+        </div>
+        
+        <div class="metrics-container">
+          <div class="metric-card">
+            <div class="metric-title">Total Sales</div>
+            <div class="metric-value">${totalSales}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Total Profit</div>
+            <div class="metric-value">${totalProfit}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Profit Margin</div>
+            <div class="metric-value">${profitMargin}</div>
+          </div>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Channel</th>
+              <th>Category</th>
+              <th>Sales</th>
+             
+            </tr>
+          </thead>
+          <tbody>
+            ${tableContent}
+          </tbody>
+        </table>
+        
+        <div class="footer">
+          <p>Report generated on ${new Date().toLocaleString()}</p>
+          <p>Piñana Gourmet © ${new Date().getFullYear()}</p>
+        </div>
+        
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() {
+              window.close();
+            }, 500);
+          };
+        </script>
+      </body>
+    </html>
+  `);
+  
+  printWindow.document.close();
 }
-

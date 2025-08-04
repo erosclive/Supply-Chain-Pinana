@@ -284,3 +284,731 @@
 2025-04-30 15:52:15 - Success: User logged in, ID: 6
 2025-04-30 15:54:33 - Login attempt for username: se.vence
 2025-04-30 15:54:33 - Success: User logged in, ID: 19
+2025-05-01 07:20:25 - Login attempt for username: Arcanoine
+2025-05-01 07:20:25 - Error: User not found
+2025-05-01 07:20:40 - Login attempt for username: Arcanoine
+2025-05-01 07:20:40 - Error: User not found
+2025-05-01 07:20:56 - Login attempt for username: Arcanoine
+2025-05-01 07:20:56 - Error: User not found
+2025-05-01 07:21:10 - Login attempt for username: tuh_lips
+2025-05-01 07:21:10 - Success: User logged in, ID: 6
+2025-05-01 08:40:52 - Login attempt for username: tuh_lips
+2025-05-01 08:40:52 - Success: User logged in, ID: 6
+2025-05-01 09:00:11 - Login attempt for username: siexy
+2025-05-01 09:00:11 - Success: User logged in, ID: 18
+2025-05-01 09:13:48 - Login attempt for username: se.vence
+2025-05-01 09:13:48 - Success: User logged in, ID: 19
+2025-05-01 09:14:44 - Login attempt for username: businessadmin
+2025-05-01 09:14:45 - Success: User logged in, ID: 2
+2025-05-01 10:47:11 - Login attempt for username: fyaver
+2025-05-01 10:47:11 - Success: User logged in, ID: 21
+2025-05-01 15:04:59 - Login attempt for username: aer_van
+2025-05-01 15:05:00 - Error: Invalid password
+2025-05-01 15:05:08 - Login attempt for username: aer_van
+2025-05-01 15:05:08 - Success: User logged in, ID: 20
+2025-05-01 16:09:05 - Login attempt for username: se.vence
+2025-05-01 16:09:05 - Success: User logged in, ID: 19
+2025-05-01 16:48:20 - Login attempt for username: fyaver
+2025-05-01 16:48:20 - Success: User logged in, ID: 21
+2025-05-01 18:09:39 - Login attempt for username: siexy
+2025-05-01 18:09:39 - Success: User logged in, ID: 18
+2025-05-01 20:31:04 - Login attempt for username: se.vence
+2025-05-01 20:31:04 - Success: User logged in, ID: 19
+2025-05-02 01:49:15 - Login attempt for username: businessadmin
+2025-05-02 01:49:16 - Error: Invalid password
+2025-05-02 01:49:28 - Login attempt for username: businessadmin
+2025-05-02 01:49:29 - Success: User logged in, ID: 2
+2025-05-02 05:35:38 - Login attempt for username: fyaver
+2025-05-02 05:35:38 - Success: User logged in, ID: 21
+2025-05-02 05:36:36 - Login attempt for username: se.vence
+2025-05-02 05:36:36 - Success: User logged in, ID: 19
+2025-05-02 05:49:06 - Login attempt for username: aer_van
+2025-05-02 05:49:06 - Success: User logged in, ID: 20
+2025-05-02 05:49:20 - Login attempt for username: businessadmin
+2025-05-02 05:49:20 - Success: User logged in, ID: 2
+2025-05-02 06:08:50 - Login attempt for username: pepitomanaloto
+2025-05-02 06:08:51 - Success: User logged in, ID: 25
+2025-05-02 14:01:15 - Login attempt for username: tuh_lips
+2025-05-02 14:01:15 - Success: User logged in, ID: 6
+2025-05-02 15:23:17 - Login attempt for username: businessadmin
+2025-05-02 15:23:17 - Success: User logged in, ID: 2
+2025-05-03 08:52:10 - Login attempt for username: siexy
+2025-05-03 08:52:10 - Success: User logged in, ID: 18
+2025-05-03 09:19:24 - Login attempt for username: se.vence
+2025-05-03 09:19:24 - Success: User logged in, ID: 19
+2025-05-03 12:29:03 - Login attempt for username: tuh_lips
+2025-05-03 12:29:03 - Success: User logged in, ID: 6
+2025-05-03 14:29:56 - Login attempt for username: siexy
+2025-05-03 14:29:57 - Success: User logged in, ID: 18
+2025-05-03 14:52:16 - Login attempt for username: fyaver
+2025-05-03 14:52:17 - Success: User logged in, ID: 21
+2025-05-03 18:09:54 - Login attempt for username: tuh_lips
+2025-05-03 18:09:54 - Success: User logged in, ID: 6
+2025-05-03 18:39:53 - Login attempt for username: siexy
+2025-05-03 18:39:54 - Success: User logged in, ID: 18
+2025-05-03 18:41:24 - Login attempt for username: siexy
+2025-05-03 18:41:24 - Success: User logged in, ID: 18
+2025-05-03 20:04:04 - Login attempt for username: businessadmin
+2025-05-03 20:04:04 - Success: User logged in, ID: 2
+2025-05-03 20:29:11 - Login attempt for username: businessadmin
+2025-05-03 20:29:11 - Success: User logged in, ID: 2
+2025-05-03 20:52:22 - Login attempt for username: businessadmin
+2025-05-03 20:52:22 - Success: User logged in, ID: 2
+2025-05-04 05:51:24 - Login attempt for username: businessadmin
+2025-05-04 05:51:25 - Success: User logged in, ID: 2
+2025-05-04 07:57:28 - Login attempt for username: businessadmin
+2025-05-04 07:57:28 - Success: User logged in, ID: 2
+2025-05-04 16:53:25 - Login attempt for username: businessadmin
+2025-05-04 16:53:25 - Error: Invalid password
+2025-05-04 16:53:34 - Login attempt for username: businessadmin
+2025-05-04 16:53:34 - Success: User logged in, ID: 2
+2025-05-04 18:05:59 - Login attempt for username: businessadmin
+2025-05-04 18:05:59 - Success: User logged in, ID: 2
+2025-05-04 18:07:56 - Login attempt for username: businessadmin
+2025-05-04 18:07:56 - Success: User logged in, ID: 2
+2025-05-04 18:20:40 - Login attempt for username: fyaver
+2025-05-04 18:20:40 - Success: User logged in, ID: 21
+2025-05-04 20:53:46 - Login attempt for username: businessadmin
+2025-05-04 20:53:46 - Success: User logged in, ID: 2
+2025-05-04 20:55:47 - Login attempt for username: siexy
+2025-05-04 20:55:47 - Success: User logged in, ID: 18
+2025-05-05 05:10:40 - Login attempt for username: businessadmin
+2025-05-05 05:10:40 - Success: User logged in, ID: 2
+2025-05-05 05:19:07 - Login attempt for username: businessadmin
+2025-05-05 05:19:07 - Success: User logged in, ID: 2
+2025-05-05 05:36:33 - Login attempt for username: siexy
+2025-05-05 05:36:34 - Success: User logged in, ID: 18
+2025-05-05 07:12:29 - Login attempt for username: businesspos
+2025-05-05 07:12:29 - Error: Invalid password
+2025-05-05 07:12:47 - Login attempt for username: businesspos
+2025-05-05 07:12:47 - Error: Invalid password
+2025-05-05 07:14:20 - Login attempt for username: tuh_lips
+2025-05-05 07:14:20 - Success: User logged in, ID: 6
+2025-05-05 07:15:25 - Login attempt for username: pospinyana
+2025-05-05 07:15:25 - Success: User logged in, ID: 6
+2025-05-05 07:16:52 - Login attempt for username: pospinyana
+2025-05-05 07:16:52 - Success: User logged in, ID: 6
+2025-05-05 07:36:41 - Login attempt for username: siexy
+2025-05-05 07:36:41 - Success: User logged in, ID: 18
+2025-05-05 07:37:09 - Login attempt for username: se.vence
+2025-05-05 07:37:09 - Success: User logged in, ID: 19
+2025-05-05 07:40:03 - Login attempt for username: se.vence
+2025-05-05 07:40:03 - Success: User logged in, ID: 19
+2025-05-05 08:04:05 - Login attempt for username: businessadmin
+2025-05-05 08:04:05 - Success: User logged in, ID: 2
+2025-05-05 09:38:10 - Login attempt for username: siexy
+2025-05-05 09:38:10 - Success: User logged in, ID: 18
+2025-05-05 09:39:28 - Login attempt for username: fyaver
+2025-05-05 09:39:28 - Success: User logged in, ID: 21
+2025-05-05 18:21:31 - Login attempt for username: eighthqt
+2025-05-05 18:21:31 - Success: User logged in, ID: 12
+2025-05-05 20:33:22 - Login attempt for username: fyaver
+2025-05-05 20:33:22 - Success: User logged in, ID: 21
+2025-05-06 06:36:42 - Login attempt for username: fyaver
+2025-05-06 06:36:43 - Success: User logged in, ID: 21
+2025-05-06 06:37:13 - Login attempt for username: businessadmin
+2025-05-06 06:37:13 - Success: User logged in, ID: 2
+2025-05-06 06:38:16 - Login attempt for username: fyaver
+2025-05-06 06:38:17 - Success: User logged in, ID: 21
+2025-05-06 07:27:19 - Login attempt for username: businessadmin
+2025-05-06 07:27:19 - Success: User logged in, ID: 2
+2025-05-06 08:33:18 - Login attempt for username: businessadmin
+2025-05-06 08:33:18 - Success: User logged in, ID: 2
+2025-05-06 08:36:32 - Login attempt for username: businessadmin
+2025-05-06 08:36:32 - Success: User logged in, ID: 2
+2025-05-06 08:37:49 - Login attempt for username: siexy
+2025-05-06 08:37:49 - Success: User logged in, ID: 18
+2025-05-06 08:48:54 - Login attempt for username: siexy
+2025-05-06 08:48:54 - Success: User logged in, ID: 18
+2025-05-06 08:55:52 - Login attempt for username: siexy
+2025-05-06 08:55:52 - Success: User logged in, ID: 18
+2025-05-06 09:29:14 - Login attempt for username: businessadmin
+2025-05-06 09:29:14 - Success: User logged in, ID: 2
+2025-05-06 09:43:05 - Login attempt for username: siexy
+2025-05-06 09:43:05 - Success: User logged in, ID: 18
+2025-05-06 11:15:25 - Login attempt for username: businessadmin
+2025-05-06 11:15:25 - Success: User logged in, ID: 2
+2025-05-06 11:55:15 - Login attempt for username: siexy
+2025-05-06 11:55:15 - Success: User logged in, ID: 18
+2025-05-06 12:33:21 - Login attempt for username: businessadmin
+2025-05-06 12:33:21 - Success: User logged in, ID: 2
+2025-05-06 12:38:58 - Login attempt for username: businessadmin
+2025-05-06 12:38:58 - Success: User logged in, ID: 2
+2025-05-06 12:57:32 - Login attempt for username: pospinyana
+2025-05-06 12:57:32 - Success: User logged in, ID: 6
+2025-05-06 14:47:39 - Login attempt for username: siexy
+2025-05-06 14:47:39 - Success: User logged in, ID: 18
+2025-05-06 14:48:09 - Login attempt for username: siexy
+2025-05-06 14:48:09 - Success: User logged in, ID: 18
+2025-05-06 14:48:29 - Login attempt for username: businessadmin
+2025-05-06 14:48:29 - Success: User logged in, ID: 2
+2025-05-06 14:49:09 - Login attempt for username: siexy
+2025-05-06 14:49:09 - Success: User logged in, ID: 18
+2025-05-06 15:17:43 - Login attempt for username: siexy
+2025-05-06 15:17:43 - Success: User logged in, ID: 18
+2025-05-06 15:17:54 - Login attempt for username: pospinyana
+2025-05-06 15:17:54 - Success: User logged in, ID: 6
+2025-05-06 15:17:57 - Login attempt for username: pospinyana
+2025-05-06 15:17:57 - Success: User logged in, ID: 6
+2025-05-06 15:18:05 - Login attempt for username: pospinyana
+2025-05-06 15:18:06 - Success: User logged in, ID: 6
+2025-05-06 15:18:16 - Login attempt for username: siexy
+2025-05-06 15:18:16 - Success: User logged in, ID: 18
+2025-05-06 15:18:23 - Login attempt for username: siexy
+2025-05-06 15:18:23 - Success: User logged in, ID: 18
+2025-05-06 15:20:49 - Login attempt for username: siexy
+2025-05-06 15:20:49 - Success: User logged in, ID: 18
+2025-05-06 15:24:09 - Login attempt for username: pospinyana
+2025-05-06 15:24:10 - Success: User logged in, ID: 6
+2025-05-06 15:24:16 - Login attempt for username: pospinyana
+2025-05-06 15:24:16 - Success: User logged in, ID: 6
+2025-05-06 15:24:25 - Login attempt for username: pospinyana
+2025-05-06 15:24:25 - Success: User logged in, ID: 6
+2025-05-06 15:24:32 - Login attempt for username: pospinyana
+2025-05-06 15:24:32 - Success: User logged in, ID: 6
+2025-05-06 15:24:48 - Login attempt for username: Wanpiece
+2025-05-06 15:24:48 - Success: User logged in, ID: 24
+2025-05-06 15:24:57 - Login attempt for username: businessadmin
+2025-05-06 15:24:57 - Success: User logged in, ID: 2
+2025-05-06 15:25:57 - Login attempt for username: siexy
+2025-05-06 15:25:57 - Success: User logged in, ID: 18
+2025-05-06 15:31:26 - Login attempt for username: businessadmin
+2025-05-06 15:31:26 - Success: User logged in, ID: 2
+2025-05-06 15:38:00 - Login attempt for username: siexy
+2025-05-06 15:38:01 - Success: User logged in, ID: 18
+2025-05-06 16:13:41 - Login attempt for username: businessadmin
+2025-05-06 16:13:41 - Success: User logged in, ID: 2
+2025-05-06 16:13:57 - Login attempt for username: fyaver
+2025-05-06 16:13:57 - Success: User logged in, ID: 21
+2025-05-06 17:55:17 - Login attempt for username: businessadmin
+2025-05-06 17:55:17 - Success: User logged in, ID: 2
+2025-05-06 18:18:49 - Login attempt for username: siexy
+2025-05-06 18:18:49 - Success: User logged in, ID: 18
+2025-05-06 18:19:02 - Login attempt for username: businessadmin
+2025-05-06 18:19:03 - Success: User logged in, ID: 2
+2025-05-06 18:27:55 - Login attempt for username: businessadmin
+2025-05-06 18:27:55 - Success: User logged in, ID: 2
+2025-05-06 18:29:06 - Login attempt for username: siexy
+2025-05-06 18:29:06 - Success: User logged in, ID: 18
+2025-05-06 18:38:44 - Login attempt for username: siexy
+2025-05-06 18:38:44 - Success: User logged in, ID: 18
+2025-05-06 19:11:57 - Login attempt for username: pospinyana
+2025-05-06 19:11:57 - Success: User logged in, ID: 6
+2025-05-06 19:12:25 - Login attempt for username: businessadmin
+2025-05-06 19:12:25 - Success: User logged in, ID: 2
+2025-05-06 19:12:47 - Login attempt for username: businessadmin
+2025-05-06 19:12:47 - Success: User logged in, ID: 2
+2025-05-06 19:17:15 - Login attempt for username: businessadmin
+2025-05-06 19:17:15 - Success: User logged in, ID: 2
+2025-05-06 19:17:19 - Login attempt for username: businessadmin
+2025-05-06 19:17:19 - Success: User logged in, ID: 2
+2025-05-06 19:17:36 - Login attempt for username: businessadmin
+2025-05-06 19:17:36 - Success: User logged in, ID: 2
+2025-05-06 19:18:36 - Login attempt for username: businessadmin
+2025-05-06 19:18:37 - Success: User logged in, ID: 2
+2025-05-06 19:18:46 - Login attempt for username: businessadmin
+2025-05-06 19:18:46 - Success: User logged in, ID: 2
+2025-05-06 19:18:54 - Login attempt for username: pospinyana
+2025-05-06 19:18:54 - Success: User logged in, ID: 6
+2025-05-06 19:19:07 - Login attempt for username: pospinyana
+2025-05-06 19:19:07 - Success: User logged in, ID: 6
+2025-05-06 19:19:11 - Login attempt for username: pospinyana
+2025-05-06 19:19:11 - Success: User logged in, ID: 6
+2025-05-06 19:19:17 - Login attempt for username: pospinyana
+2025-05-06 19:19:17 - Success: User logged in, ID: 6
+2025-05-06 19:19:32 - Login attempt for username: pospinyana
+2025-05-06 19:19:32 - Success: User logged in, ID: 6
+2025-05-06 19:20:17 - Login attempt for username: pospinyana
+2025-05-06 19:20:17 - Success: User logged in, ID: 6
+2025-05-06 19:22:05 - Login attempt for username: businessadmin
+2025-05-06 19:22:05 - Success: User logged in, ID: 2
+2025-05-06 19:27:23 - Login attempt for username: pospinyana
+2025-05-06 19:27:23 - Success: User logged in, ID: 6
+2025-05-06 19:48:47 - Login attempt for username: siexy
+2025-05-06 19:48:47 - Success: User logged in, ID: 18
+2025-05-06 19:49:09 - Login attempt for username: se.vence
+2025-05-06 19:49:09 - Success: User logged in, ID: 19
+2025-05-06 20:22:19 - Login attempt for username: fyaver
+2025-05-06 20:22:19 - Success: User logged in, ID: 21
+2025-05-06 20:28:16 - Login attempt for username: siexy
+2025-05-06 20:28:16 - Success: User logged in, ID: 18
+2025-05-06 20:30:16 - Login attempt for username: se.vence
+2025-05-06 20:30:16 - Success: User logged in, ID: 19
+2025-05-06 20:32:32 - Login attempt for username: businessadmin
+2025-05-06 20:32:32 - Success: User logged in, ID: 2
+2025-05-06 20:33:13 - Login attempt for username: se.vence
+2025-05-06 20:33:13 - Success: User logged in, ID: 19
+2025-05-06 20:39:16 - Login attempt for username: siexy
+2025-05-06 20:39:16 - Success: User logged in, ID: 18
+2025-05-07 00:52:14 - Login attempt for username: fyaver
+2025-05-07 00:52:14 - Success: User logged in, ID: 21
+2025-05-07 01:59:09 - Login attempt for username: pospinyana
+2025-05-07 01:59:09 - Success: User logged in, ID: 6
+2025-05-07 02:20:13 - Login attempt for username: Wanpiece
+2025-05-07 02:20:13 - Success: User logged in, ID: 24
+2025-05-07 02:30:59 - Login attempt for username: pospinyana
+2025-05-07 02:30:59 - Success: User logged in, ID: 6
+2025-05-07 06:46:48 - Login attempt for username: siexy
+2025-05-07 06:46:48 - Success: User logged in, ID: 18
+2025-05-07 07:24:49 - Login attempt for username: businessadmin
+2025-05-07 07:24:49 - Success: User logged in, ID: 2
+2025-05-15 05:47:56 - Login attempt for username: businessadmin
+2025-05-15 05:47:56 - Success: User logged in, ID: 2
+2025-05-17 07:07:27 - Login attempt for username: businessadmin
+2025-05-17 07:07:27 - Success: User logged in, ID: 2
+2025-05-17 10:32:25 - Login attempt for username: fyaver
+2025-05-17 10:32:25 - Success: User logged in, ID: 21
+2025-05-17 13:14:04 - Login attempt for username: businessadmin
+2025-05-17 13:14:04 - Success: User logged in, ID: 2
+2025-05-21 06:29:01 - Login attempt for username: businessadmin
+2025-05-21 06:29:02 - Success: User logged in, ID: 2
+2025-05-24 07:12:12 - Login attempt for username: businessadmin
+2025-05-24 07:12:12 - Success: User logged in, ID: 2
+2025-05-25 14:33:13 - Login attempt for username: businessadmin
+2025-05-25 14:33:13 - Success: User logged in, ID: 2
+2025-05-26 11:46:52 - Login attempt for username: businessadmin
+2025-05-26 11:46:52 - Success: User logged in, ID: 2
+2025-05-27 07:57:20 - Login attempt for username: businessadmin
+2025-05-27 07:57:20 - Error: Unknown column 'approval_status' in 'field list'
+2025-05-27 07:57:34 - Login attempt for username: businessadmin
+2025-05-27 07:57:34 - Error: Unknown column 'approval_status' in 'field list'
+2025-05-27 07:58:51 - Login attempt for username: businessadmin
+2025-05-27 07:58:51 - Error: Unknown column 'approval_status' in 'field list'
+2025-05-27 08:00:40 - Login attempt for username: businessadmin
+2025-05-27 08:00:41 - Success: User logged in, ID: 2
+2025-05-27 08:02:35 - Login attempt for username: businessadmin
+2025-05-27 08:02:35 - Error: Unknown column 'approval_status' in 'field list'
+2025-05-27 08:03:21 - Login attempt for username: businessadmin
+2025-05-27 08:03:21 - Success: User logged in, ID: 2
+2025-05-27 08:16:55 - Login attempt for username: businessadmin
+2025-05-27 08:16:55 - Success: User logged in, ID: 2
+2025-05-27 08:21:55 - Login attempt for username: Zorin.
+2025-05-27 08:21:55 - Error: Invalid password
+2025-05-27 08:22:06 - Login attempt for username: Zorin.
+2025-05-27 08:22:06 - Error: Retailer account pending approval for user ID: 28
+2025-05-27 08:22:40 - Login attempt for username: businessadmin
+2025-05-27 08:22:40 - Success: User logged in, ID: 2
+2025-05-27 08:26:36 - Login attempt for username: Zorin.
+2025-05-27 08:26:36 - Error: Retailer account pending approval for user ID: 28
+2025-05-27 08:31:23 - Login attempt for username: Zorin
+2025-05-27 08:31:23 - Error: User not found
+2025-05-27 08:31:34 - Login attempt for username: Zorin.
+2025-05-27 08:31:34 - Error: Retailer account pending approval for user ID: 28
+2025-05-27 08:31:48 - Login attempt for username: Zorin.
+2025-05-27 08:31:49 - Error: Retailer account pending approval for user ID: 28
+2025-05-27 08:31:50 - Login attempt for username: businessadmin
+2025-05-27 08:31:50 - Success: User logged in, ID: 2
+2025-05-27 08:34:16 - Login attempt for username: Zorin.
+2025-05-27 08:34:16 - Error: Retailer account pending approval for user ID: 28
+2025-05-27 08:34:38 - Login attempt for username: Zorin.
+2025-05-27 08:34:38 - Error: Retailer account pending approval for user ID: 28
+2025-05-27 08:54:20 - Login attempt for username: Zorin.
+2025-05-27 08:54:20 - Error: Retailer account pending approval for user ID: 28
+2025-05-27 08:54:59 - Login attempt for username: Zorin.
+2025-05-27 08:54:59 - Error: Retailer account pending approval for user ID: 28
+2025-05-27 08:56:02 - Login attempt for username: Zorin.
+2025-05-27 08:56:02 - Error: Retailer account pending approval for user ID: 28
+2025-05-27 12:48:48 - Login attempt for username: Zorin.
+2025-05-27 12:48:48 - Error: Retailer account pending approval for user ID: 28
+2025-05-27 16:39:39 - Login attempt for username: Fyaver
+2025-05-27 16:39:41 - Error: Invalid password
+2025-05-27 16:39:59 - Login attempt for username: Fyaver
+2025-05-27 16:39:59 - Error: Retailer account pending approval for user ID: 21
+2025-05-27 16:41:08 - Login attempt for username: Fyaver
+2025-05-27 16:41:09 - Success: User logged in, ID: 21
+2025-05-27 19:08:19 - Login attempt for username: Fyaver
+2025-05-27 19:08:20 - Success: User logged in, ID: 21, Role: retailer
+2025-05-27 19:08:44 - Login attempt for username: Zorin.
+2025-05-27 19:08:45 - Error: Retailer account pending approval for user ID: 28
+2025-05-28 05:37:22 - Login attempt for username: zorin
+2025-05-28 05:37:22 - Error: Retailer account pending approval for user ID: 29
+2025-05-28 05:38:03 - Login attempt for username: zorin
+2025-05-28 05:38:03 - Success: User logged in, ID: 29, Role: retailer
+2025-05-28 08:16:10 - Login attempt for username: businessadmin
+2025-05-28 08:16:10 - Error: Invalid password
+2025-05-28 08:16:22 - Login attempt for username: businessadmin
+2025-05-28 08:16:22 - Success: User logged in, ID: 2, Role: admin
+2025-05-28 08:31:00 - Login attempt for username: Fyaver
+2025-05-28 08:31:00 - Success: User logged in, ID: 21, Role: retailer
+2025-06-02 07:48:16 - Login attempt for username: businessadmin
+2025-06-02 07:48:16 - Success: User logged in, ID: 2, Role: admin
+2025-06-11 09:23:28 - Login attempt for username: businessadmin
+2025-06-11 09:23:28 - Success: User logged in, ID: 2, Role: admin
+2025-06-16 12:30:44 - Login attempt for username: businessadmin
+2025-06-16 12:30:45 - Success: User logged in, ID: 2, Role: admin
+2025-06-17 14:17:01 - Login attempt for username: businessadmin
+2025-06-17 14:17:02 - Success: User logged in, ID: 2, Role: admin
+2025-06-18 14:14:22 - Login attempt for username: businessadmin
+2025-06-18 14:14:30 - Error: MySQL server has gone away
+2025-06-18 14:15:05 - Login attempt for username: businessadmin
+2025-06-18 14:15:05 - Success: User logged in, ID: 2, Role: admin
+2025-06-19 10:00:53 - Login attempt for username: businessadmin
+2025-06-19 10:00:53 - Success: User logged in, ID: 2, Role: admin
+2025-06-19 22:45:50 - Login attempt for username: tuh_lips
+2025-06-19 22:45:50 - Error: User not found
+2025-06-19 22:45:59 - Login attempt for username: tuh_lips
+2025-06-19 22:45:59 - Error: User not found
+2025-06-19 22:46:07 - Login attempt for username: tuh_lips
+2025-06-19 22:46:07 - Error: User not found
+2025-06-19 22:46:17 - Login attempt for username: tuh_lips
+2025-06-19 22:46:17 - Error: User not found
+2025-06-19 22:46:26 - Login attempt for username: tuh_lips
+2025-06-19 22:46:26 - Error: User not found
+2025-06-19 22:46:38 - Login attempt for username: fyaver
+2025-06-19 22:46:38 - Success: User logged in, ID: 21, Role: retailer
+2025-06-19 23:27:07 - Login attempt for username: businessadmin
+2025-06-19 23:27:07 - Error: Invalid password
+2025-06-19 23:27:16 - Login attempt for username: businessadmin
+2025-06-19 23:27:16 - Success: User logged in, ID: 2, Role: admin
+2025-06-20 07:51:58 - Login attempt for username: fyaver
+2025-06-20 07:51:58 - Success: User logged in, ID: 21, Role: retailer
+2025-06-20 08:19:20 - Login attempt for username: Fyaver
+2025-06-20 08:19:20 - Success: User logged in, ID: 21, Role: retailer
+2025-06-25 10:46:43 - Login attempt for username: fyaver
+2025-06-25 10:46:44 - Success: User logged in, ID: 21, Role: retailer
+2025-06-25 10:47:02 - Login attempt for username: Vann
+2025-06-25 10:47:02 - Error: Retailer account pending approval for user ID: 31
+2025-06-25 10:47:33 - Login attempt for username: businessadmin
+2025-06-25 10:47:33 - Success: User logged in, ID: 2, Role: admin
+2025-07-01 04:40:54 - Login attempt for username: businessadmin
+2025-07-01 04:40:54 - Success: User logged in, ID: 2, Role: admin
+2025-07-01 05:09:50 - Login attempt for username: siexy
+2025-07-01 05:09:50 - Success: User logged in, ID: 18, Role: cashier
+2025-07-03 08:29:33 - Login attempt for username: businessadmin
+2025-07-03 08:29:33 - Success: User logged in, ID: 2, Role: admin
+2025-07-03 12:12:18 - Login attempt for username: businessadmin
+2025-07-03 12:12:18 - Success: User logged in, ID: 2, Role: admin
+2025-07-03 13:45:00 - Login attempt for username: businessadmin
+2025-07-03 13:45:01 - Success: User logged in, ID: 2, Role: admin
+2025-07-03 19:54:13 - Login attempt for username: businessadmin
+2025-07-03 19:54:13 - Success: User logged in, ID: 2, Role: admin
+2025-07-03 19:59:10 - Login attempt for username: businessadmin
+2025-07-03 19:59:11 - Success: User logged in, ID: 2, Role: admin
+2025-07-03 21:32:53 - Login attempt for username: businessadmin
+2025-07-03 21:32:53 - Error: Invalid password
+2025-07-03 21:33:14 - Login attempt for username: businessadmin
+2025-07-03 21:33:14 - Success: User logged in, ID: 2, Role: admin
+2025-07-04 14:56:19 - Login attempt for username: businessadmin
+2025-07-04 14:56:19 - Success: User logged in, ID: 2, Role: admin
+2025-07-04 21:28:28 - Login attempt for username: businessadmin
+2025-07-04 21:28:29 - Success: User logged in, ID: 2, Role: admin
+2025-07-06 09:48:15 - Login attempt for username: businessadmin
+2025-07-06 09:48:17 - Error: MySQL server has gone away
+2025-07-06 09:49:18 - Login attempt for username: businessadmin
+2025-07-06 09:49:19 - Success: User logged in, ID: 2, Role: admin
+2025-07-06 09:51:30 - Login attempt for username: businessadmin
+2025-07-06 09:51:31 - Success: User logged in, ID: 2, Role: admin
+2025-07-06 09:52:19 - Login attempt for username: businessadmin
+2025-07-06 09:52:19 - Error: Invalid password
+2025-07-06 09:52:30 - Login attempt for username: businessadmin
+2025-07-06 09:52:30 - Success: User logged in, ID: 2, Role: admin
+2025-07-06 13:51:33 - Login attempt for username: businessadmin
+2025-07-06 13:51:34 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 12:54:30 - Login attempt for username: businessadmin
+2025-07-07 12:54:30 - Error: Invalid password
+2025-07-07 12:54:43 - Login attempt for username: businessadmin
+2025-07-07 12:54:44 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 12:58:51 - Login attempt for username: businessadmin
+2025-07-07 12:58:52 - Error: Invalid password
+2025-07-07 12:59:01 - Login attempt for username: businessadmin
+2025-07-07 12:59:01 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 13:02:06 - Login attempt for username: businessadmin
+2025-07-07 13:02:06 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 13:02:45 - Login attempt for username: businessadmin
+2025-07-07 13:02:45 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 13:03:33 - Login attempt for username: businessadmin
+2025-07-07 13:03:33 - Error: Invalid password
+2025-07-07 13:03:43 - Login attempt for username: businessadmin
+2025-07-07 13:03:43 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 13:54:30 - Login attempt for username: businessadmin
+2025-07-07 13:54:30 - Error: Invalid password
+2025-07-07 13:54:46 - Login attempt for username: businessadmin
+2025-07-07 13:54:46 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 13:57:20 - Login attempt for username: businessadmin
+2025-07-07 13:57:21 - Error: Invalid password
+2025-07-07 13:57:31 - Login attempt for username: businessadmin
+2025-07-07 13:57:31 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 14:25:55 - Login attempt for username: businessadmin
+2025-07-07 14:25:55 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 14:26:51 - Login attempt for username: businessadmin
+2025-07-07 14:26:51 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 14:34:09 - Login attempt for username: businessadmin
+2025-07-07 14:34:09 - Success: User logged in, ID: 2, Role: admin
+2025-07-07 20:53:54 - Login attempt for username: businessadmin
+2025-07-07 20:53:54 - Success: User logged in, ID: 2, Role: admin
+2025-07-08 11:14:52 - Login attempt for username: businessadmin
+2025-07-08 11:14:52 - Success: User logged in, ID: 2, Role: admin
+2025-07-08 12:25:40 - Login attempt for username: businessadmin
+2025-07-08 12:25:40 - Success: User logged in, ID: 2, Role: admin
+2025-07-08 12:29:28 - Login attempt for username: businessadmin
+2025-07-08 12:29:29 - Success: User logged in, ID: 2, Role: admin
+2025-07-10 12:18:37 - Login attempt for username: businessadmin
+2025-07-10 12:18:37 - Success: User logged in, ID: 2, Role: admin
+2025-07-10 15:21:33 - Login attempt for username: businessadmin
+2025-07-10 15:21:34 - Success: User logged in, ID: 2, Role: admin
+2025-07-10 15:32:35 - Login attempt for username: Fyaver
+2025-07-10 15:32:35 - Success: User logged in, ID: 21, Role: retailer
+2025-07-10 16:30:40 - Login attempt for username: Fyaver
+2025-07-10 16:30:40 - Success: User logged in, ID: 21, Role: retailer
+2025-07-10 19:30:57 - Login attempt for username: businessadmin
+2025-07-10 19:30:57 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 07:09:42 - Login attempt for username: Fyaver
+2025-07-11 07:09:42 - Success: User logged in, ID: 21, Role: retailer
+2025-07-11 07:10:13 - Login attempt for username: businessadmin
+2025-07-11 07:10:13 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 07:15:03 - Login attempt for username: businessadmin
+2025-07-11 07:15:03 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 07:15:20 - Login attempt for username: businessadmin
+2025-07-11 07:15:20 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 07:21:02 - Login attempt for username: businessadmin
+2025-07-11 07:21:02 - Error: Invalid password
+2025-07-11 07:21:14 - Login attempt for username: businessadmin
+2025-07-11 07:21:14 - Error: Invalid password
+2025-07-11 07:21:23 - Login attempt for username: businessadmin
+2025-07-11 07:21:23 - Error: Invalid password
+2025-07-11 07:21:29 - Login attempt for username: businessadmin
+2025-07-11 07:21:29 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 07:23:10 - Login attempt for username: businessadmin
+2025-07-11 07:23:10 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 07:23:43 - Login attempt for username: businessadmin
+2025-07-11 07:23:43 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 07:24:14 - Login attempt for username: businessadmin
+2025-07-11 07:24:14 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 07:29:21 - Login attempt for username: businessadmin
+2025-07-11 07:29:21 - Error: Invalid password
+2025-07-11 07:29:33 - Login attempt for username: businessadmin
+2025-07-11 07:29:33 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 07:42:33 - Login attempt for username: businessadmin
+2025-07-11 07:42:33 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 07:55:40 - Login attempt for username: businessadmin
+2025-07-11 07:55:40 - Error: Invalid password
+2025-07-11 07:55:56 - Login attempt for username: businessadmin
+2025-07-11 07:55:56 - Success: User logged in, ID: 2, Role: admin
+2025-07-11 08:30:11 - Login attempt for username: Fyaver
+2025-07-11 08:30:11 - Success: User logged in, ID: 21, Role: retailer
+2025-07-12 12:45:12 - Login attempt for username: businessadmin
+2025-07-12 12:45:13 - Success: User logged in, ID: 2, Role: admin
+2025-07-12 13:36:42 - Login attempt for username: businessadmin
+2025-07-12 13:36:42 - Success: User logged in, ID: 2, Role: admin
+2025-07-12 15:17:30 - Login attempt for username: businessadmin
+2025-07-12 15:17:30 - Error: Invalid password
+2025-07-12 15:17:40 - Login attempt for username: businessadmin
+2025-07-12 15:17:40 - Success: User logged in, ID: 2, Role: admin
+2025-07-12 16:18:03 - Login attempt for username: businessadmin
+2025-07-12 16:18:03 - Success: User logged in, ID: 2, Role: admin
+2025-07-12 16:20:17 - Login attempt for username: businessadmin
+2025-07-12 16:20:17 - Success: User logged in, ID: 2, Role: admin
+2025-07-13 20:27:12 - Login attempt for username: businessadmin
+2025-07-13 20:27:12 - Success: User logged in, ID: 2, Role: admin
+2025-07-14 17:19:57 - Login attempt for username: businessadmin
+2025-07-14 17:19:57 - Success: User logged in, ID: 2, Role: admin
+2025-07-14 17:40:05 - Login attempt for username: businessadmin
+2025-07-14 17:40:05 - Success: User logged in, ID: 2, Role: admin
+2025-07-15 10:13:34 - Login attempt for username: businessadmin
+2025-07-15 10:13:34 - Success: User logged in, ID: 2, Role: admin
+2025-07-15 14:15:20 - Login attempt for username: Fyaver
+2025-07-15 14:15:20 - Success: User logged in, ID: 21, Role: retailer
+2025-07-16 10:35:52 - Login attempt for username: businessadmin
+2025-07-16 10:35:54 - Success: User logged in, ID: 2, Role: admin
+2025-07-16 15:48:55 - Login attempt for username: businessadmin
+2025-07-16 15:48:57 - Success: User logged in, ID: 2, Role: admin
+2025-07-17 13:04:56 - Login attempt for username: gelainikol
+2025-07-17 13:04:56 - Error: User not found
+2025-07-17 13:06:16 - Login attempt for username: nikol69
+2025-07-17 13:06:16 - Error: Retailer account pending approval for user ID: 33
+2025-07-19 16:24:28 - Login attempt for username: pospinyana
+2025-07-19 16:24:29 - Success: User logged in, ID: 6, Role: cashier
+2025-07-19 23:27:22 - Login attempt for username: businessadmin
+2025-07-19 23:27:22 - Success: User logged in, ID: 2, Role: admin
+2025-07-20 07:28:05 - Login attempt for username: Fyaver
+2025-07-20 07:28:05 - Success: User logged in, ID: 21, Role: retailer
+2025-07-20 11:23:04 - Login attempt for username: businessadmin
+2025-07-20 11:23:04 - Success: User logged in, ID: 2, Role: admin
+2025-07-20 11:23:30 - Login attempt for username: businessadmin
+2025-07-20 11:23:30 - Success: User logged in, ID: 2, Role: admin
+2025-07-20 11:23:55 - Login attempt for username: businessadmin
+2025-07-20 11:23:55 - Success: User logged in, ID: 2, Role: admin
+2025-07-20 16:00:08 - Login attempt for username: Wanpiece
+2025-07-20 16:00:09 - Error: Invalid password
+2025-07-20 16:00:19 - Login attempt for username: Wanpiece
+2025-07-20 16:00:19 - Success: User logged in, ID: 24, Role: retailer
+2025-07-20 19:25:23 - Login attempt for username: businessadmin
+2025-07-20 19:25:24 - Success: User logged in, ID: 2, Role: admin
+2025-07-20 19:26:06 - Login attempt for username: businessadmin
+2025-07-20 19:26:06 - Success: User logged in, ID: 2, Role: admin
+2025-07-20 21:51:54 - Login attempt for username: businessadmin
+2025-07-20 21:51:54 - Success: User logged in, ID: 2, Role: admin
+2025-07-20 21:52:59 - Login attempt for username: businessadmin
+2025-07-20 21:52:59 - Success: User logged in, ID: 2, Role: admin
+2025-07-20 22:02:00 - Login attempt for username: businessadmin
+2025-07-20 22:02:00 - Success: User logged in, ID: 2, Role: admin
+2025-07-21 03:50:21 - Login attempt for username: Wanpiece
+2025-07-21 03:50:21 - Error: Invalid password
+2025-07-21 03:50:30 - Login attempt for username: Wanpiece
+2025-07-21 03:50:30 - Success: User logged in, ID: 24, Role: retailer
+2025-07-21 04:29:22 - Login attempt for username: Wanpiece
+2025-07-21 04:29:22 - Success: User logged in, ID: 24, Role: retailer
+2025-07-21 19:58:46 - Login attempt for username: businessadmin
+2025-07-21 19:58:47 - Success: User logged in, ID: 2, Role: admin
+2025-07-22 16:54:50 - Login attempt for username: businessadmin
+2025-07-22 16:54:50 - Success: User logged in, ID: 2, Role: admin
+2025-07-22 17:59:10 - Login attempt for username: businessadmin
+2025-07-22 17:59:10 - Success: User logged in, ID: 2, Role: admin
+2025-07-22 21:42:27 - Login attempt for username: Wanpiece
+2025-07-22 21:42:27 - Success: User logged in, ID: 24, Role: retailer
+2025-07-22 21:44:00 - Login attempt for username: Fyaver
+2025-07-22 21:44:00 - Success: User logged in, ID: 21, Role: retailer
+2025-07-24 15:22:58 - Login attempt for username: Wanpiece
+2025-07-24 15:22:58 - Error: User not found
+2025-07-24 15:23:06 - Login attempt for username: Wanpiece
+2025-07-24 15:23:06 - Error: User not found
+2025-07-24 19:31:22 - Login attempt for username: siexy
+2025-07-24 19:31:22 - Error: User not found
+2025-07-24 19:31:39 - Login attempt for username: Siexy
+2025-07-24 19:31:39 - Error: User not found
+2025-07-24 19:31:53 - Login attempt for username: fyaver
+2025-07-24 19:31:54 - Error: Email not verified for user ID: 21
+2025-07-24 19:35:48 - Login attempt for username: se.vence
+2025-07-24 19:35:48 - Success: User logged in, ID: 19, Role: retailer
+2025-07-24 20:05:57 - Login attempt for username: eighthqt
+2025-07-24 20:05:57 - Success: User logged in, ID: 12, Role: retailer
+2025-07-24 21:11:25 - Login attempt for username: businessadmin
+2025-07-24 21:11:25 - Success: User logged in, ID: 2, Role: admin
+2025-07-24 21:12:53 - Login attempt for username: businessadmin
+2025-07-24 21:12:53 - Success: User logged in, ID: 2, Role: admin
+2025-07-24 21:18:57 - Login attempt for username: businessadmin
+2025-07-24 21:18:57 - Success: User logged in, ID: 2, Role: admin
+2025-07-24 22:19:19 - Login attempt for username: eighthty
+2025-07-24 22:19:19 - Error: User not found
+2025-07-24 22:20:04 - Login attempt for username: eighthqt
+2025-07-24 22:20:04 - Success: User logged in, ID: 12, Role: retailer
+2025-07-24 22:46:10 - Login attempt for username: se.vence
+2025-07-24 22:46:10 - Success: User logged in, ID: 19, Role: retailer
+2025-07-25 19:06:03 - Login attempt for username: se.vence
+2025-07-25 19:06:03 - Success: User logged in, ID: 19, Role: retailer
+2025-07-25 19:10:16 - Login attempt for username: businessadmin
+2025-07-25 19:10:16 - Success: User logged in, ID: 2, Role: admin
+2025-07-25 19:12:20 - Login attempt for username: businessadmin
+2025-07-25 19:12:20 - Success: User logged in, ID: 2, Role: admin
+2025-07-25 19:12:47 - Login attempt for username: businessadmin
+2025-07-25 19:12:47 - Success: User logged in, ID: 2, Role: admin
+2025-07-25 19:12:57 - Login attempt for username: businessadmin
+2025-07-25 19:12:57 - Error: Invalid password
+2025-07-25 19:14:14 - Login attempt for username: businessadmin
+2025-07-25 19:14:14 - Success: User logged in, ID: 2, Role: admin
+2025-07-25 19:15:37 - Login attempt for username: businessadmin
+2025-07-25 19:15:37 - Success: User logged in, ID: 2, Role: admin
+2025-07-26 21:26:43 - Login attempt for username: businessadmin
+2025-07-26 21:26:44 - Error: Invalid password
+2025-07-26 21:26:53 - Login attempt for username: businessadmin
+2025-07-26 21:26:53 - Success: User logged in, ID: 2, Role: admin
+2025-07-26 21:28:18 - Login attempt for username: se.vence
+2025-07-26 21:28:18 - Success: User logged in, ID: 19, Role: retailer
+2025-07-27 08:12:28 - Login attempt for username: businessadmin
+2025-07-27 08:12:29 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 08:14:06 - Login attempt for username: businessadmin
+2025-07-27 08:14:06 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 08:34:00 - Login attempt for username: Siextore
+2025-07-27 08:34:00 - Error: Retailer account pending approval for user ID: 35
+2025-07-27 08:53:55 - Login attempt for username: se.vence
+2025-07-27 08:53:56 - Success: User logged in, ID: 19, Role: retailer
+2025-07-27 14:44:30 - Login attempt for username: businessadmin
+2025-07-27 14:44:30 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 14:44:54 - Login attempt for username: Siextore
+2025-07-27 14:44:54 - Error: Retailer account pending approval for user ID: 35
+2025-07-27 14:45:50 - Login attempt for username: Siextore
+2025-07-27 14:45:50 - Error: Email not verified for user ID: 35
+2025-07-27 14:47:29 - Login attempt for username: Siextore
+2025-07-27 14:47:29 - Success: User logged in, ID: 35, Role: retailer
+2025-07-27 14:48:42 - Login attempt for username: businessadmin
+2025-07-27 14:48:42 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 14:48:54 - Login attempt for username: businessadmin
+2025-07-27 14:48:54 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 14:52:19 - Login attempt for username: Siextore
+2025-07-27 14:52:19 - Success: User logged in, ID: 35, Role: retailer
+2025-07-27 14:54:24 - Login attempt for username: se.vence
+2025-07-27 14:54:24 - Error: Invalid password
+2025-07-27 14:54:33 - Login attempt for username: se.vence
+2025-07-27 14:54:33 - Success: User logged in, ID: 19, Role: retailer
+2025-07-27 16:35:38 - Login attempt for username: Niroz
+2025-07-27 16:35:38 - Error: Retailer account pending approval for user ID: 36
+2025-07-27 16:36:02 - Login attempt for username: businessadmin
+2025-07-27 16:36:02 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 17:54:43 - Login attempt for username: Siextore
+2025-07-27 17:54:43 - Error: Invalid password
+2025-07-27 18:15:51 - Login attempt for username: Siextore
+2025-07-27 18:15:51 - Error: Invalid password
+2025-07-27 18:16:05 - Login attempt for username: businessadmin
+2025-07-27 18:16:06 - Error: Invalid password
+2025-07-27 19:29:34 - Login attempt for username: businessadmin
+2025-07-27 19:29:34 - Error: Invalid password
+2025-07-27 19:29:43 - Login attempt for username: businessadmin
+2025-07-27 19:29:43 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 19:56:28 - Login attempt for username: businessadmin
+2025-07-27 19:56:28 - Error: Invalid password
+2025-07-27 19:57:06 - Login attempt for username: siexy
+2025-07-27 19:57:06 - Error: User not found
+2025-07-27 19:58:47 - Login attempt for username: businessadmin
+2025-07-27 19:58:47 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 20:00:38 - Login attempt for username: businessadmin
+2025-07-27 20:00:38 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 20:11:45 - Login attempt for username: pospinyana
+2025-07-27 20:11:45 - Success: User logged in, ID: 6, Role: cashier
+2025-07-27 20:30:00 - Login attempt for username: businessadmin
+2025-07-27 20:30:00 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 20:31:00 - Login attempt for username: businessadmin
+2025-07-27 20:31:00 - Success: User logged in, ID: 2, Role: admin
+2025-07-27 20:31:26 - Login attempt for username: se.vence
+2025-07-27 20:31:26 - Success: User logged in, ID: 19, Role: retailer
+2025-07-27 20:43:18 - Login attempt for username: pospinyana
+2025-07-27 20:43:18 - Success: User logged in, ID: 6, Role: cashier
+2025-07-27 23:07:09 - Login attempt for username: businessadmin
+2025-07-27 23:07:09 - Success: User logged in, ID: 2, Role: admin
+2025-07-28 04:49:47 - Login attempt for username: pospinyana
+2025-07-28 04:49:47 - Success: User logged in, ID: 12, Role: cashier
+2025-07-28 06:25:14 - Login attempt for username: LIKHANGLAGUNA
+2025-07-28 06:25:15 - Error: Invalid password
+2025-07-28 06:25:25 - Login attempt for username: LIKHANGLAGUNA
+2025-07-28 06:25:25 - Error: Email not verified for user ID: 32
+2025-07-28 06:29:11 - Login attempt for username: LIKHANGLAGUNA
+2025-07-28 06:29:11 - Error: Email not verified for user ID: 32
+2025-07-28 06:30:06 - Login attempt for username: LIKHANGLAGUNA
+2025-07-28 06:30:06 - Error: Invalid password
+2025-07-28 06:30:19 - Login attempt for username: LIKHANGLAGUNA
+2025-07-28 06:30:19 - Error: Email not verified for user ID: 32
+2025-07-28 06:30:59 - Login attempt for username: LIKHANGLAGUNA
+2025-07-28 06:31:00 - Success: User logged in, ID: 32, Role: retailer
+2025-07-28 06:39:59 - Login attempt for username: OTOPHUBUPLB
+2025-07-28 06:39:59 - Error: Invalid password
+2025-07-28 06:40:06 - Login attempt for username: OTOPHUBUPLB
+2025-07-28 06:40:07 - Success: User logged in, ID: 21, Role: retailer
+2025-07-28 07:00:51 - Login attempt for username: OTOPHUBUPLB
+2025-07-28 07:00:51 - Success: User logged in, ID: 21, Role: retailer
+2025-07-28 07:06:28 - Login attempt for username: OTOPHUBEK
+2025-07-28 07:06:28 - Error: Invalid password
+2025-07-28 07:06:44 - Login attempt for username: OTOPHUBEK
+2025-07-28 07:06:44 - Success: User logged in, ID: 35, Role: retailer
+2025-07-28 07:24:44 - Login attempt for username: OTOPHUBUPLB
+2025-07-28 07:24:45 - Success: User logged in, ID: 21, Role: retailer
+2025-07-28 07:49:15 - Login attempt for username: OTOPHUBEK
+2025-07-28 07:49:16 - Error: Invalid password
+2025-07-28 07:49:30 - Login attempt for username: OTOPHUBEK
+2025-07-28 07:49:30 - Success: User logged in, ID: 35, Role: retailer
+2025-07-28 07:53:33 - Login attempt for username: LIKHANGLAGUNA
+2025-07-28 07:53:33 - Error: Invalid password
+2025-07-28 07:53:48 - Login attempt for username: LIKHANGLAGUNA
+2025-07-28 07:53:48 - Success: User logged in, ID: 32, Role: retailer
+2025-07-28 08:02:51 - Login attempt for username: pospinyana
+2025-07-28 08:02:51 - Success: User logged in, ID: 12, Role: cashier
+2025-07-28 08:32:01 - Login attempt for username: businessadmin
+2025-07-28 08:32:02 - Success: User logged in, ID: 2, Role: admin
+2025-07-28 08:50:03 - Login attempt for username: pospinyana
+2025-07-28 08:50:04 - Success: User logged in, ID: 12, Role: cashier
+2025-07-28 09:12:01 - Login attempt for username: businessadmin
+2025-07-28 09:12:01 - Success: User logged in, ID: 2, Role: admin
+2025-07-28 09:58:03 - Login attempt for username: a
+2025-07-28 09:58:03 - Error: Retailer account pending approval for user ID: 43
+2025-07-28 09:59:39 - Login attempt for username: a
+2025-07-28 09:59:39 - Error: Email not verified for user ID: 43
+2025-07-28 10:13:55 - Login attempt for username: LIKHANGLAGUNA
+2025-07-28 10:13:56 - Success: User logged in, ID: 32, Role: retailer

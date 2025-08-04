@@ -37,8 +37,8 @@ function sendVerificationEmail($email, $name, $token) {
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'wantargaryen@gmail.com'; // Your Gmail address
-        $mail->Password   = 'kjiz fcxe ajri xuwu';    // Your Gmail app password
+        $mail->Username   = 'pinyanagfp.scm@gmail.com'; // Your Gmail address
+        $mail->Password   = 'yuiq iriu khmi qden';    // Your Gmail app password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
         $mail->Timeout    = 30; // Set timeout to 30 seconds (default is 10)
@@ -54,7 +54,7 @@ function sendVerificationEmail($email, $name, $token) {
         );
         
         // Recipients
-        $mail->setFrom('wantargaryen@gmail.com', 'Pinana Gourmet');
+        $mail->setFrom('pinyanagfp.scm@gmail.com', 'Pinana Gourmet');
         $mail->addAddress($email, $name);
         
         // Content
@@ -342,8 +342,8 @@ function sendWelcomeEmail($email, $name) {
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'wantargaryen@gmail.com'; // Your Gmail address
-        $mail->Password   = 'kjiz fcxe ajri xuwu';    // Your Gmail app password
+        $mail->Username   = 'pinyanagfp.scm@gmail.com'; // Your Gmail address
+        $mail->Password   = 'yuiq iriu khmi qden';    // Your Gmail app password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
         
@@ -357,7 +357,7 @@ function sendWelcomeEmail($email, $name) {
         );
         
         // Recipients
-        $mail->setFrom('wantargaryen@gmail.com', 'Pinana Gourmet');
+        $mail->setFrom('pinyanagfp.scm@gmail.com', 'Pinana Gourmet');
         $mail->addAddress($email, $name);
         
         // Content
@@ -627,8 +627,8 @@ function testEmailConnection() {
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'wantargaryen@gmail.com';
-        $mail->Password   = 'kjiz fcxe ajri xuwu';
+        $mail->Username   = 'pinyanagfp.scm@gmail.com';
+        $mail->Password   = 'yuiq iriu khmi qden';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
         
